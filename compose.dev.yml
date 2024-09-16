@@ -10,6 +10,21 @@ services:
       - backend
     ports:
       - "3000:3000"
+    reverse-proxy:
+      image: traefik:v3.1.2
+      container_name: traefik
+      ports:
+        - "80:80" # HTTP
+        - "8080:8080" # The Web UI (enabled by --api.insecure=true)
+        - "443:443" # HTTPS
+      command:
+        #- "--log.level=DEBUG"
+        - "--api.insecure=true" # Enables insecure API (NOT FOR PRODUCTION)
+        - "--providers.docker=true"
+        - "--providers.docker.exposedbydefault=false"
+        - "--entryPoints.web.address=:80"
+      volumes:
+        - "/var/run/docker.sock:/var/run/docker.sock:ro"
   backend:
     build:
       context: .
