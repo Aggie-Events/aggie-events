@@ -1,13 +1,12 @@
 services:
   app:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: frontend
+      dockerfile: Dockerfile
     container_name: app_container
     environment:
       - NODE_ENV=production
     depends_on:
-      - db
       - reverse-proxy
     ports:
       - "3000:3000"
@@ -27,20 +26,6 @@ services:
         - "8080:8080"
       volumes:
         - "/var/run/docker.sock:/var/run/docker.sock:ro"
-  db:
-    container_name: postgres_container
-    image: postgres
-    restart: always
-    volumes: 
-      - ./pgdata: /var/lib/postgresql/data
-    ports: 
-      - "5433:5432"
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: "agev"
-    depends_on:
-      - reverse-proxy
   whoami:
     image: "traefik/whoami"
     container_name: "simple-service"
