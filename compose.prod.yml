@@ -1,8 +1,8 @@
 services:
   app:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: frontend
+      dockerfile: Dockerfile
     container_name: app_container
     environment:
       - NODE_ENV=production
