@@ -9,10 +9,12 @@ const dialect = new kysely_1.PostgresDialect({
         database: 'agev',
         host: 'localhost',
         user: 'admin',
-        port: 5433,
+        port: 5432,
         max: 10,
     })
 });
+console.log("Database url: " + process.env.DATABASE_URL);
+console.log("PWD: " + process.env.POSTGRES_PASSWORD);
 // Database interface is passed to Kysely's constructor, and from now on, Kysely 
 // knows your database structure.
 // Dialect is passed to Kysely's constructor, and from now on, Kysely knows how 

@@ -8,8 +8,6 @@ services:
       - NODE_ENV=production
     depends_on:
       - reverse-proxy
-    ports:
-      - "3000:3000"
   reverse-proxy:
       image: traefik:v3.1.2
       container_name: traefik

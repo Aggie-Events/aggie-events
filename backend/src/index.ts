@@ -1,7 +1,9 @@
 import { app } from './express'
 import { db } from './database'
+import dotenv from 'dotenv'; 
+dotenv.config();
 
-app.get('/users/usernames', async (req, res) => {
+app.get('/api/users/usernames', async (req, res) => {
     try {
         const users = await db.selectFrom('users').select('user_name').execute()
         res.json(users)
@@ -12,7 +14,7 @@ app.get('/users/usernames', async (req, res) => {
     }
 })
 
-app.post('/users', async (req, res) => {
+app.post('/api/users', async (req, res) => {
     const { username, email } = req.body
     try {
         await db.insertInto('users').values({user_name: username, user_email: email}).execute()

@@ -8,7 +8,7 @@ export default function AddUserForm() {
   const [update, setUpdate] = useState<boolean>(false);
 
   const addUser = async (username: string, email: string) => {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

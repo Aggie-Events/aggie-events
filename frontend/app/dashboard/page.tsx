@@ -8,7 +8,6 @@ export default function Database() {
     <>
       <h1>Dashboard</h1>
       <AddUserForm />
-      
     </>
   );
 }
