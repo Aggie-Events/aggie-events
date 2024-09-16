@@ -1,4 +1,5 @@
-import { DB } from 'kysely-codegen';
+// import { DB } from 'kysely-codegen';
+import { DB } from './types';
 import { Pool } from 'pg'
 import { Kysely, PostgresDialect} from 'kysely'
 
@@ -13,8 +14,7 @@ const dialect = new PostgresDialect({
         max: 10,
     })
 })
-console.log("Database url: " + process.env.DATABASE_URL)
-console.log("PWD: " + process.env.POSTGRES_PASSWORD)
+
 // Database interface is passed to Kysely's constructor, and from now on, Kysely 
 // knows your database structure.
 // Dialect is passed to Kysely's constructor, and from now on, Kysely knows how 

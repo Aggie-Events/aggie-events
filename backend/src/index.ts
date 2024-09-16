@@ -1,5 +1,6 @@
 import { app } from './express'
 import { db } from './database'
+
 import dotenv from 'dotenv'; 
 dotenv.config();
 
