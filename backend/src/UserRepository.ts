@@ -1,6 +1,6 @@
 "use server"
 import { db } from './database'
-import { Users } from 'kysely-codegen'
+import { Users } from './types'
 import { Selectable, Insertable, Updateable } from 'kysely'
 import { app } from './express'
 
