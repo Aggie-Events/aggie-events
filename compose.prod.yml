@@ -6,6 +6,8 @@ services:
     container_name: app_container
     environment:
       - NODE_ENV=production
+    env_file:
+      - frontend/.env
     depends_on:
       - backend
     ports:
