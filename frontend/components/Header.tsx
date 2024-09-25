@@ -32,8 +32,8 @@ function Header() {
       <nav className='navbar'>
         <div className='navbar-container'>
           <Link to='/' className='navbar-logo' onClick={closeMobileMenu}>
-            Aggie Events
-            <img className='.fa-typo3' src="/logo.png" width='65' />
+            Aggie Events 
+            <img className='.fa-typo3' src="/logo.png" width='55' />
             {/* {<i className='image'/>} */}
           </Link>
           <div className='menu-icon' onClick={handleClick}>
