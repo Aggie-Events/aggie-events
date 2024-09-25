@@ -1,41 +1,84 @@
-import React from 'react'
-import Image from 'next/image'
+"use client";
 
-const links: { href: string, label: string }[] = [
-    { href: '/', label: 'Home' },
-    { href: '/posts', label: 'Search' },
-    { href: '/about', label: 'About' },
-]
+import React, { useState, useEffect  } from 'react';
+import { Button } from './Button';
+import { Link } from 'react-router-dom';
+import './Header.css';
 
-export default function Header() {
-    return (
-        <header className="bg-slate-400">
-            <nav className="flex items-center justify-between w-[92%] mx-auto">
-                {/* Logo section */}
-                <div>
-                    <a href='/'>
-                        <Image src="/logo.png" alt="logo" width={75} height={75} />
-                    </a>
-                </div>
+function Header() {
+  const [click, setClick] = useState(false);
+  const [button, setButton] = useState(true);
 
-                {/* Navigation section */}
-                <div className="">
-                    <ul className="flex gap-x-[4vw]">
-                        {links.map(({ href, label }, index) => (
-                            <li key={index}>
-                                <a href={href} className="text-lg">{label}</a>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+  const handleClick = () => setClick(!click);
+  const closeMobileMenu = () => setClick(false);
 
-                {/* User section */}
-                <div>
-                    <button className="bg-slate-700 text-white px-4 py-2 rounded-lg">
-                        <a href='/login'>Login</a>
-                    </button>
-                </div>
-            </nav>
-        </header >
-    )
+
+  const showButton = () => {
+    if (window.innerWidth <= 960) {
+      setButton(false);
+    } else {
+      setButton(true);
+    }
+  };
+
+  useEffect(() => {
+    showButton();
+  }, []);
+
+  window.addEventListener('resize', showButton);
+
+  return (
+    <>
+      <nav className='navbar'>
+        <div className='navbar-container'>
+          <Link to='/' className='navbar-logo' onClick={closeMobileMenu}>
+            Aggie Events
+            <img className='.fa-typo3' src="/logo.png" width='65' />
+            {/* {<i className='image'/>} */}
+          </Link>
+          <div className='menu-icon' onClick={handleClick}>
+            <i className={click ? 'fas fa-times' : 'fas fa-bars'} />
+          </div>
+          <ul className={click ? 'nav-menu active' : 'nav-menu'}>
+            <li className='nav-item'>
+              <Link to='/' className='nav-links' onClick={closeMobileMenu}>
+                Home
+              </Link>
+            </li>
+            <li className='nav-item'>
+              <Link
+                to='/services'
+                className='nav-links'
+                onClick={closeMobileMenu}
+              >
+                Services
+              </Link>
+            </li>
+            <li className='nav-item'>
+              <Link
+                to='/products'
+                className='nav-links'
+                onClick={closeMobileMenu}
+              >
+                Products
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                to='/sign-up'
+                className='nav-links-mobile'
+                onClick={closeMobileMenu}
+              >
+                Sign Up
+              </Link>
+            </li>
+          </ul>
+          {/* {button && <Button buttonStyle='btn--outline'>SIGN UP</Button>} */}
+        </div>
+      </nav>
+    </>
+  );
 }
+
+export default Header;
