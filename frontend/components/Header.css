@@ -27,18 +27,12 @@
     font-size: 2rem;
     display: flex;
     align-items: center;
+
   }
   
   .fa-typo3 {
     margin-left: 0.5rem;
     font-size: 1.8rem;
-  }
-  
-  .logo {
-    src: "/logo.png";
-    alt: "logo";
-    width: 75;
-    height: 75;
   }
 
   .nav-menu {
@@ -47,7 +41,7 @@
     grid-gap: 10px;
     list-style: none;
     text-align: center;
-    width: 60vw;
+    width: 80vw;
     justify-content: end;
     margin-right: 2rem;
   }
