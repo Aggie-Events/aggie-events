@@ -113,5 +113,5 @@ services:
   #     - traefik-network
 networks:
   traefik-network:
-    container_name: traefik-network
+    name: traefik-network
     driver: bridge  # Optional: define the network driver (default is `bridge`)
