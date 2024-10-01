@@ -57,7 +57,7 @@ services:
       - db
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`api.aggieevents.tech`)"  # Replace with API subdomain
+      - "traefik.http.routers.api.rule=Host(`api.aggieevents.tech`)"
       - "traefik.http.routers.api.entrypoints=websecure"
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
     networks:
