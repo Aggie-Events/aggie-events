@@ -23,10 +23,13 @@ services:
       # # remove next line when using Traefik v2
       # - --entrypoints.websecure.asDefault=true 
       
-
+      - "--api.dashboard=true"
       - "--api.insecure=true"
+      - "--log.level=DEBUG"
+
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
+      
       - "--entryPoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
