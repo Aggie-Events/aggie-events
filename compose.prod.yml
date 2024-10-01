@@ -7,10 +7,30 @@ services:
       - "80:80"        # HTTP
       - "443:443"      # HTTPS
       - "8080:8080"    # Traefik dashboard (optional)
+    command:
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --log.level=INFO
+      #- --log.filepath=/var/log/traefik.log
+      - --accesslog=true
+      #- --accesslog.filepath=/var/log/traefik-access.log
+      - --providers.docker.network=proxy
+      - --providers.docker.exposedByDefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entryPoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      # remove next line when using Traefik v2
+      - --entrypoints.websecure.asDefault=true 
+      - --entrypoints.websecure.http.tls.certresolver=myresolver
+      - --certificatesresolvers.myresolver.acme.email=zanbowie138@gmail.com
+      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./traefik.yml:/traefik.yml"  # Traefik configuration file
       - "./letsencrypt:/letsencrypt"  # Store SSL certificates
+    labels:
+      - "traefik.enable=true"
     networks:
       - traefik-network
   app:
