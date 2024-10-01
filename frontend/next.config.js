@@ -1,14 +1,14 @@
-/** @type {import('next').NextConfig} */
-
 module.exports = {
     reactStrictMode: true,
     output: 'standalone',
-    // webpack: (config, _) => ({
-    //   ...config,
-    //   watchOptions: {
-    //     ...config.watchOptions,
-    //     poll: 800,
-    //     aggregateTimeout: 300,
-    //   },
-    // }),
+    images: {
+      remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: 'lh3.googleusercontent.com',
+        //   port: '',
+        //   pathname: '/account123/**',
+        },
+      ],
+    },
   }
