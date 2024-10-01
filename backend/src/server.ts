@@ -35,7 +35,7 @@ const init = async () => {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         callbackURL: `${process.env.BACKEND_URL}/auth/google/callback`, // Adjust as needed
     }, async (accessToken, refreshToken, profile, done) => {
-        console.log('Google profile:', profile)
+        // console.log('Google profile:', profile)
         if (!profile.emails || !profile.emails[0].value) {
             console.error('No email found in Google profile')
             return done(null, false)
