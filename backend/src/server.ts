@@ -13,7 +13,7 @@ const init = async () => {
 
     const cors = require("cors");
     const corsOptions = {
-        origin: process.env.FRONTEND_URL!,  // Allow requests from your frontend's origin
+        origin: `${process.env.FRONTEND_URL}`,  // Allow requests from your frontend's origin
         credentials: true,  // Allow credentials (cookies, session data)
     };
 
@@ -33,7 +33,7 @@ const init = async () => {
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID!,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        callbackURL: 'http://localhost:5000/auth/google/callback', // Adjust as needed
+        callbackURL: `${process.env.BACKEND_URL}/auth/google/callback`, // Adjust as needed
     }, async (accessToken, refreshToken, profile, done) => {
         console.log('Google profile:', profile)
         if (!profile.emails || !profile.emails[0].value) {
