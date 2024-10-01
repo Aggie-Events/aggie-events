@@ -4,7 +4,7 @@ import passport from 'passport';
 export const authRouter = express.Router();
 
 authRouter.get('/user', async (req, res) => {
-    res.send(req.user ? req.user : {} );
+    res.send(req.user ? req.user : null );
 }) 
 
 // Route to start Google OAuth login
