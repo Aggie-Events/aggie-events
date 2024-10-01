@@ -76,5 +76,4 @@ services:
       - traefik-network
 networks:
   traefik-network:
-    external: true
     driver: bridge  # Optional: define the network driver (default is `bridge`)
