@@ -42,3 +42,5 @@ pgdata
 .env
 
 dist/
+
+letsencrypt/
