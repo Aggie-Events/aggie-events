@@ -10,8 +10,9 @@ export const testApi = async () => {
         throw new Error('Error testing api: ' + error);
     });
 
-    console.log("API Tested: " + response)
-    ToastManager.addToast('API Tested' + response, 'success', 1000);
+    const message = await response.json().then(data => {return data.message})
+    console.log("API Tested: " + message)
+    ToastManager.addToast('API Message: ' + message, 'success', 1000);
 
     return response.status === 200
 };

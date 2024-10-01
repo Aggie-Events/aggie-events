@@ -20,7 +20,7 @@ apiRouter.get('/auth', authMiddleware, async (req, res) => {
 })
 
 apiRouter.get('/test', async (req, res) => {
-    res.status(200).json({ message: 'Test' });
+    res.status(200).json({ message: 'Test successful!' });
 })
 
 apiRouter.post('/users', authMiddleware, async (req, res) => {
