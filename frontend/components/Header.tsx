@@ -4,6 +4,7 @@ import Image from 'next/image'
 const links: { href: string, label: string }[] = [
     { href: '/', label: 'Home' },
     { href: '/posts', label: 'Search' },
+    { href: '/dashboard', label: 'Dashboard' },
     { href: '/about', label: 'About' },
 ]
 
