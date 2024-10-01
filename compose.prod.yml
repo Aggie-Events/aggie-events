@@ -31,6 +31,7 @@ services:
       - "./letsencrypt:/letsencrypt"  # Store SSL certificates
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
     networks:
       - traefik-network
   app:
