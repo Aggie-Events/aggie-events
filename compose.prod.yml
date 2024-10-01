@@ -51,7 +51,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`api.aggieevents.tech`)"
       - "traefik.http.routers.api.entrypoints=websecure"
-      - "traefik.http.routers.app.tls=true"  # Enable SSL
+      - "traefik.http.routers.api.tls=true"  # Enable SSL
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
     networks:
       - traefik-network
