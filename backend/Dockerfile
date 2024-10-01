@@ -30,8 +30,5 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./
 
-# Expose the port the app runs on
-# EXPOSE 3000
-
-# Start the Next.js application
-CMD ["npm", "start"]
+ENV HOSTNAME="0.0.0.0"
+CMD ["node", "index.js"]

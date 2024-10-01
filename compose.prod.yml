@@ -36,20 +36,40 @@ services:
     env_file:
       - frontend/.env
     depends_on:
-      - backend
-    ports:
-      - "3000:3000"
-  backend:
+      - backend-api
+    expose:
+      - "3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`aggieevents.tech`)"  # Replace with your domain
+      - "traefik.http.routers.app.entrypoints=websecure"     # HTTPS
+      - "traefik.http.routers.app.tls=true"  # Enable SSL
+      - "traefik.http.routers.app.tls.certresolver=letsencrypt"  # Use Let's Encrypt for SSL
+      # - "traefik.docker.network=traefik-network"
+    networks:
+      - traefik-network
+  backend-api:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: backend
+      dockerfile: Dockerfile
     container_name: backend_container
     environment:
       - NODE_ENV=production
+    env_file:
+      - backend/.env
+    expose:
+      - "5000"
     depends_on:
       - db
-    ports:
-      - "5000:5000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.aggieevents.tech`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls=true"  # Enable SSL
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+      # - "traefik.docker.network=traefik-network"
+    networks:
+      - traefik-network
   db:
     container_name: postgres_container
     image: postgres
@@ -62,3 +82,28 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: "agev"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - traefik-network
+  # whoami:
+  #   container_name: whoami
+  #   image: traefik/whoami
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.mywhoami.rule=Host(`whoami.aggieevents.tech`) 
+  #     - traefik.http.services.mywhoami.loadbalancer.server.port=80
+
+  #     - traefik.http.middlewares.mywwwredirect.redirectregex.regex=^https://www\.(.*)
+  #     - traefik.http.middlewares.mywwwredirect.redirectregex.replacement=https://$${1}
+  #     - traefik.http.routers.mywhoami.middlewares=mywwwredirect
+  #     - traefik.docker.network=traefik-network
+  #   networks:
+  #     - traefik-network
+networks:
+  traefik-network:
+    name: traefik-network
+    driver: bridge  # Optional: define the network driver (default is `bridge`)

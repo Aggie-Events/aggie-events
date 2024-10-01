@@ -1,4 +1,6 @@
 module.exports = {
+    reactStrictMode: true,
+    output: 'standalone',
     images: {
       remotePatterns: [
         {
