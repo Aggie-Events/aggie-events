@@ -14,7 +14,7 @@ api:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: zanbowie138@example.com
+      email: zanbowie138@gmail.com
       storage: /letsencrypt/acme.json
       httpChallenge:
         entryPoint: web
