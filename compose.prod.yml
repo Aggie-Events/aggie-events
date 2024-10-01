@@ -1,16 +1,8 @@
 services:
   traefik:
-    image: traefik:v2.10
+    image: traefik:v3.1.4
     container_name: traefik
     restart: always
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--entryPoints.web.address=:80"
-      - "--entryPoints.websecure.address=:443"
-      - "--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web"
-      - "--certificatesResolvers.letsencrypt.acme.email=zanbowie138@gmail.com"
-      - "--certificatesResolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"        # HTTP
       - "443:443"      # HTTPS
@@ -38,10 +30,10 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`aggieevents.tech`)"  # Replace with your domain
       - "traefik.http.routers.app.entrypoints=websecure"     # HTTPS
+      - "traefik.http.routers.app.tls=true"  # Enable SSL
       - "traefik.http.routers.app.tls.certresolver=letsencrypt"  # Use Let's Encrypt for SSL
     networks:
       - traefik-network
-
   backend-api:
     build:
       context: backend
@@ -59,6 +51,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`api.aggieevents.tech`)"
       - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.app.tls=true"  # Enable SSL
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
     networks:
       - traefik-network
@@ -83,4 +76,5 @@ services:
       - traefik-network
 networks:
   traefik-network:
+    external: true
     driver: bridge  # Optional: define the network driver (default is `bridge`)
