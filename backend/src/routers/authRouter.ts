@@ -14,10 +14,10 @@ authRouter.get('/google', passport.authenticate('google', {
 
 // OAuth callback route
 authRouter.get('/google/callback',
-    passport.authenticate('google', { failureRedirect: 'http://localhost:3000/login' }),
+    passport.authenticate('google', { failureRedirect: `${process.env.FRONTEND_URL}/login` }),
     (req, res) => {
         // Successful authentication
-        res.redirect('http://localhost:3000/login'); // Redirect to frontend
+        res.redirect(`${process.env.FRONTEND_URL}/login`); // Redirect to frontend
     }
 );
 
