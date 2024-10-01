@@ -25,7 +25,7 @@ const init = async () => {
         resave: false,
         saveUninitialized: false,
         cookie: {
-            httpOnly: true,
+            httpOnly: false,
             secure: process.env.NODE_ENV === 'production',  // Set to true in production
             sameSite: 'lax',  // Or 'strict', depending on your use case
         },
