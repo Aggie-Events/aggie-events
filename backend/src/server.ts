@@ -5,6 +5,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { apiRouter } from './routers/apiRouter';
 import { authRouter } from './routers/authRouter';
 import { db } from './database'
+import MemoryStore from 'memorystore';
 
 const init = async () => {
     const app = express();
@@ -26,8 +27,11 @@ const init = async () => {
         cookie: {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',  // Set to true in production
-            sameSite: 'strict',  // Or 'strict', depending on your use case
+            sameSite: 'lax',  // Or 'strict', depending on your use case
         },
+        store: new (MemoryStore(session))({
+            checkPeriod: 86400000, // prune expired entries every 24h
+        })
     }));
 
     passport.use(new GoogleStrategy({
