@@ -9,6 +9,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: VPS
 
     steps:
       # Step 1: Checkout the repository
