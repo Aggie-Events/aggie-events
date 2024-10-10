@@ -31,6 +31,7 @@ services:
       context: frontend
       dockerfile: Dockerfile
     container_name: app_container
+    restart: always
     environment:
       - NODE_ENV=production
     env_file:
@@ -45,7 +46,6 @@ services:
       - "traefik.http.routers.app.entrypoints=websecure"     # HTTPS
       - "traefik.http.routers.app.tls=true"  # Enable SSL
       - "traefik.http.routers.app.tls.certresolver=letsencrypt"  # Use Let's Encrypt for SSL
-      # - "traefik.docker.network=traefik-network"
     networks:
       - traefik-network
   backend-api:
@@ -53,6 +53,7 @@ services:
       context: backend
       dockerfile: Dockerfile
     container_name: backend_container
+    restart: always
     environment:
       - NODE_ENV=production
     env_file:
@@ -67,7 +68,6 @@ services:
       - "traefik.http.routers.api.entrypoints=websecure"
       - "traefik.http.routers.api.tls=true"  # Enable SSL
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
-      # - "traefik.docker.network=traefik-network"
     networks:
       - traefik-network
   db:
@@ -89,20 +89,6 @@ services:
       retries: 5
     networks:
       - traefik-network
-  # whoami:
-  #   container_name: whoami
-  #   image: traefik/whoami
-  #   labels:
-  #     - traefik.enable=true
-  #     - traefik.http.routers.mywhoami.rule=Host(`whoami.aggieevents.tech`) 
-  #     - traefik.http.services.mywhoami.loadbalancer.server.port=80
-
-  #     - traefik.http.middlewares.mywwwredirect.redirectregex.regex=^https://www\.(.*)
-  #     - traefik.http.middlewares.mywwwredirect.redirectregex.replacement=https://$${1}
-  #     - traefik.http.routers.mywhoami.middlewares=mywwwredirect
-  #     - traefik.docker.network=traefik-network
-  #   networks:
-  #     - traefik-network
 networks:
   traefik-network:
     name: traefik-network

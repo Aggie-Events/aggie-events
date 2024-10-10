@@ -1,0 +1,54 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - production_testing  # Deploy when code is pushed to the 'main' branch
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # Step 2: Set up SSH
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+      
+      - name: Create frontend .env file
+        run: |
+          touch frontend/.env
+          echo API_URL=${{ vars.API_URL }} >> frontend/.env
+          echo AUTH_URL=${{ vars.AUTH_URL }} >> frontend/.env
+          echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> frontend/.env
+          echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> frontend/.env
+
+      - name: Create backend .env file
+        run: |
+          touch backend/.env
+          echo FRONTEND_URL=${{ vars.FRONTEND_URL }} >> frontend/.env
+          echo BACKEND_URL=${{ vars.BACKEND_URL }} >> frontend/.env
+          echo DATABASE_URL=${{ vars.DATABASE_URL }} >> backend/.env
+
+          echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> backend/.env
+          echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> backend/.env
+          echo BACKEND_SECRET=${{ secrets.BACKEND_SECRET }} >> backend/.env
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> backend/.env
+
+      # Step 3: Copy files to the VPS
+      - name: Copy files via SCP
+        run: scp -r -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/deploy
+
+      # Step 4: SSH into VPS and Deploy using Docker Compose
+      - name: SSH and deploy with Docker Compose
+        run: |
+          ssh -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} << 'EOF'
+            cd ~/deploy
+            sudo sh run_prod.sh
+          EOF
