@@ -44,7 +44,7 @@ jobs:
 
       # Step 3: Copy files to the VPS
       - name: Copy files via SCP
-        run: scp -r -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/deploy
+        run: scp -r -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no . ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/deploy
 
       # Step 4: SSH into VPS and Deploy using Docker Compose
       - name: SSH and deploy with Docker Compose
