@@ -15,7 +15,7 @@ export default function Header() {
                 {/* Logo section */}
                 <div>
                     <a href='/'>
-                        <Image src="/logo.png" alt="logo" width={75} height={75} />
+                        <Image src="/logo.png" alt="logo" width={75} height={75} priority={true} />
                     </a>
                 </div>
 

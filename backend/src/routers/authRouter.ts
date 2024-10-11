@@ -4,7 +4,7 @@ import passport from 'passport';
 export const authRouter = express.Router();
 
 authRouter.get('/user', async (req, res) => {
-    res.send(req.user ? req.user : {} );
+    res.send(req.user ? req.user : { });
 }) 
 
 // Route to start Google OAuth login
@@ -16,8 +16,9 @@ authRouter.get('/google', passport.authenticate('google', {
 authRouter.get('/google/callback',
     passport.authenticate('google', { failureRedirect: `${process.env.FRONTEND_URL}/login` }),
     (req, res) => {
+        console.log("Authentication success!")
         // Successful authentication
-        res.redirect(`${process.env.FRONTEND_URL}/login`); // Redirect to frontend
+        res.redirect(`${process.env.FRONTEND_URL}/dashboard`); // Redirect to frontend
     }
 );
 

@@ -5,10 +5,14 @@ import { useContext } from 'react'
 
 export default function Login() {
     const { user, logout } = useAuth()
+    const handleGoogleLogin = () => {
+        window.location.href = `${process.env.AUTH_URL}/google`
+    }
+    
     return (
         <>
             <h1 className="text-3xl my-4">User Page</h1>
-            <button onClick={() => { window.location.href = `${process.env.NEXT_PUBLIC_AUTH_URL}/google`; }}
+            <button onClick={handleGoogleLogin}
                 className="bg-blue-400 p-4 m-2 rounded-md">
                 Log in with Google
             </button>

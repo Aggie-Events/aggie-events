@@ -1,64 +1,68 @@
 services:
   traefik:
-    image: traefik:v2.10
+    image: traefik:v3.1.4
     container_name: traefik
     restart: always
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--entryPoints.web.address=:80"
-      - "--entryPoints.websecure.address=:443"
-      - "--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web"
-      - "--certificatesResolvers.letsencrypt.acme.email=zanbowie138@gmail.com"
-      - "--certificatesResolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"        # HTTP
       - "443:443"      # HTTPS
       - "8080:8080"    # Traefik dashboard (optional)
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--log.level=INFO"
+
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+
+      - "--entryPoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
+      - "--certificatesresolvers.letsencrypt.acme.email=zanbowie138@gmail.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./traefik.yml:/traefik.yml"  # Traefik configuration file
       - "./letsencrypt:/letsencrypt"  # Store SSL certificates
     networks:
       - traefik-network
   app:
-    build:
-      context: frontend
-      dockerfile: Dockerfile
+    image: agev/frontend:latest
     container_name: app_container
+    restart: always
     environment:
       - NODE_ENV=production
     env_file:
-      - frontend/.env
+      - frontend.env
     depends_on:
-      - backend-api
+      - backend
     expose:
       - "3000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`aggieevents.tech`)"  # Replace with your domain
       - "traefik.http.routers.app.entrypoints=websecure"     # HTTPS
+      - "traefik.http.routers.app.tls=true"  # Enable SSL
       - "traefik.http.routers.app.tls.certresolver=letsencrypt"  # Use Let's Encrypt for SSL
     networks:
       - traefik-network
-
-  backend-api:
-    build:
-      context: backend
-      dockerfile: Dockerfile
+  backend:
+    image: agev/backend:latest
     container_name: backend_container
+    restart: always
     environment:
       - NODE_ENV=production
     env_file:
-      - backend/.env
+      - backend.env
     expose:
       - "5000"
     depends_on:
       - db
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`api.aggieevents.tech`)"  # Replace with API subdomain
+      - "traefik.http.routers.api.rule=Host(`api.aggieevents.tech`)"
       - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls=true"  # Enable SSL
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
     networks:
       - traefik-network
@@ -83,4 +87,5 @@ services:
       - traefik-network
 networks:
   traefik-network:
+    name: traefik-network
     driver: bridge  # Optional: define the network driver (default is `bridge`)

@@ -5,6 +5,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { apiRouter } from './routers/apiRouter';
 import { authRouter } from './routers/authRouter';
 import { db } from './database'
+import MemoryStore from 'memorystore';
 
 const init = async () => {
     const app = express();
@@ -24,10 +25,13 @@ const init = async () => {
         resave: false,
         saveUninitialized: false,
         cookie: {
-            httpOnly: true,
+            httpOnly: false,
             secure: process.env.NODE_ENV === 'production',  // Set to true in production
-            sameSite: 'strict',  // Or 'strict', depending on your use case
+            sameSite: 'lax',  // Or 'strict', depending on your use case
         },
+        store: new (MemoryStore(session))({
+            checkPeriod: 86400000, // prune expired entries every 24h
+        })
     }));
 
     passport.use(new GoogleStrategy({
@@ -35,7 +39,7 @@ const init = async () => {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         callbackURL: `${process.env.BACKEND_URL}/auth/google/callback`, // Adjust as needed
     }, async (accessToken, refreshToken, profile, done) => {
-        console.log('Google profile:', profile)
+        // console.log('Google profile:', profile)
         if (!profile.emails || !profile.emails[0].value) {
             console.error('No email found in Google profile')
             return done(null, false)

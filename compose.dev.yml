@@ -33,6 +33,11 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "aggieevents"
       POSTGRES_DB: "agev"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   pgadmin:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
