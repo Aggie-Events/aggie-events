@@ -33,7 +33,7 @@ services:
     environment:
       - NODE_ENV=production
     env_file:
-      - frontend.env
+      - .env.frontend
     depends_on:
       - backend
     expose:
@@ -53,7 +53,7 @@ services:
     environment:
       - NODE_ENV=production
     env_file:
-      - backend.env
+      - .env.backend
     expose:
       - "5000"
     depends_on:
