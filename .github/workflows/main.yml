@@ -28,17 +28,14 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Create frontend .env file for build
-        run: |
-          touch frontend/.env
-          echo NEXT_PUBLIC_API_URL=${{ vars.API_URL }} >> .env
-          echo NEXT_PUBLIC_AUTH_URL=${{ vars.AUTH_URL }} >> .env
-
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
           context: frontend
           push: true
+          secrets: |
+            NEXT_PUBLIC_API_URL=${{ vars.API_URL }}
+            NEXT_PUBLIC_AUTH_URL=${{ vars.AUTH_URL }}
           tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
       - name: Build and push backend
@@ -59,8 +56,6 @@ jobs:
 
       - name: Create backend .env file
         run: |
-          echo FRONTEND_URL=${{ vars.FRONTEND_URL }} >> .env.backend
-          echo BACKEND_URL=${{ vars.BACKEND_URL }} >> .env.backend
           echo DATABASE_URL=${{ vars.DATABASE_URL }} >> .env.backend
 
           echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> .env.backend
