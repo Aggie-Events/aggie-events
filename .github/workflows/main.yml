@@ -56,12 +56,15 @@ jobs:
 
       - name: Create backend .env file
         run: |
+          echo FRONTEND_URL=${{ vars.FRONTEND_URL }} >> .env.backend
+          echo BACKEND_URL=${{ vars.BACKEND_URL }} >> .env.backend
           echo DATABASE_URL=${{ vars.DATABASE_URL }} >> .env.backend
-
+          
           echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> .env.backend
           echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> .env.backend
           echo BACKEND_SECRET=${{ secrets.BACKEND_SECRET }} >> .env.backend
           echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.backend
+          
 
         
       - name: Copy environment variables and run script
