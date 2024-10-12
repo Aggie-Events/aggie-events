@@ -3,6 +3,8 @@ FROM node:20 AS base
 
 FROM base AS deps
 
+ENV NODE_ENV=production
+
 # Set the working directory
 WORKDIR /app
 
@@ -12,6 +14,8 @@ RUN npm ci
 
 # Use a smaller image for the production build
 FROM base AS builder
+
+ENV NODE_ENV=production
 
 # Set the working directory
 WORKDIR /app
@@ -24,6 +28,8 @@ RUN npm run build
 
 # Production image, copy all the files and run node
 FROM base AS runner
+
+ENV NODE_ENV=production
 
 WORKDIR /app
 

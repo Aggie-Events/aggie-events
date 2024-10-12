@@ -3,6 +3,8 @@ FROM node:20 AS base
 
 FROM base AS deps
 
+ENV NODE_ENV=production
+
 # Set the working directory
 WORKDIR /app
 

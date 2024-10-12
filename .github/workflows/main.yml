@@ -3,7 +3,7 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - main
+      - production_testing
 
 
 jobs:
@@ -21,41 +21,12 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - uses: webfactory/ssh-agent@v0.9.0
-        with:
-            ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Create root .env file
-        run: |
-          touch .env
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
-      
-      - name: Create frontend .env file
-        run: |
-          touch frontend/.env
-          echo API_URL=${{ vars.API_URL }} >> frontend.env
-          echo AUTH_URL=${{ vars.AUTH_URL }} >> frontend.env
-          echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> frontend.env
-          echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> frontend.env
-
-      - name: Create backend .env file
-        run: |
-          touch backend/.env
-          echo FRONTEND_URL=${{ vars.FRONTEND_URL }} >> backend.env
-          echo BACKEND_URL=${{ vars.BACKEND_URL }} >> backend.env
-          echo DATABASE_URL=${{ vars.DATABASE_URL }} >> backend.env
-
-          echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> backend.env
-          echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> backend.env
-          echo BACKEND_SECRET=${{ secrets.BACKEND_SECRET }} >> backend.env
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> backend.env
 
       - name: Build and push frontend
         uses: docker/build-push-action@v6
@@ -71,12 +42,43 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/backend:latest
 
-      - name: Copy docker-compose.prod.yml
+      - name: Create root .env file
         run: |
-          scp compose.prod.yml .env frontend.env backend.env ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}: ~/deploy
+          touch .env
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+      
+      - name: Create frontend .env file
+        run: |
+          touch frontend/.env
+          echo API_URL=${{ vars.API_URL }} >> .env.frontend
+          echo AUTH_URL=${{ vars.AUTH_URL }} >> .env.frontend
+          echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> .env.frontend
+          echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> .env.frontend
 
-      - name: multiple command
-        uses: appleboy/ssh-action@v1.1.0
+      - name: Create backend .env file
+        run: |
+          echo FRONTEND_URL=${{ vars.FRONTEND_URL }} >> .env.backend
+          echo BACKEND_URL=${{ vars.BACKEND_URL }} >> .env.backend
+          echo DATABASE_URL=${{ vars.DATABASE_URL }} >> .env.backend
+
+          echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> .env.backend
+          echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> .env.backend
+          echo BACKEND_SECRET=${{ secrets.BACKEND_SECRET }} >> .env.backend
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.backend
+
+        
+      - name: Copy environment variables and run script
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "compose.prod.yml,.env,.env.frontend,.env.backend,run_prod.sh"
+          target: ~/deploy/
+        
+      - name: Run Docker Compose
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_IP }}
           username: ${{ secrets.SSH_USER }}
@@ -84,6 +86,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ~/deploy
-            sh run_prod.sh
+            sudo sh run_prod.sh
       
       
