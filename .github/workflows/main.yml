@@ -87,6 +87,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ~/deploy
-            sudo sh run_prod.sh
+            sudo bash run_prod.sh
       
       
