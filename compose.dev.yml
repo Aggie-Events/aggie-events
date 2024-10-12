@@ -23,7 +23,7 @@ services:
   #     - "5000:5000"
   db:
     container_name: postgres_container
-    image: postgres
+    image: postgres:17
     restart: always
     volumes: 
       - ./pgdata:/var/lib/postgresql/data

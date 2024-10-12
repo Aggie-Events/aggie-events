@@ -28,10 +28,19 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Create frontend .env file
+        run: |
+          touch frontend/.env
+          echo NEXT_PUBLIC_API_URL=${{ vars.API_URL }} >> .env.frontend
+          echo NEXT_PUBLIC_AUTH_URL=${{ vars.AUTH_URL }} >> .env.frontend
+
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
           context: frontend
+          secrets: |
+            NEXT_PUBLIC_API_URL: ${{ vars.API_URL }}
+            NEXT_PUBLIC_AUTH_URL: ${{ vars.AUTH_URL }}
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
