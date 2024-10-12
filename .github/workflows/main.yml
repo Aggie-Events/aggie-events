@@ -50,8 +50,8 @@ jobs:
       - name: Create frontend .env file
         run: |
           touch frontend/.env
-          echo API_URL=${{ vars.API_URL }} >> .env.frontend
-          echo AUTH_URL=${{ vars.AUTH_URL }} >> .env.frontend
+          echo NEXT_PUBLIC_API_URL=${{ vars.API_URL }} >> .env.frontend
+          echo NEXT_PUBLIC_AUTH_URL=${{ vars.AUTH_URL }} >> .env.frontend
           echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> .env.frontend
           echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> .env.frontend
 

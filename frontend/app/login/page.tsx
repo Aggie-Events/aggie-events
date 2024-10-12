@@ -6,7 +6,7 @@ import { useContext } from 'react'
 export default function Login() {
     const { user, logout } = useAuth()
     const handleGoogleLogin = () => {
-        window.location.href = `${process.env.AUTH_URL}/google`
+        window.location.href = `${process.env.NEXT_PUBLIC_AUTH_URL}/google`
     }
     
     return (
