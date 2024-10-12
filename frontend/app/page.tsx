@@ -6,6 +6,7 @@ export default function Page() {
 
     return (<>
         <h1 className="text-3xl">Production Test</h1>
+        <h1>{`${process.env.NEXT_PUBLIC_API_URL}`}</h1>
         <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 my-4 px-4 rounded"
         onClick={testApi}>
             Test API
