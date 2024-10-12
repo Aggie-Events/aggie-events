@@ -39,8 +39,8 @@ jobs:
         with:
           context: frontend
           secrets: |
-            NEXT_PUBLIC_API_URL: ${{ vars.API_URL }}
-            NEXT_PUBLIC_AUTH_URL: ${{ vars.AUTH_URL }}
+            NEXT_PUBLIC_API_URL=${{ vars.API_URL }}
+            NEXT_PUBLIC_AUTH_URL=${{ vars.AUTH_URL }}
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
