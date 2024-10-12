@@ -1,0 +1,51 @@
+services:
+  traefik:
+    image: traefik:v3.1.4
+    container_name: traefik
+    restart: always
+    ports:
+      - "80:80"        # HTTP
+      - "443:443"      # HTTPS
+      - "8080:8080"    # Traefik dashboard (optional)
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--log.level=INFO"
+
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+
+      - "--entryPoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
+      - "--certificatesresolvers.letsencrypt.acme.email=zanbowie138@gmail.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"  # Store SSL certificates
+    networks:
+      - traefik-network
+  db:
+    container_name: postgres_container
+    image: postgres:17
+    restart: always
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: "agev"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - traefik-network
+networks:
+  traefik-network:
+    name: traefik-network
+    driver: bridge  # Optional: define the network driver (default is `bridge`)

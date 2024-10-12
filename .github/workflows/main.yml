@@ -64,8 +64,6 @@ jobs:
           echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> .env.backend
           echo BACKEND_SECRET=${{ secrets.BACKEND_SECRET }} >> .env.backend
           echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.backend
-          
-
         
       - name: Copy environment variables and run script
         uses: appleboy/scp-action@v0.1.7
