@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      context: .
+      context: frontend
       dockerfile: frontend/Dockerfile
     container_name: app_container
     restart: always
@@ -23,7 +23,7 @@ services:
       - traefik-network
   backend:
     build:
-      context: .
+      context: backend
       dockerfile: backend/Dockerfile
     container_name: backend_container
     restart: always
