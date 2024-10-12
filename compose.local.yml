@@ -9,6 +9,9 @@ services:
       - NODE_ENV=production
     env_file:
       - .env.frontend
+    args:
+      API_URL: ${NEXT_PUBLIC_API_URL}
+      AUTH_URL: ${NEXT_PUBLIC_AUTH_URL}
     depends_on:
       - backend
     expose:
