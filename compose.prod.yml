@@ -29,8 +29,6 @@ services:
       - .env.backend
     expose:
       - "5000"
-    depends_on:
-      - db
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`api.aggieevents.tech`)"
