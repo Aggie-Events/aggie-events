@@ -3,15 +3,15 @@ services:
     build:
       context: frontend
       dockerfile: Dockerfile
+      args:
+        API_URL: ${NEXT_PUBLIC_API_URL}
+        AUTH_URL: ${NEXT_PUBLIC_AUTH_URL}
     container_name: app_container
     restart: always
     environment:
       - NODE_ENV=production
     env_file:
       - .env.frontend
-    args:
-      API_URL: ${NEXT_PUBLIC_API_URL}
-      AUTH_URL: ${NEXT_PUBLIC_AUTH_URL}
     depends_on:
       - backend
     expose:
