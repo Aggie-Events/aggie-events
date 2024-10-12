@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: frontend
-      dockerfile: frontend/Dockerfile
+      dockerfile: Dockerfile
     container_name: app_container
     restart: always
     environment:
@@ -24,7 +24,7 @@ services:
   backend:
     build:
       context: backend
-      dockerfile: backend/Dockerfile
+      dockerfile: Dockerfile
     container_name: backend_container
     restart: always
     environment:
