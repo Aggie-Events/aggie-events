@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - production_testing
+  workflow_dispatch:
 
 
 jobs:

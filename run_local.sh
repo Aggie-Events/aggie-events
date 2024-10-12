@@ -10,4 +10,4 @@ else
 fi
 
 docker compose -f compose.local.yml down 
-docker compose -f compose.local.yml up --build -d
+docker compose -f compose.local.yml up --build -d --remove-orphans
