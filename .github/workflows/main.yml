@@ -33,7 +33,7 @@ jobs:
         with:
           context: frontend
           push: true
-          secrets: |
+          build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.API_URL }}
             NEXT_PUBLIC_AUTH_URL=${{ vars.AUTH_URL }}
           tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
