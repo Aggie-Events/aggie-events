@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server'
 // This function can be marked `async` if using `await` inside
 export function middleware(request: NextRequest) {
     const token = request.cookies.get('connect.sid');
+    console.log('Token:', token);
     if (request.nextUrl.pathname.startsWith('/dashboard') && !token) {
         return NextResponse.redirect(new URL('/login', request.url));
     }

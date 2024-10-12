@@ -26,7 +26,7 @@ const init = async () => {
         saveUninitialized: false,
         cookie: {
             httpOnly: false,
-            secure: process.env.NODE_ENV === 'production',  // Set to true in production
+            secure: false,  // Set to true in production
             sameSite: 'lax',  // Or 'strict', depending on your use case
         },
         store: new (MemoryStore(session))({
