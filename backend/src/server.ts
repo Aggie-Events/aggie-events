@@ -21,7 +21,7 @@ const init = async () => {
     app.use(cors(corsOptions));
 
     app.use(session({
-        secret: process.env.SECRET!,
+        secret: process.env.BACKEND_SECRET!,
         resave: false,
         saveUninitialized: false,
         cookie: {
