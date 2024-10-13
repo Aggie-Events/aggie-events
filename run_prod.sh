@@ -1,18 +1,18 @@
 #!/bin/bash
 
-IS_RUNNING_APP=` sudo docker ps -a | grep app_container`
-IS_RUNNING_BACKEND=` sudo docker ps -a | grep backend_container`
-if [[ "$IS_RUNNING_APP" != ""]]; then
-    echo "App is running. Stopping now..."
-    docker stop app_container
-    docker rm app_container
-else
+# IS_RUNNING_APP=`sudo docker ps -a | grep app_container`
+# IS_RUNNING_BACKEND=`sudo docker ps -a | grep backend_container`
+# if [[ "$IS_RUNNING_APP" != ""]]; then
+#     echo "App is running. Stopping now..."
+#     docker stop app_container
+#     docker rm app_container
+# else
 
-if [[ "$IS_RUNNING_BACKEND" != ""]]; then
-    echo "Backend is running. Stopping now..."
-    docker stop backend_container
-    docker rm backend_container
-else
+# if [[ "$IS_RUNNING_BACKEND" != ""]]; then
+#     echo "Backend is running. Stopping now..."
+#     docker stop backend_container
+#     docker rm backend_container
+# else
 
 IS_RUNNING_TRAEFIK=`docker compose -f compose.deps.yml ps -q traefik`
 IS_RUNNING_DB=`docker compose -f compose.deps.yml ps -q db`
