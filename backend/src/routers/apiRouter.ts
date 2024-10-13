@@ -15,8 +15,12 @@ apiRouter.get('/users', authMiddleware, async (req, res) => {
     }
 })
 
-apiRouter.get('/auth', authMiddleware, async (req, res) => {
-    res.status(200).json({ message: 'Authenticated' });
+apiRouter.get('/auth', async (req, res) => {
+    if (!req.user) {
+        res.status(401).json({ message: 'User not logged in' });
+    } else {
+        res.status(200).json({ message: 'User is logged in' });
+    }
 })
 
 apiRouter.get('/test', async (req, res) => {

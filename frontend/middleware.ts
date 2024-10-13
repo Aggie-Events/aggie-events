@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { verifyAuth } from './api/auth';
 
 // This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {
-    const token = request.cookies.get('connect.sid');
-    console.log('Token:', token);
-    if (request.nextUrl.pathname.startsWith('/dashboard') && !token) {
-        return NextResponse.redirect(new URL('/login', request.url));
+export async function middleware(request: NextRequest) {
+    console.log("Middleware is running!")
+    const auth = await verifyAuth();
+    console.log('Auth middleware: ', auth)
+    if (request.nextUrl.pathname.startsWith('/dashboard') && !auth) {
+        const response = NextResponse.redirect(new URL('/login', request.url));
+        response.headers.set('x-middleware-cache', 'no-cache');
+        return response;
     }
     return NextResponse.next();
 }

@@ -4,7 +4,7 @@ interface FetchOptions extends RequestInit {
     body?: any;
 }
 
-export const fetchUtil = async (url: string, options: FetchOptions = {}) => {
+export const fetchUtil = async (url: string, options: FetchOptions = {}, throwErrOnUnauthorized: boolean = true) => {
     const { body, ...restOptions } = options;
 
     const response = await fetch(url, {
@@ -21,7 +21,7 @@ export const fetchUtil = async (url: string, options: FetchOptions = {}) => {
         throw error;
     });
 
-    if (response.status === 401) {
+    if (response.status === 401 && throwErrOnUnauthorized) {
         const errorText = response.text();
         console.error('Unauthorized:', errorText);
         ToastManager.addToast('Unauthorized', 'error', 1000);

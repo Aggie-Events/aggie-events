@@ -18,7 +18,7 @@ export const testAuth = async (): Promise<boolean> => {
 export const verifyAuth = async (): Promise<boolean> => {
     const response = await fetchUtil(`${process.env.NEXT_PUBLIC_API_URL}/auth`, {
         method: 'GET',
-    }).catch((error) => {
+    }, false).catch((error) => {
         throw new Error('Error verifying user authentication: ' + error);
     });
 
