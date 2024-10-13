@@ -11,7 +11,7 @@ interface User {
 }
 
 interface AuthContextType {
-    user: User | null;
+    user: User | undefined | null;
     logout: () => Promise<void>;
 }
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -25,7 +25,7 @@ export const useAuth = (): AuthContextType => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null)
+    const [user, setUser] = useState<User | undefined | null>(undefined)
 
     useEffect(() => {
         const fetchUser = async () => fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/user`, { credentials: 'include' })

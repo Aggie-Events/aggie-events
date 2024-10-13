@@ -1,7 +1,6 @@
 "use client"
 import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthContext'
-import { useContext } from 'react'
 
 export default function Login() {
     const { user, logout } = useAuth()
