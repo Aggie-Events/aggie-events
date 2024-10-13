@@ -3,7 +3,7 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - production_testing
+      - main
   workflow_dispatch:
 
 
