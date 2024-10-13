@@ -20,13 +20,17 @@ const init = async () => {
 
     app.use(cors(corsOptions));
 
+    if (process.env.NODE_ENV === "production") {
+        app.set('trust proxy', 1) // trust first proxy
+    }
+
     app.use(session({
         secret: process.env.BACKEND_SECRET!,
         resave: false,
         saveUninitialized: false,
         cookie: {
-            httpOnly: false,
-            secure: false,  // Set to true in production
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",  // Set to true in production
             sameSite: 'lax',  // Or 'strict', depending on your use case
         },
         store: new (MemoryStore(session))({
