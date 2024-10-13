@@ -1,7 +1,7 @@
 #!/bin/bash
 
-IS_RUNNING_APP=`docker compose -f compose.deps.yml ps -q app_container`
-IS_RUNNING_BACKEND=`docker compose -f compose.deps.yml ps -q backend_container`
+IS_RUNNING_APP=` sudo docker ps -a | grep app_container`
+IS_RUNNING_BACKEND=` sudo docker ps -a | grep backend_container`
 if [[ "$IS_RUNNING_APP" != ""]]; then
     echo "App is running. Stopping now..."
     docker stop app_container
