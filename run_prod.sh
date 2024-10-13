@@ -1,5 +1,19 @@
 #!/bin/bash
 
+IS_RUNNING_APP=`docker compose -f compose.deps.yml ps -q app_container`
+IS_RUNNING_BACKEND=`docker compose -f compose.deps.yml ps -q backend_container`
+if [[ "$IS_RUNNING_APP" != ""]]; then
+    echo "App is running. Stopping now..."
+    docker stop app_container
+    docker rm app_container
+else
+
+if [[ "$IS_RUNNING_BACKEND" != ""]]; then
+    echo "Backend is running. Stopping now..."
+    docker stop backend_container
+    docker rm backend_container
+else
+
 IS_RUNNING_TRAEFIK=`docker compose -f compose.deps.yml ps -q traefik`
 IS_RUNNING_DB=`docker compose -f compose.deps.yml ps -q db`
 if [[ "$IS_RUNNING_TRAEFIK" == "" || "$IS_RUNNING_DB" == "" ]]; then
