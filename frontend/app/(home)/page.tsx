@@ -1,9 +1,9 @@
 import React from "react";
 import Image from "next/image";
-import AnimText from "@/components/typing_animation/AnimText";
+import AnimText from "@/app/(home)/components/typing-animation/AnimText";
 import { TypingText, TypingTextBase } from "@/config/config";
 import HomeHeader from "@/components/headers/HomeHeader";
-import ParallaxBanner from "@/components/ParallaxBanner";
+import ParallaxBanner from "@/app/(home)/components/ParallaxBanner";
 import EventCard from "@/components/cards/EventCard";
 
 export default function Homepage() {

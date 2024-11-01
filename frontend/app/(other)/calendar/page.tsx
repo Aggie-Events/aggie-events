@@ -1,13 +1,13 @@
 // app/calendar/page.tsx
 "use client";
 
-import React from 'react'
-import { useState } from 'react';
-import Calendar from '@/components/Calendar';
-import EventModal from '@/components/EventModal';
+import React from "react";
+import { useState } from "react";
+import Calendar from "@/app/(other)/calendar/components/Calendar";
+import EventModal from "@/app/(other)/calendar/components/EventModal";
 
 interface Events {
-  [key: string]: string[];  // Date string as key, event array as value
+  [key: string]: string[]; // Date string as key, event array as value
 }
 
 export default function CalendarPage(): JSX.Element {
@@ -23,7 +23,7 @@ export default function CalendarPage(): JSX.Element {
   const handleSaveEvent = (event: string): void => {
     if (!selectedDate) return;
 
-    const dateKey = selectedDate.toISOString().split('T')[0];
+    const dateKey = selectedDate.toISOString().split("T")[0];
     setEvents((prevEvents) => ({
       ...prevEvents,
       [dateKey]: [...(prevEvents[dateKey] || []), event],
