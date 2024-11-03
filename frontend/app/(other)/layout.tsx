@@ -12,7 +12,7 @@ export default function RootLayout({
   return (
     <div className="flex flex-col min-h-[100vh]">
       <Header />
-      <div className="grow relative">{children}</div>
+      <div className="grow relative flex flex-row">{children}</div>
       <Footer />
     </div>
   );

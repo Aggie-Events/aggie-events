@@ -1,38 +1,50 @@
-import React from 'react'
-import Image from 'next/image'
+import React from "react";
+import Image from "next/image";
 
-
-import { Links } from '@/config/config'
+import { Links } from "@/config/config";
+import Link from "next/link";
 
 export default function Header() {
-    return (
-        <header className="bg-maroon border-b-4 border-b-black flex">
-            <nav className="flex items-center justify-between w-[92%] mx-auto">
-                {/* Logo section */}
-                <div className="mb-2">
-                    <a href='/'>
-                        <Image src="/logo2.png" alt="logo" width={70} height={70} />
-                    </a>
-                </div>
+  return (
+    <header className="dark:bg-gray-950 border-b-[1px] border-b-gray-300 dark:border-b-white flex">
+      <nav className="flex items-center justify-between mx-5 w-full">
+        {/* Logo section */}
+        <div className="mb-2">
+          <a href="/">
+            <Image src="/logo2.png" alt="logo" width={50} height={50} />
+          </a>
+        </div>
 
-                {/* Navigation section */}
-                <div className="">
-                    <ul className="flex gap-x-[4vw]">
-                        {Links.map(({ href, label }, index) => (
-                            <li key={index}>
-                                <a href={href} className="text-lg text-white">{label}</a>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+        {/* Navigation section */}
+        <div className="">
+          <ul className="flex gap-x-[4vw]">
+            {Links.map(({ href, label }, index) => (
+              <li key={index}>
+                <a
+                  href={href}
+                  className="text-md dark:text-white font-semibold"
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-                {/* User section */}
-                <div>
-                    {/* <button className="bg-slate-700 text-white px-4 py-2 rounded-lg">
-                    <a href='/login'>Login</a>
-                </button> */}
-                </div>
-            </nav>
-        </header >
-    )
+        {/* User section */}
+        <div className="text-white">
+          {/*<Link href="/login" className="">*/}
+          {/*  Sign in*/}
+          {/*</Link>*/}
+          <Image
+            src="/cat.webp"
+            alt="user"
+            width={40}
+            height={40}
+            className="rounded-full border-[1px] border-maroon-400"
+          />
+        </div>
+      </nav>
+    </header>
+  );
 }

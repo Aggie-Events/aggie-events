@@ -22,7 +22,7 @@ export default function RootLayout({
           content="width=device-width, initial-scale=1.0"
         ></meta>
       </head>
-      <body className="">{children}</body>
+      <body className="dark">{children}</body>
     </html>
   );
 }

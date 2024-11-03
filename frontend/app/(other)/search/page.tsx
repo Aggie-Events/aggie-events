@@ -13,11 +13,14 @@ import EventList from "@/app/(other)/search/EventList";
 // - Sort by
 // - Search bar
 
+// Topic Page (browse popular tags)
+// Tag page (browse events with a specific tag)
+
 // By default, search will be for future events
 export default function Search() {
   return (
-    <div className="flex flex-row absolute w-full h-full justify-center">
-      <div className="flex flex-col grow-0 h-full basis-[1500px]">
+    <div className="flex flex-row w-full grow justify-center bg-white">
+      <div className="flex flex-col grow-0 h-full min-h-fit basis-[1500px] bg-white">
         {/* Upper Box */}
         <div className="shadow-md">
           <div className="px-5 py-5 border-b-[1px] border-gray-200">
@@ -53,7 +56,7 @@ export default function Search() {
           </div>
         </div>
 
-        <div className="bg-gray-100 flex gap-2 grow">
+        <div className="flex gap-2 grow">
           <div className="grow py-3 px-5">
             <h1 className="text-xl font-semibold">Search Results</h1>
             <EventList />
