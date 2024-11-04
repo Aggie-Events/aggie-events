@@ -1,8 +1,8 @@
 import React from "react";
 import { FaSearch } from "react-icons/fa";
-import EventList from "@/app/(other)/search/EventList";
-import CollapsableConfig from "@/app/(other)/search/CollapsableConfig";
-import FilterInput from "@/app/(other)/search/FilterInput";
+import EventList from "@/app/(other)/search/components/EventList";
+import CollapsableConfig from "@/app/(other)/search/components/CollapsableConfig";
+import FilterInput from "@/app/(other)/search/components/FilterInput";
 
 // Filters
 // - Date Range
@@ -21,6 +21,7 @@ import FilterInput from "@/app/(other)/search/FilterInput";
 // By default, search will be for future events
 
 const sortOptions = [
+  "Chronological",
   "Date Posted",
   "Date Updated",
   "Alphabetical (A-Z)",

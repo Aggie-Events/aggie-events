@@ -26,6 +26,10 @@ export default function EventList() {
       <EventDisplay event={event} />
       <EventDisplay event={event} />
       <EventDisplay event={event} />
+      <EventDisplay event={event} />
+      <EventDisplay event={event} />
+      <EventDisplay event={event} />
+      <EventDisplay event={event} />
     </div>
   );
 }
