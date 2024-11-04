@@ -5,8 +5,8 @@ import { Links } from "@/config/config";
 
 export default function HomeHeader() {
   return (
-    <header className="bg-gradient-to-b from-20% from-maroon/90 h-[120px] flex">
-      <nav className="flex items-center justify-between w-[92%] mx-auto h-fit">
+    <header className="bg-gradient-to-b from-20% from-maroon h-[120px] flex">
+      <nav className="flex items-center justify-between w-full mx-5 h-fit">
         {/* Logo section */}
         <div className="mb-2">
           <a href="/">
@@ -19,7 +19,7 @@ export default function HomeHeader() {
           <ul className="flex gap-x-[4vw]">
             {Links.map(({ href, label }, index) => (
               <li key={index}>
-                <a href={href} className="text-lg text-white">
+                <a href={href} className="text-md text-white font-semibold">
                   {label}
                 </a>
               </li>

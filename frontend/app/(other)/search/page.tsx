@@ -1,6 +1,8 @@
 import React from "react";
 import { FaSearch } from "react-icons/fa";
 import EventList from "@/app/(other)/search/EventList";
+import CollapsableConfig from "@/app/(other)/search/CollapsableConfig";
+import FilterInput from "@/app/(other)/search/FilterInput";
 
 // Filters
 // - Date Range
@@ -17,56 +19,67 @@ import EventList from "@/app/(other)/search/EventList";
 // Tag page (browse events with a specific tag)
 
 // By default, search will be for future events
+
+const sortOptions = [
+  "Date Posted",
+  "Date Updated",
+  "Alphabetical (A-Z)",
+  "Alphabetical (Z-A)",
+  "Most Popular",
+];
+const viewOptions = ["List View", "Calendar View"];
 export default function Search() {
   return (
     <div className="flex flex-row w-full grow justify-center bg-white">
-      <div className="flex flex-col grow-0 h-full min-h-fit basis-[1500px] bg-white">
-        {/* Upper Box */}
-        <div className="shadow-md">
-          <div className="px-5 py-5 border-b-[1px] border-gray-200">
-            <h1 className="text-4xl font-semibold">Search Page</h1>
-            <h2 className="text-lg mt-3">
-              This is the search page. You can search for events here.
-            </h2>
-            <div className="flex mt-2">
-              <input
-                alt="Test"
-                className="bg-gray-100 rounded-sm px-2 max-w-[500px] w-full"
-                placeholder="Search for event name, tags, organizations, locations..."
-              ></input>
-              <button className="bg-blue-500 rounded-r-md py-2 px-3">
-                <FaSearch color="white" />
-              </button>
-            </div>
+      <div className="flex flex-col grow-0 h-full min-h-fit basis-[1500px] bg-white relative">
+        {/* Banner footer */}
+        <div
+          className="flex w-full border-b-[1px] border-gray-200 h-12 items-center
+        sticky top-0 bg-white z-20"
+        >
+          <div className="grow px-1">
+            <select className="bg-gray-100 text-md px-1 outline-0">
+              {viewOptions.map((option) => (
+                <option key={option} className="bg-white">
+                  {option}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Banner footer */}
-          <div className="flex w-full border-b-[1px] border-gray-200">
-            <span className="text-md font-semibold grow px-3 py-1 ">
-              # results
-            </span>
-            <div className="flex border-l-[1px] border-gray-200 px-3 py-1 ">
-              <span className="mr-2">Sort by:</span>
-              <select>
-                <option>Option 1</option>
-                <option>Option 2</option>
-                <option>Option 3</option>
-              </select>
-            </div>
+          <div className="flex border-l-[1px] border-gray-200 px-3 py-1 items-center">
+            <span className="mr-2">Sort by:</span>
+            <select className="bg-gray-200 p-1 outline-0">
+              {sortOptions.map((option) => (
+                <option key={option} className="bg-gray-200">
+                  {option}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
         <div className="flex gap-2 grow">
-          <div className="grow py-3 px-5">
-            <h1 className="text-xl font-semibold">Search Results</h1>
-            <EventList />
+          <div className="p-3 basis-72 shrink-0">
+            <div className="flex gap-2">
+              <div className="text-lg font-semibold">Search For: </div>
+              <select className="bg-gray-100 text-lg px-1 outline-0 font-semibold">
+                <option className="font-semibold bg-white">Event</option>
+                <option className="font-semibold bg-white">Organization</option>
+              </select>
+            </div>
+            <CollapsableConfig title="Name">
+              <FilterInput />
+            </CollapsableConfig>
+            <CollapsableConfig title="Tag">
+              <FilterInput />
+            </CollapsableConfig>
           </div>
 
-          <div className="p-3 basis-52 bg-gray-50 shrink-0">
-            <h1 className="text-xl font-semibold">Filter</h1>
-            <p className="text-lg">
-              This is where the filter options will be displayed.
-            </p>
+          <div className="grow py-3 px-5">
+            <h1 className="text-2xl font-bold">Search Results</h1>
+            <h3>3 results (0.12 seconds)</h3>
+            <EventList />
           </div>
         </div>
       </div>

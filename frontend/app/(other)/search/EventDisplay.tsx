@@ -1,6 +1,8 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { FaLocationDot } from "react-icons/fa6";
+import { FaCalendar, FaClock } from "react-icons/fa";
 
 export interface Event {
   title: string;
@@ -33,14 +35,22 @@ export default function EventDisplay({ event }: { event: Event }) {
       <div className="px-2">
         <span>
           <p className="h-max line-clamp-3">{event.description}</p>
-          <Link href="/">Read more</Link>
         </span>
       </div>
 
       <div className="border-t-[1px] border-gray-200 px-2">
-        <h4 className="text-md font-semibold">Location: {event.location}</h4>
-        <h4 className="text-md font-semibold">Date: {event.date}</h4>
-        <h4 className="text-md font-semibold">Time: {event.time}</h4>
+        <div className="flex items-center gap-1">
+          <FaLocationDot />
+          <h4 className="text-md font-semibold mb">{event.location}</h4>
+        </div>
+        <div className="flex items-center gap-1">
+          <FaCalendar />
+          <h4 className="text-md font-semibold mb">{event.date}</h4>
+        </div>
+        <div className="flex items-center gap-1">
+          <FaClock />
+          <h4 className="text-md font-semibold mb">{event.time}</h4>
+        </div>
       </div>
     </div>
   );
