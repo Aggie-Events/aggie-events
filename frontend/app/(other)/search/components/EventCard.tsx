@@ -6,6 +6,7 @@ import { HiEye } from "react-icons/hi";
 import { FaHeart } from "react-icons/fa";
 import { Event } from "@/config/dbtypes";
 import { motion } from "framer-motion";
+import EventTagList from "@/app/(other)/search/components/EventTagList";
 
 export default function EventCard({ event }: { event: Event }) {
   return (
@@ -36,6 +37,9 @@ export default function EventCard({ event }: { event: Event }) {
           {event.title}
         </a>
       </h1>
+      <div>
+        <EventTagList />
+      </div>
       <div className="">
         <span>
           <p className="h-max line-clamp-3">{event.description}</p>
