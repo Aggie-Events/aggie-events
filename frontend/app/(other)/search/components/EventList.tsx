@@ -1,5 +1,6 @@
 import React from "react";
-import EventDisplay, { Event } from "./EventDisplay";
+import EventDisplay from "./EventDisplay";
+import { Event } from "@/config/dbtypes";
 
 export default function EventList() {
   let event: Event = {
@@ -17,12 +18,12 @@ export default function EventList() {
       "      aspernatur cum deleniti deserunt doloribus earum eligendi exercitationem facilis hic in iste nesciunt nostrum\n" +
       "      obcaecati odit optio quam quos, voluptatibus.",
     location: "ZACH 461",
-    date: "Saturday, November 16, 2024",
+    date: new Date(),
     link: "https://tamu.edu",
     time: "All-day",
   };
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3 my-2">
       <EventDisplay event={event} />
       <EventDisplay event={event} />
       <EventDisplay event={event} />
