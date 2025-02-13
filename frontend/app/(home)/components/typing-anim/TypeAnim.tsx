@@ -7,15 +7,17 @@ export default function TypeAnim({
   baseText,
   texts,
   delay,
+  className,
 }: {
   baseText: string;
   texts: string[];
   delay: number;
+  className?: string;
 }) {
   return (
-    <>
+    <div className={className}>
       <TypeAnimMutator baseText={baseText} texts={texts} delay={delay} />
       <CursorBlinker />
-    </>
+    </div>
   );
 }
