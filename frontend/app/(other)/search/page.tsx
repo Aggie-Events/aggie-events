@@ -1,19 +1,18 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import FilterTagList from "@/app/(other)/search/components/filter-tag-list/FilterTagList";
+import { useRouter, useSearchParams } from "next/navigation";
+import FilterTagList from "@/app/(other)/search/_components/filter-tag-list/FilterTagList";
 import {
   SearchFilters,
   setFilterParam,
   castFilterParam,
 } from "@/config/query-types";
 import { searchEvents, SearchEventsReturn } from "@/api/event";
-import EventList from "@/app/(other)/search/components/EventList";
+import EventList from "@/app/(other)/search/_components/EventList";
 import FilterList, {
   FilterListOutput,
-} from "@/app/(other)/search/components/filter-list/FilterList";
-import PageSelect from "@/app/(other)/search/components/PageSelect";
-import { IoFilter } from "react-icons/io5";
+} from "@/app/(other)/search/_components/filter-list/FilterList";
+import PageSelect from "@/app/(other)/search/_components/PageSelect";
 
 // Filters
 // - Date Range

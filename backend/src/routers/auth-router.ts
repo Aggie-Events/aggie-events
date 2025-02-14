@@ -24,7 +24,7 @@ authRouter.get("/user", async (req, res) => {
     req.user
       ? {
           user_name: user.user_name,
-          picture: user.picture,
+          user_img: user.user_img,
           user_email: user.user_email,
         }
       : {},

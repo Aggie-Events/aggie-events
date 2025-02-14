@@ -43,7 +43,7 @@ export default function UserLogoToggle() {
             className="inline-flex justify-center w-full py-2 text-sm font-medium text-white"
           >
             <Image
-              src={user.picture}
+              src={user.user_img}
               alt="user"
               width={35}
               height={35}

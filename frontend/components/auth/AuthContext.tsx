@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
 import { ReactNode } from "react";
+import ToastManager from "@/components/toast/ToastManager";
 
 interface AuthContextType {
   user: User | undefined | null;
@@ -42,6 +43,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         })
         .catch((error) => {
           console.error("Error checking user authentication:", error);
+          ToastManager.addToast(
+            "Failed to check authentication status",
+            "error",
+            3000
+          );
           setUser(null);
         });
     fetchUser();
@@ -55,12 +61,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .then((response) => {
         if (response.ok) {
           setUser(null);
+          ToastManager.addToast("Successfully logged out", "success", 3000);
         } else {
           console.error("Failed to log out:", response.statusText);
+          ToastManager.addToast("Failed to log out", "error", 3000);
         }
       })
       .catch((error) => {
         console.error("Error logging out:", error);
+        ToastManager.addToast("Error during logout", "error", 3000);
         setUser(null);
       });
   }
