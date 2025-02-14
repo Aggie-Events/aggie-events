@@ -1,5 +1,5 @@
 import React from "react";
-import IconLabel from "@/app/(other)/search/components/IconLabel";
+import IconLabel from "@/components/common/IconLabel";
 import { FaLocationDot } from "react-icons/fa6";
 import { formatTimeInterval, isSameDay } from "@/utils/date";
 import { FaClock } from "react-icons/fa";

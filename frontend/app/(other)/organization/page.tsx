@@ -1,4 +1,4 @@
-import AddOrgnizationForm from "./AddOrganizationForm";
+import AddOrgnizationForm from "./_components/AddOrganizationForm";
 export default function addOrganization() {
   return (
     <>

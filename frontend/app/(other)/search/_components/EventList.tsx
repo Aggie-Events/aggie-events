@@ -1,11 +1,11 @@
 "use client";
-import React, { Suspense, useEffect, useState } from "react";
-import EventDisplay from "@/app/(other)/search/components/event-display/EventDisplay";
+import React, { Suspense } from "react";
+import EventDisplay from "@/app/(other)/search/_components/event-display/EventDisplay";
 import { SearchEventsReturn } from "@/api/event";
 
 export default function EventList({
   events,
-}: {
+}: {  
   events: SearchEventsReturn[] | undefined;
 }) {
   if (!events) {

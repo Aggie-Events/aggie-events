@@ -29,7 +29,7 @@ export default function DashboardHeader() {
         <div className="flex items-center gap-4 flex-1 max-w-2xl mx-4">
           <SearchBar />
           <Link
-            href="/dashboard/create"
+            href="/dashboard/events/create"
             className="bg-maroon hover:bg-darkmaroon text-white flex items-center px-4 py-2 rounded-md transition-colors"
           >
             <MdAdd className="mr-2" />

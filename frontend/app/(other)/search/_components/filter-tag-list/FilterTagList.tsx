@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
-import FilterTagDisplay from "@/app/(other)/search/components/filter-tag-list/FilterTagDisplay";
-import { useState } from "react";
+import React from "react";
+import FilterTagDisplay from "@/app/(other)/search/_components/filter-tag-list/FilterTagDisplay";
 
 export default function FilterTagList({
   tags,

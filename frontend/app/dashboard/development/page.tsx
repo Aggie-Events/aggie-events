@@ -1,10 +1,9 @@
 "use client";
 import React, { useState } from "react";
 import { useAuth } from "@/components/auth/AuthContext";
-import UserList from "../UserList";
-import { Event } from "@/config/dbtypes";
+import UserList from "../_components/UserList";
 import { EventCreate } from "@/config/query-types";
-import IconLabel from "@/app/(other)/search/components/IconLabel";
+import IconLabel from "@/components/common/IconLabel";
 import { FaLocationDot } from "react-icons/fa6";
 import { createEvent } from "@/api/event";
 import ToastManager from "@/components/toast/ToastManager";

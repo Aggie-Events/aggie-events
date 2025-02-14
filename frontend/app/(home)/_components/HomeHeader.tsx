@@ -1,5 +1,5 @@
 import React from "react";
-import HeaderContent from "./HeaderContent";
+import HeaderContent from "@/components/headers/HeaderContent";
 
 export default function HomeHeader() {
   return (

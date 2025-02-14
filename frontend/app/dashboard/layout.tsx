@@ -5,8 +5,8 @@ import Link from "next/link";
 import { MdDashboard, MdEvent, MdGroup, MdSettings } from "react-icons/md";
 import SearchBar from "@/components/search/SearchBar";
 import UserLogoToggle from "@/components/headers/user-menu/UserLogoToggle";
-import DashboardHeader from "@/components/headers/dashboard/DashboardHeader";
-import DashboardSidebar from "@/components/headers/dashboard/DashboardSidebar";
+import DashboardHeader from "@/app/dashboard/_components/DashboardHeader";
+import DashboardSidebar from "@/app/dashboard/_components/DashboardSidebar";
 import { SidebarProvider } from "@/components/layout/SidebarContext";
 
 const sidebarLinks = [

@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { MdDashboard, MdEvent, MdGroup, MdSettings, MdCode } from "react-icons/md";
 import { useSidebar } from "@/components/layout/SidebarContext";
 
@@ -13,6 +14,14 @@ const sidebarLinks = [
 
 export default function DashboardSidebar() {
   const { isOpen } = useSidebar();
+  const pathname = usePathname();
+
+  const isLinkActive = (href: string) => {
+    if (href === '/dashboard') {
+      return pathname === href;
+    }
+    return pathname.startsWith(href);
+  };
 
   if (!isOpen) return null;
 
@@ -24,7 +33,11 @@ export default function DashboardSidebar() {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                  isLinkActive(link.href)
+                    ? "bg-maroon text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
               >
                 {link.icon}
                 <span>{link.label}</span>

@@ -2,15 +2,27 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { MdAdd, MdEdit, MdDelete } from "react-icons/md";
+import { MdAdd, MdEdit, MdDelete, MdMoreVert } from "react-icons/md";
+import ToastManager from "@/components/toast/ToastManager";
+
+type EventStatus = 'draft' | 'published' | 'cancelled';
+
+interface Event {
+  id: number;
+  title: string;
+  date: string;
+  status: EventStatus;
+  attendees: number;
+  thumbnail: string;
+}
 
 export default function EventsPage() {
-  const events = [
+  const [events, setEvents] = React.useState<Event[]>([
     {
       id: 1,
       title: "Aggie Football Game",
       date: "2024-03-20",
-      status: "Upcoming",
+      status: "published",
       attendees: 1200,
       thumbnail: "/tamufield.png",
     },
@@ -18,11 +30,39 @@ export default function EventsPage() {
       id: 2,
       title: "MSC Open House",
       date: "2024-03-25",
-      status: "Draft",
+      status: "draft",
       attendees: 0,
       thumbnail: "/tamufield.png",
     },
-  ];
+  ]);
+
+  const updateEventStatus = async (eventId: number, newStatus: EventStatus) => {
+    try {
+      // TODO: Add API call to update status
+      // await updateEvent(eventId, { status: newStatus });
+      
+      setEvents(events.map(event => 
+        event.id === eventId ? { ...event, status: newStatus } : event
+      ));
+      
+      ToastManager.addToast("Event status updated", "success");
+    } catch (error) {
+      ToastManager.addToast("Failed to update event status", "error");
+    }
+  };
+
+  const getStatusColor = (status: EventStatus) => {
+    switch (status) {
+      case 'published':
+        return 'bg-green-100 text-green-800';
+      case 'draft':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -84,13 +124,15 @@ export default function EventsPage() {
                     <div className="text-sm text-gray-900">{event.date}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      event.status === "Upcoming"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}>
-                      {event.status}
-                    </span>
+                    <select
+                      value={event.status}
+                      onChange={(e) => updateEventStatus(event.id, e.target.value as EventStatus)}
+                      className={`px-2 py-1 text-xs font-semibold rounded-full border-0 ${getStatusColor(event.status)}`}
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="published">Published</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {event.attendees}

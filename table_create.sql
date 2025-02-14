@@ -48,6 +48,7 @@ CREATE TABLE events
     event_name        VARCHAR(255)                        NOT NULL,
     event_description TEXT                                NULL,
     event_likes       INT       DEFAULT 0                 NOT NULL,
+    event_views       INT       DEFAULT 0                 NOT NULL,
     event_location    VARCHAR(255),
     event_img         VARCHAR(255)                        NULL,
 

@@ -8,11 +8,14 @@ import {
   MdDescription,
   MdClose,
   MdAdd,
+  MdPublish,
 } from "react-icons/md";
 import { FaTag } from "react-icons/fa";
 import { fetchTags } from "@/api/tags";
 import ToastManager from "@/components/toast/ToastManager";
 import { useRouter } from "next/navigation";
+
+type EventStatus = 'draft' | 'published' | 'cancelled';
 
 interface EventForm {
   event_name: string;
@@ -22,6 +25,7 @@ interface EventForm {
   start_time: string;
   end_date: string;
   end_time: string;
+  status: EventStatus;
   tags: string[];
 }
 
@@ -36,6 +40,7 @@ export default function CreateEventPage() {
     start_time: "",
     end_date: "",
     end_time: "",
+    status: "draft",
     tags: [],
   });
 
@@ -90,6 +95,19 @@ export default function CreateEventPage() {
     });
   };
 
+  const getStatusColor = (status: EventStatus) => {
+    switch (status) {
+      case 'published':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'draft':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -103,8 +121,14 @@ export default function CreateEventPage() {
       console.log(combinedData);
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
 
-      ToastManager.addToast("Event created successfully!", "success", 3000);
-    //   router.push("/"); // Redirect to home page after success
+      ToastManager.addToast(
+        formData.status === 'published' 
+          ? "Event published successfully!" 
+          : "Event saved as draft!",
+        "success",
+        3000
+      );
+      router.push("/dashboard/events");
     } catch (error) {
       console.error("Error creating event:", error);
       ToastManager.addToast(
@@ -249,6 +273,23 @@ export default function CreateEventPage() {
               </div>
             </div>
 
+            {/* Status */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <MdPublish className="inline mr-1" />
+                Status
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as EventStatus })}
+                className={`px-3 py-2 text-sm font-medium rounded-md border ${getStatusColor(formData.status)}`}
+              >
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
             {/* Tags Input with Autocomplete */}
             <div ref={tagRef} className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -305,23 +346,19 @@ export default function CreateEventPage() {
               </div>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit Buttons */}
             <div className="flex gap-4 justify-end mt-8 border-t pt-6">
               <button
                 type="button"
                 className="px-6 py-2 rounded-md border border-gray-300 hover:bg-gray-50 transition"
-                onClick={() =>
-                  window.history.length > 1
-                    ? window.history.back()
-                    : (window.location.href = "/")
-                }
+                onClick={() => router.push("/dashboard/events")}
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-primary/90 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-maroon text-white px-6 py-2 rounded-md hover:bg-darkmaroon transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>
@@ -330,8 +367,8 @@ export default function CreateEventPage() {
                   </>
                 ) : (
                   <>
-                    <MdAdd size={20} />
-                    Create Event
+                    {formData.status === 'published' ? <MdPublish size={20} /> : <MdAdd size={20} />}
+                    {formData.status === 'published' ? 'Publish Event' : 'Save as Draft'}
                   </>
                 )}
               </button>

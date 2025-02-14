@@ -2,12 +2,12 @@
 import React from "react";
 import { FaLocationDot } from "react-icons/fa6";
 import { FaClock } from "react-icons/fa";
-import IconLabel from "@/app/(other)/search/components/IconLabel";
-import EventCard from "@/app/(other)/search/components/event-display/EventCard";
+import IconLabel from "@/components/common/IconLabel";
+import EventCard from "@/app/(other)/search/_components/event-display/EventCard";
 import { motion } from "motion/react";
 import { SearchEventsReturn } from "@/api/event";
 import { formatTimeInterval } from "@/utils/date";
-import EventDateDisplay from "@/app/(other)/search/components/event-display/EventDateDisplay";
+import EventDateDisplay from "@/app/(other)/search/_components/event-display/EventDateDisplay";
 
 export default function EventDisplay({ event }: { event: SearchEventsReturn }) {
   return (
