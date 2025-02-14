@@ -114,7 +114,7 @@ const init = async (): Promise<express.Application> => {
             return done(null, {
               user_email: user_email,
               user_name: profile.displayName,
-              picture: profile.photos ? profile.photos[0].value : "",
+              user_img: profile.photos ? profile.photos[0].value : "",
               user_id: user_id,
             } as UserStorage);
           })
@@ -127,19 +127,19 @@ const init = async (): Promise<express.Application> => {
   );
 
   // Determines what user data should be persisted in the session
-  passport.serializeUser((user: any, done) => {
-    done(null, { user_id: user.user_id, picture: user.picture });
+  passport.serializeUser((user: UserStorage, done) => {
+    done(null, { user_id: user.user_id, user_img: user.user_img });
   });
 
   // Retrieves user data from the session
   // Accessed by req.user in route handlers
-  passport.deserializeUser(({ user_id: user_id, picture: picture }, done) => {
+  passport.deserializeUser(({ user_id: user_id, user_img: user_img }, done) => {
     getUserById(user_id).then(({ user_name, user_email }) => {
       done(null, {
         user_id,
         user_email: user_email,
         user_name: user_name,
-        picture,
+        user_img: user_img,
       });
     });
   });

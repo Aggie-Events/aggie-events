@@ -24,7 +24,7 @@ const UserMenu = forwardRef<HTMLElement, UserMenuProps>(
       <div className="items-center gap-2 w-fit inline-flex px-0.5">
         <div className="w-max">
           <Image
-            src={user.picture}
+            src={user.user_img}
             alt="user"
             width={30}
             height={30}
