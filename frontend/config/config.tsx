@@ -7,7 +7,7 @@ import { MdDashboard, MdLogout } from "react-icons/md";
 
 export const HeaderLinks: { href: string; label: string }[] = [
   { href: "/search", label: "Browse" },
-  { href: "/create", label: "Create" },
+  { href: "/dashboard/create", label: "Create" },
   { href: "/calendar", label: "Calendar" },
 ];
 

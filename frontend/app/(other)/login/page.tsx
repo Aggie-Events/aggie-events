@@ -18,7 +18,7 @@ export default function LoginPage() {
   }, [user, router, callbackUrl]);
 
   const handleGoogleLogin = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_AUTH_URL}/auth/google`;
+    window.location.href = `${process.env.NEXT_PUBLIC_AUTH_URL}/google`;
   };
 
   return (
