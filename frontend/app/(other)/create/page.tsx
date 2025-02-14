@@ -100,11 +100,11 @@ export default function CreateEventPage() {
         end_time: `${formData.end_date}T${formData.end_time}`,
       };
 
-      // TODO: Replace with actual API call
+      console.log(combinedData);
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
 
       ToastManager.addToast("Event created successfully!", "success", 3000);
-      router.push("/"); // Redirect to home page after success
+    //   router.push("/"); // Redirect to home page after success
     } catch (error) {
       console.error("Error creating event:", error);
       ToastManager.addToast(

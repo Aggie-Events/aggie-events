@@ -9,7 +9,7 @@ export default function PopularEvents() {
       date: "Mar 15 • 7:00 PM",
       location: "MSC",
       price: "Free",
-      image: "/images/events/msc.jpg"
+      image: "/tamufield.png"
     },
     {
       id: 2,
@@ -17,7 +17,7 @@ export default function PopularEvents() {
       date: "Mar 20 • 2:00 PM",
       location: "Reed Arena",
       price: "Free",
-      image: "/images/events/ring-day.jpg"
+      image: "/tamufield.png"
     },
     {
       id: 3,
@@ -25,7 +25,7 @@ export default function PopularEvents() {
       date: "Mar 22 • 9:00 AM",
       location: "Rudder Tower",
       price: "Free",
-      image: "/images/events/career-fair.jpg"
+      image: "/tamufield.png"
     }
   ];
 
