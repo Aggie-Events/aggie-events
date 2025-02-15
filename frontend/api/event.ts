@@ -125,6 +125,22 @@ export const createEvent = async (event: EventCreate) => {
   }
 };
 
+/**
+ * Get all events created by a user
+ * @param {number} user_id - The ID of the user
+ * @returns {Promise<Event[]>} The events
+ */
+export const getUserEvents = async (): Promise<Event[]> => {
+  try {
+    const response = await fetchUtil(`${process.env.NEXT_PUBLIC_API_URL}/events/user/${user_id}`, {
+      method: "GET",
+    });
+    return response.json() ?? [];
+  } catch (error) {
+    throw new Error("Error getting user events");
+  }
+}
+
 // export const getEventTags = async (event_id: number): Promise<string[]> => {
 //     try {
 //         const IDs = await fetchUtil(`${process.env.NEXT_PUBLIC_API_URL}/events/${event_id}/tags`, {
