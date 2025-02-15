@@ -1,6 +1,5 @@
 import ToastManager from "@/components/toast/ToastManager";
 import { fetchUtil } from "@/api/fetch";
-import Toast from "@/components/toast/Toast";
 
 export interface User {
     user_email: string;
@@ -9,6 +8,12 @@ export interface User {
     user_name: string;
 }
 
+/**
+ * Add a user
+ * @param username - The username of the user
+ * @param email - The email of the user
+ * @returns The response from the fetch
+ */
 export const addUser = async (username: string, email: string) => {
     try {
         const response = await fetchUtil(
@@ -24,6 +29,10 @@ export const addUser = async (username: string, email: string) => {
     }
 };
 
+/**
+ * Fetch all users
+ * @returns List of users
+ */
 export const fetchUsernames = async (): Promise<User[]> => {
     try {
         const response = await fetchUtil(
@@ -38,6 +47,10 @@ export const fetchUsernames = async (): Promise<User[]> => {
     }
 };
 
+/**
+ * Delete all users
+ * @returns The response from the fetch
+ */
 export const deleteUser = async () => {
     try {
         const response = await fetchUtil(
@@ -51,6 +64,12 @@ export const deleteUser = async () => {
     }
 };
 
+/**
+ * Update a user
+ * @param username - The username of the user
+ * @param email - The email of the user
+ * @returns The response from the fetch
+ */
 export const updateUser = async (username: string, email: string) => {
     try {
         const response = await fetchUtil(
@@ -66,8 +85,11 @@ export const updateUser = async (username: string, email: string) => {
     }
 };
 
-// TODO: wait until update is finished then check or keep checking asynchronously for a bit then return error. Make loading animation while updating backend
-// updateResponse is the response from the updateUser function to verify that the user has been updated
+/**
+ * Verify that the user has been updated
+ * @param username - The username of the user
+ * @returns The response from the fetch
+ */
 export const verifyUserUpdate = async (username: string) => {
     console.log(`${process.env.NEXT_PUBLIC_API_URL}/users`);
     const response = await fetchUtil(

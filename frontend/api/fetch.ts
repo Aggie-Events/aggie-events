@@ -4,6 +4,13 @@ interface FetchOptions extends RequestInit {
   body?: any;
 }
 
+/**
+ * Fetch utility function
+ * @param url - The URL to fetch
+ * @param options - The options for the fetch
+ * @param throwErrOnUnauthorized - Whether to throw an error if the user gets a 401 (Unauthorized) response
+ * @returns The response from the fetch
+ */
 export const fetchUtil = async (
   url: string,
   options: FetchOptions = {},

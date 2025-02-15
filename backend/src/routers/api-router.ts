@@ -13,12 +13,9 @@ import { tagRouter } from "./api-router/tag";
 export const apiRouter = express.Router();
 
 /**
- * Route to check authentication status.
- * @name get/auth
- * @function
- * @memberof module:routers/api-router
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
+ * @route GET /api/auth
+ * @description Check authentication status
+ * @access Private - Requires authentication
  * @returns {Object} JSON object with a message indicating the authentication status.
  */
 apiRouter.get("/auth", async (req, res) => {
@@ -31,12 +28,9 @@ apiRouter.get("/auth", async (req, res) => {
 });
 
 /**
- * Route to test the API.
- * @name get/test
- * @function
- * @memberof module:routers/api-router
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
+ * @route GET /api/test
+ * @description Test the API
+ * @access Public
  * @returns {Object} JSON object with a message indicating the test status.
  */
 apiRouter.get("/test", async (req, res) => {

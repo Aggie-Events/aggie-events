@@ -1,8 +1,3 @@
-/**
- * Middleware for authenticating users.
- * @module middlewares/authMiddleware
- */
-
 import { Request, Response, NextFunction } from "express";
 
 /**

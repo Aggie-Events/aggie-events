@@ -6,13 +6,11 @@ import express from "express";
 export const eventRouter = express.Router();
 
 /**
- * Route to fetch all events.
- * @name get/
- * @function
- * @memberof module:routers/api-router/events
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {Object} JSON object containing all events.
+ * @route GET /api/events
+ * @description Fetch all events from the database
+ * @access Public
+ * @returns {Object[]} Array of all events
+ * @returns {Error} 500 - Server error if events cannot be fetched
  */
 eventRouter.get("/", async (req, res) => {
   try {
@@ -25,30 +23,14 @@ eventRouter.get("/", async (req, res) => {
   }
 });
 
-interface EventPageInformation {
-  event_id: number;
-  event_name: string;
-  event_description: string | null;
-  event_location: string | null;
-  event_likes: number;
-  start_time: Date;
-  end_time: Date;
-  date_created: Date;
-  date_modified: Date;
-  contributor_name: string;
-  org_name: string | null;
-  org_id: number | null;
-  tags: string[];
-}
-
 /**
- * Route to fetch detailed information for a specific event.
- * @name get/:event_id
- * @function
- * @memberof module:routers/api-router/events
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {Object} JSON object containing detailed information for the specified event.
+ * @route GET /api/events/:event_id
+ * @description Fetch detailed information for a specific event
+ * @access Public
+ * @param {number} event_id - The ID of the event to fetch
+ * @returns {Object} Detailed event information including tags and organization
+ * @returns {Error} 404 - Event not found
+ * @returns {Error} 500 - Server error if event cannot be fetched
  */
 eventRouter.get("/:event_id", async (req, res) => {
   const event_id: number = parseInt(req.params.event_id, 10);
@@ -107,7 +89,22 @@ eventRouter.get("/:event_id", async (req, res) => {
         res.status(404).json({ message: "Error fetching tags" });
       });
 
-    res.json({ ...page_data, tags } as EventPageInformation);
+    res.json({ ...page_data, tags } as { 
+      event_id: number; 
+      event_name: string; 
+      event_description: string | null; 
+      event_location: string | null; 
+      event_likes: number; 
+      start_time: Date; 
+      end_time: Date; 
+      date_created: Date; 
+      date_modified: Date; 
+      contributor_name: string; 
+      org_name: string | null; 
+      org_id: number | null; 
+      tags: string[]; 
+    });
+
     console.log("Event requested!");
     console.log("Tags: " + tags);
   } catch (error) {
@@ -116,23 +113,19 @@ eventRouter.get("/:event_id", async (req, res) => {
   }
 });
 
-export interface EventCreate {
-  event_name: string;
-  event_description: string | null;
-  event_location: string | null;
-  start_time: Date;
-  end_time: Date;
-  tags: string[];
-}
-
 /**
- * Route to create a new event.
- * @name post/
- * @function
- * @memberof module:routers/api-router/events
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {Object} JSON object containing the created event.
+ * @route POST /api/events
+ * @description Create a new event
+ * @access Private - Requires authentication
+ * @param {Object} req.body - Event data
+ * @param {string} req.body.event_name - Name of the event
+ * @param {string} [req.body.event_description] - Description of the event
+ * @param {string} [req.body.event_location] - Location of the event
+ * @param {Date} req.body.start_time - Start time of the event
+ * @param {Date} req.body.end_time - End time of the event
+ * @param {string[]} req.body.tags - Array of tag names for the event
+ * @returns {Object} Created event object
+ * @returns {Error} 500 - Server error if event cannot be created
  */
 eventRouter.post("/", authMiddleware, async (req, res) => {
   const {
@@ -142,7 +135,14 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
     start_time,
     end_time,
     tags,
-  } = req.body as EventCreate;
+  }: {
+    event_name: string;
+    event_description: string | null;
+    event_location: string | null;
+    start_time: Date;
+    end_time: Date;
+    tags: string[];
+  } = req.body;
 
   try {
     const event = await db
@@ -184,5 +184,24 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error creating event:", error);
     res.status(500).send("Error creating event!");
+  }
+});
+
+/**
+ * @route GET /api/events/user/:user_id
+ * @description Fetch all events created by a specific user
+ * @access Public
+ * @param {number} user_id - The ID of the user whose events to fetch
+ * @returns {Object[]} Array of events created by the user
+ * @returns {Error} 500 - Server error if events cannot be fetched
+ */
+eventRouter.get("/user/:user_id", async (req, res) => {
+  const user_id: number = parseInt(req.params.user_id, 10);
+  try {
+    const events = await db.selectFrom("events").where("contributor_id", "=", user_id).selectAll().execute();
+    res.json(events);
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    res.status(500).send("Error fetching events!");
   }
 });

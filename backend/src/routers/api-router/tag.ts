@@ -1,22 +1,13 @@
-/**
- * Tag Router module for handling tag-related API routes.
- * @module routers/api-router/tag
- */
-
 import { db } from "../../database";
 import express from "express";
 
 export const tagRouter = express.Router();
 
 /**
- * Route to search for tags based on query parameters.
- * @name get/search
- * @function
- * @memberof module:routers/api-router/tag
- * @param {Object} req - The request object.
- * @param {string} req.query.query - The search query string.
- * @param {Object} res - The response object.
- * @returns {Object} JSON object containing the search results.
+ * @route GET /api/tags/search
+ * @description Search for tags based on query parameters
+ * @returns {Object} JSON object containing the search results
+ * @returns {Error} 500 error if tags cannot be fetched
  */
 tagRouter.get("/search", async (req, res) => {
   console.log(req.query);

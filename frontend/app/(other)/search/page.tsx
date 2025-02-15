@@ -9,10 +9,8 @@ import {
 } from "@/config/query-types";
 import { searchEvents, SearchEventsReturn } from "@/api/event";
 import EventList from "@/app/(other)/search/_components/EventList";
-import FilterList, {
-  FilterListOutput,
-} from "@/app/(other)/search/_components/filter-list/FilterList";
 import PageSelect from "@/app/(other)/search/_components/PageSelect";
+// import { FilterListOutput } from "./_components/filter-list/FilterList";
 
 // Filters
 // - Date Range
@@ -156,26 +154,26 @@ export default function Search() {
     push(`/search?${params.toString()}`);
   }
 
-  function updateFilters(filtersUpdate: FilterListOutput) {
-    if (filtersUpdate.name !== undefined) {
-      filters.current.name = filtersUpdate.name.trim();
-    }
+  // function updateFilters(filtersUpdate: FilterListOutput) {
+  //   if (filtersUpdate.name !== undefined) {
+  //     filters.current.name = filtersUpdate.name.trim();
+  //   }
 
-    if (filtersUpdate.tag) {
-      const newTag = filtersUpdate.tag.trim();
-      const currentTags = filters.current.tags || new Set();
+  //   if (filtersUpdate.tag) {
+  //     const newTag = filtersUpdate.tag.trim();
+  //     const currentTags = filters.current.tags || new Set();
 
-      if (!currentTags.has(newTag)) {
-        filters.current.tags = new Set([...currentTags, newTag]);
-        // Reset selected category when adding custom tags
-        setSelectedCategory("All Events");
-      }
-    }
+  //     if (!currentTags.has(newTag)) {
+  //       filters.current.tags = new Set([...currentTags, newTag]);
+  //       // Reset selected category when adding custom tags
+  //       setSelectedCategory("All Events");
+  //     }
+  //   }
 
-    // Reset to page 1 when changing filters
-    filters.current.page = 1;
-    updateUrl();
-  }
+  //   // Reset to page 1 when changing filters
+  //   filters.current.page = 1;
+  //   updateUrl();
+  // }
 
   // Change the function signature to use Category type
   function handleCategorySelect(category: Category) {

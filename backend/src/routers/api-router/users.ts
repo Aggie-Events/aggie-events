@@ -5,13 +5,11 @@ import express from "express";
 export const usersRouter = express.Router();
 
 /**
- * Route to fetch all users.
- * @name get/
- * @function
- * @memberof module:routers/api-router/users
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {Object} JSON object containing all users.
+ * @route GET /api/users
+ * @description Fetch all users
+ * @access Private - Requires authentication
+ * @returns {Object[]} Array of all users
+ * @returns {Error} 500 - Server error if users cannot be fetched
  */
 usersRouter.get("/", authMiddleware, async (req, res) => {
   try {
@@ -52,16 +50,14 @@ usersRouter.post("/", authMiddleware, async (req, res) => {
 });
 
 /**
- * Route to update an existing user.
- * @name put/
- * @function
- * @memberof module:routers/api-router/users
- * @param {Object} req - The request object.
+ * @route PUT /api/users
+ * @description Update a user
+ * @access Private - Requires authentication
  * @param {Object} req.body - The request body.
  * @param {string} req.body.username - The new name of the user.
  * @param {string} req.body.email - The email of the user to update.
- * @param {Object} res - The response object.
  * @returns {string} A message indicating the user update status.
+ * @returns {Error} 500 - Server error if users cannot be updated
  */
 usersRouter.put("/", authMiddleware, async (req, res) => {
   const { username, email } = req.body;
@@ -79,13 +75,11 @@ usersRouter.put("/", authMiddleware, async (req, res) => {
 });
 
 /**
- * Route to delete all users.
- * @name delete/
- * @function
- * @memberof module:routers/api-router/users
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
+ * @route DELETE /api/users
+ * @description Delete all users
+ * @access Private - Requires authentication
  * @returns {string} A message indicating the user deletion status.
+ * @returns {Error} 500 - Server error if users cannot be deleted
  */
 usersRouter.delete("/", authMiddleware, async (req, res) => {
   try {

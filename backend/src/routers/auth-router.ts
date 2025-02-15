@@ -32,12 +32,10 @@ authRouter.get("/user", async (req, res) => {
 });
 
 /**
- * Route to start Google OAuth login.
- * @name get/google
- * @function
- * @memberof module:routers/auth-router
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
+ * @route GET /auth/google
+ * @description Initiate Google OAuth login
+ * @access Public
+ * @returns {void} Redirects to Google OAuth consent screen
  */
 authRouter.get(
   "/google",
@@ -47,12 +45,10 @@ authRouter.get(
 );
 
 /**
- * OAuth callback route.
- * @name get/google/callback
- * @function
- * @memberof module:routers/auth-router
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
+ * @route GET /auth/google/callback
+ * @description Handle Google OAuth callback
+ * @access Public
+ * @returns {void} Redirects to dashboard on success, login page on failure
  */
 authRouter.get(
   "/google/callback",
@@ -61,19 +57,15 @@ authRouter.get(
   }),
   (req, res) => {
     console.log("Authentication success!");
-    // Successful authentication
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard`); // Redirect to frontend
+    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
   },
 );
 
 /**
- * Route to log out the user.
- * @name post/logout
- * @function
- * @memberof module:routers/auth-router
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {Object} JSON object with a message indicating the logout status.
+ * @route POST /auth/logout
+ * @description Log out the user
+ * @returns {Object} JSON object with a message indicating the logout status
+ * @returns {Error} 500 error if logout fails
  */
 authRouter.post("/logout", (req, res) => {
   // Destroy the session

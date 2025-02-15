@@ -1,3 +1,9 @@
+
+/**
+ * Fetch tags
+ * @param query - The query to search for
+ * @returns The tags
+ */
 export const fetchTags = async (query: string) => {
   try {
     const response = await fetch(

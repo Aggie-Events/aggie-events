@@ -10,24 +10,20 @@ import express from "express";
 export const orgRouter = express.Router();
 
 /**
- * Route to create a new organization.
- * @name post/
- * @function
- * @memberof module:routers/api-router/orgs
- * @param {Object} req - The request object.
- * @param {Object} req.body - The request body.
- * @param {string} req.body.username - The name of the organization.
- * @param {string} req.body.email - The email of the organization.
- * @param {Object} res - The response object.
+ * @route POST /api/orgs
+ * @description Create a new organization
+ * @access Private - Requires authentication
+ * @param {string} req.body.org_name - The name of the organization.
+ * @param {string} req.body.org_email - The email of the organization.
  * @returns {string} A message indicating the organization creation status.
+ * @returns {Error} 500 - Server error if organizations cannot be created
  */
 orgRouter.post("/", authMiddleware, async (req, res) => {
-  const { username, email } = req.body;
-  console.log("Post user req.user: " + req.user);
+  const { org_name, org_email } = req.body;
   try {
     await db
       .insertInto("orgs")
-      .values({ org_name: username, org_email: email })
+      .values({ org_name: org_name, org_email: org_email })
       .execute();
     res.send("Org created!");
   } catch (error) {
@@ -37,13 +33,11 @@ orgRouter.post("/", authMiddleware, async (req, res) => {
 });
 
 /**
- * Route to fetch all organizations.
- * @name get/
- * @function
- * @memberof module:routers/api-router/orgs
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {Array} JSON array containing all organizations.
+ * @route GET /api/orgs
+ * @description Fetch all organizations
+ * @access Public
+ * @returns {Object[]} Array of all organizations
+ * @returns {Error} 500 - Server error if organizations cannot be fetched
  */
 orgRouter.get("/", async (req, res) => {
   try {
@@ -58,13 +52,11 @@ orgRouter.get("/", async (req, res) => {
 });
 
 /**
- * Route to delete all organizations.
- * @name delete/
- * @function
- * @memberof module:routers/api-router/orgs
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {string} A message indicating the organization deletion status.
+ * @route DELETE /api/orgs
+ * @description Delete all organizations
+ * @access Private - Requires authentication
+ * @returns {string} Success message
+ * @returns {Error} 500 - Server error if organizations cannot be deleted
  */
 orgRouter.delete("/", authMiddleware, async (req, res) => {
   try {
@@ -72,6 +64,6 @@ orgRouter.delete("/", authMiddleware, async (req, res) => {
     res.send("Orgs deleted!");
   } catch (error) {
     console.error("Error deleting Orgs:", error);
-    res.status(500).send("Error deleting users!");
+    res.status(500).send("Error deleting Orgs!");
   }
 });

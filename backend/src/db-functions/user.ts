@@ -1,8 +1,3 @@
-/**
- * Module for interacting with the users table in the database.
- * @module dbapi/user
- */
-
 import { db } from "../database";
 
 /**
@@ -26,3 +21,4 @@ export async function getUserById(
     throw new Error("Error fetching user!");
   }
 }
+

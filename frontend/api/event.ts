@@ -19,6 +19,11 @@ export interface SearchEventsReturn {
   date_modified: Date;
   tags: string[];
 }
+/**
+ * Search for events based on query parameters
+ * @param {string} queryString - The query string to search for
+ * @returns {Promise<{events: SearchEventsReturn[], duration: number, pageSize: number, resultSize: number}>} The search results
+ */
 export const searchEvents = async (
   queryString: string,
 ): Promise<{
@@ -35,7 +40,7 @@ export const searchEvents = async (
       resultSize: resultSize,
       pageSize: pageSize,
     } = await fetchUtil(
-      `${process.env.NEXT_PUBLIC_API_URL}` + `/search?${queryString}`,
+      `${process.env.NEXT_PUBLIC_API_URL}` + `/search/events?${queryString}`,
       {
         method: "GET",
       },
@@ -61,6 +66,10 @@ export const searchEvents = async (
   }
 };
 
+/**
+ * Fetch all events
+ * @returns {Promise<Event[]>} The events
+ */
 export const fetchEvents = async (): Promise<Event[]> => {
   try {
     const response = await fetchUtil(
@@ -75,6 +84,11 @@ export const fetchEvents = async (): Promise<Event[]> => {
   }
 };
 
+/**
+ * Fetch an event by its ID
+ * @param {number} eventID - The ID of the event to fetch
+ * @returns {Promise<EventPageInformation>} The event
+ */
 export const fetchEventById = async (
   eventID: number,
 ): Promise<EventPageInformation> => {
@@ -91,6 +105,11 @@ export const fetchEventById = async (
   }
 };
 
+/**
+ * Create an event
+ * @param {EventCreate} event - The event to create
+ * @returns {Promise<Event>} The created event
+ */
 export const createEvent = async (event: EventCreate) => {
   try {
     const response = await fetchUtil(
