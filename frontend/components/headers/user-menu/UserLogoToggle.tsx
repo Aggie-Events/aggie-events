@@ -4,11 +4,12 @@ import Image from "next/image";
 import { AnimatePresence } from "motion/react";
 import UserMenu from "@/components/headers/user-menu/UserMenu";
 import { useAuth } from "@/components/auth/AuthContext";
-import Link from "next/link";
+import LoginScreen from "@/components/auth/LoginScreen";
 
 export default function UserLogoToggle() {
   const { user, logout } = useAuth();
   const [showMenu, setShowMenu] = useState<boolean>(false);
+  const [showLogin, setShowLogin] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null); // Ref for the menu container
 
   useEffect(() => {
@@ -55,14 +56,17 @@ export default function UserLogoToggle() {
           </AnimatePresence>
         </div>
       ) : (
-        <button className="py-1 px-3 rounded-md border-[1px] border-white">
-          <Link
-            href={`${process.env.NEXT_PUBLIC_AUTH_URL}/google`}
-            className=""
+        <>
+          <button 
+            onClick={() => setShowLogin(true)}
+            className="py-1 px-3 rounded-md border-[1px] border-white text-white hover:bg-white/10 transition-colors"
           >
             Sign in
-          </Link>
-        </button>
+          </button>
+          <AnimatePresence>
+            {showLogin && <LoginScreen onClose={() => setShowLogin(false)} />}
+          </AnimatePresence>
+        </>
       )}
     </>
   );

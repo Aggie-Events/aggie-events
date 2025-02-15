@@ -10,25 +10,14 @@ import { UserStorage } from "../types/customtypes";
 export const authRouter = express.Router();
 
 /**
- * Route to check if user is authenticated.
- * @name get/user
- * @function
- * @memberof module:routers/auth-router
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
+ * @route GET /auth/user
+ * @description Get user information
+ * @access Public
  * @returns {Object} JSON object containing user information if authenticated, otherwise an empty object.
  */
 authRouter.get("/user", async (req, res) => {
-  const user = req.user as UserStorage;
-  res.send(
-    req.user
-      ? {
-          user_name: user.user_name,
-          user_img: user.user_img,
-          user_email: user.user_email,
-        }
-      : {},
-  );
+  console.log("User:", req.user);
+  res.send(req.user ?? {});
 });
 
 /**
@@ -40,7 +29,7 @@ authRouter.get("/user", async (req, res) => {
 authRouter.get(
   "/google",
   passport.authenticate("google", {
-    scope: ["profile", "email"],
+    scope: ["profile", "email"],  
   }),
 );
 
@@ -48,16 +37,16 @@ authRouter.get(
  * @route GET /auth/google/callback
  * @description Handle Google OAuth callback
  * @access Public
- * @returns {void} Redirects to dashboard on success, login page on failure
+ * @returns {void} Redirects to auth callback page on success, login page on failure
  */
 authRouter.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: `${process.env.FRONTEND_URL}/login`,
+    failureRedirect: `${process.env.FRONTEND_URL}`,
   }),
   (req, res) => {
     console.log("Authentication success!");
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+    res.redirect(`${process.env.FRONTEND_URL}/auth-callback`);
   },
 );
 
