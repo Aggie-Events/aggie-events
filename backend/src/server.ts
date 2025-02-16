@@ -85,7 +85,7 @@ const init = async (): Promise<express.Application> => {
 
         await db
           .selectFrom("users")
-          .select(["user_email", "user_id"])
+          .select(["user_email", "user_id", "user_name"])
           .where("user_email", "=", user_email)
           .executeTakeFirst()
           .then(async (result) => {
@@ -113,6 +113,7 @@ const init = async (): Promise<express.Application> => {
 
             return done(null, {
               user_email: user_email,
+              user_name: result?.user_name ?? null,
               user_displayname: profile.displayName,
               user_img: profile.photos ? profile.photos[0].value : "",
               user_id: user_id,
@@ -134,11 +135,12 @@ const init = async (): Promise<express.Application> => {
   // Retrieves user data from the session
   // Accessed by req.user in route handlers
   passport.deserializeUser(({ user_id: user_id, user_img: user_img }, done) => {
-    getUserById(user_id).then(({ user_displayname: user_name, user_email }) => {
+    getUserById(user_id).then(({ user_name, user_displayname, user_email }) => {
       done(null, {
         user_id,
         user_email: user_email,
-        user_displayname: user_name,
+        user_name: user_name,
+        user_displayname: user_displayname,
         user_img: user_img,
       });
     });

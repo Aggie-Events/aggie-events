@@ -23,11 +23,33 @@ export default function LoginScreen({ onClose, showBackButton = true }: LoginScr
   const [showUsernameSelection, setShowUsernameSelection] = useState(false);
   const [tempUserData, setTempUserData] = useState<User | null>(null);
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Logout failed');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+    }
+  };
+
+  const handleUsernameSelectionClose = async () => {
+    setShowUsernameSelection(false);
+    await handleLogout();
+    ToastManager.addToast('Username selection cancelled. Please try signing in again.', 'error', 3000);
+    if (onClose) onClose();
+  };
+
   const handleGoogleAuth = async () => {
     setIsLoading(true);
     try {
       const user = await openAuthPopup(`${process.env.NEXT_PUBLIC_AUTH_URL}/google`);
       if (user) {
+        console.log("User:", user);
         if (!user.user_name) {
           // If user has no username, show username selection
           setTempUserData({
@@ -126,10 +148,7 @@ export default function LoginScreen({ onClose, showBackButton = true }: LoginScr
       >
         <UsernameSelection 
           onSubmit={handleUsernameSubmit}
-          onClose={() => {
-            setShowUsernameSelection(false);
-            if (onClose) onClose();
-          }}
+          onClose={handleUsernameSelectionClose}
         />
       </motion.div>
     );

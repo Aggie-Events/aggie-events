@@ -35,7 +35,7 @@ const UserMenu = forwardRef<HTMLElement, UserMenuProps>(
         </div>
         <div className="">
           <div className="font-semibold">{user.user_displayname}</div>
-          <div className="text-xs">{user.user_email}</div>
+          <div className="text-xs">@{user.user_name}</div>
         </div>
       </div>
       <div className="flex flex-col gap-1">

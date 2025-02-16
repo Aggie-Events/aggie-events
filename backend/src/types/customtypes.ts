@@ -11,6 +11,7 @@ export interface UserStorage {
   user_displayname: string;
   user_img: string;
   user_id: number;
+  user_name: string | null;
 }
 
 // This is how the users are stored in session storage

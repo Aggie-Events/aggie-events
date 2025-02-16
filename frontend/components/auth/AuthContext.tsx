@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { ReactNode } from "react";
 import ToastManager from "@/components/toast/ToastManager";
+import type { User } from "@/config/types";
 
 interface AuthContextType {
   user: User | undefined | null;
