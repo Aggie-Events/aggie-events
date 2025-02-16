@@ -15,9 +15,11 @@ CREATE TABLE orgs
 CREATE TABLE users
 (
     user_id          SERIAL PRIMARY KEY,
-    user_name        VARCHAR(255)          NOT NULL,
+    -- user_name is NULL for users who have not assigned their username yet
+    user_name        VARCHAR(255)          NULL UNIQUE,
     user_displayname VARCHAR(255)          NOT NULL,
     user_email       VARCHAR(255)          NOT NULL UNIQUE,
+    user_verified    BOOLEAN DEFAULT FALSE NOT NULL,
     user_mod         BOOLEAN DEFAULT FALSE NOT NULL,
 
     user_major       VARCHAR(255)          NULL,

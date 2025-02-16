@@ -8,13 +8,13 @@ import { db } from "../database";
  */
 export async function getUserById(
   userId: number,
-): Promise<{ user_name: string; user_email: string }> {
+): Promise<{ user_displayname: string; user_email: string }> {
   try {
     // Find the user by their user ID
     const result = await db
       .selectFrom("users")
       .where("user_id", "=", userId)
-      .select(["user_email", "user_name"])
+      .select(["user_email", "user_displayname"])
       .executeTakeFirstOrThrow();
     return result;
   } catch (error) {

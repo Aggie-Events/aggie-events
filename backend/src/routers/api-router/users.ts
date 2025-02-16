@@ -23,15 +23,12 @@ usersRouter.get("/", authMiddleware, async (req, res) => {
 });
 
 /**
- * Route to create a new user.
- * @name post/
- * @function
- * @memberof module:routers/api-router/users
- * @param {Object} req - The request object.
+ * @route POST /api/users
+ * @description Create a new user
+ * @access Private - Requires authentication
  * @param {Object} req.body - The request body.
  * @param {string} req.body.username - The name of the user.
  * @param {string} req.body.email - The email of the user.
- * @param {Object} res - The response object.
  * @returns {string} A message indicating the user creation status.
  */
 usersRouter.post("/", authMiddleware, async (req, res) => {
@@ -40,7 +37,7 @@ usersRouter.post("/", authMiddleware, async (req, res) => {
   try {
     await db
       .insertInto("users")
-      .values({ user_name: username, user_email: email })
+      .values({ user_name: username, user_email: email, user_displayname: username })
       .execute();
     res.send("User created!");
   } catch (error) {
@@ -88,5 +85,82 @@ usersRouter.delete("/", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error deleting users:", error);
     res.status(500).send("Error deleting users!");
+  }
+});
+
+/**
+ * @route POST /api/users/exists
+ * @description Check if a username exists
+ * @access Public
+ * @param {Object} req.body - The request body.
+ * @param {string} req.body.username - The username to check.
+ * @returns {Object} A message indicating if the username exists.
+ */
+usersRouter.post("/exists", async (req, res) => {
+  const { username } = req.body;
+
+  if (!username || typeof username !== "string") {
+    return res.status(400).json({ 
+      message: "Username is required",
+      exists: false 
+    });
+  }
+
+  try {
+    const user = await db
+      .selectFrom("users")
+      .where("user_name", "=", username)
+      .select("user_id")
+      .executeTakeFirst();
+
+    res.json({ 
+      exists: user !== undefined,
+      message: user !== undefined ? "Username is taken" : "Username is available"
+    });
+  } catch (error) {
+    console.error("Error checking username:", error);
+    res.status(500).json({ 
+      message: "Error checking username",
+      exists: false 
+    });
+  }
+});
+
+/**
+ * @route PUT /api/users/username
+ * @description Update the username of the authenticated user
+ * @access Private
+ */
+usersRouter.put("/username", authMiddleware, async (req, res) => {
+  const { username } = req.body;
+  const userId = (req.user as any).user_id;
+
+  if (!username || typeof username !== "string") {
+    return res.status(400).json({ message: "Username is required" });
+  }
+
+  try {
+    // Check if username is already taken
+    const existingUser = await db
+      .selectFrom("users")
+      .where("user_name", "=", username)
+      .select("user_id")
+      .executeTakeFirst();
+
+    if (existingUser) {
+      return res.status(400).json({ message: "Username is already taken" });
+    }
+
+    // Update the username
+    await db
+      .updateTable("users")
+      .set({ user_name: username })
+      .where("user_id", "=", userId)
+      .execute();
+
+    res.json({ message: "Username updated successfully" });
+  } catch (error) {
+    console.error("Error updating username:", error);
+    res.status(500).json({ message: "Failed to update username" });
   }
 });

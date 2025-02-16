@@ -5,8 +5,10 @@ import { FcGoogle } from "react-icons/fc";
 import { MdClose } from "react-icons/md";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { openAuthPopup } from "@/api/auth";
+import { openAuthPopup, updateUsername } from "@/api/auth";
 import ToastManager from "@/components/toast/ToastManager";
+import UsernameSelection from "./UsernameSelection";
+import type { User } from "@/config/types";
 
 interface LoginScreenProps {
   onClose?: () => void;
@@ -18,16 +20,29 @@ export default function LoginScreen({ onClose, showBackButton = true }: LoginScr
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [showUsernameSelection, setShowUsernameSelection] = useState(false);
+  const [tempUserData, setTempUserData] = useState<User | null>(null);
 
   const handleGoogleAuth = async () => {
     setIsLoading(true);
     try {
       const user = await openAuthPopup(`${process.env.NEXT_PUBLIC_AUTH_URL}/google`);
       if (user) {
-        setUser(user);
-        if (onClose) onClose();
-        ToastManager.addToast('Successfully signed in!', 'success', 3000);
-        window.location.reload();
+        if (!user.user_name) {
+          // If user has no username, show username selection
+          setTempUserData({
+            ...user,
+            user_name: '',
+            user_displayname: user.user_displayname || ''
+          });
+          setShowUsernameSelection(true);
+        } else {
+          // If user has username, complete login
+          setUser(user);
+          if (onClose) onClose();
+          ToastManager.addToast('Successfully signed in!', 'success', 3000);
+          window.location.reload();
+        }
       } else {
         ToastManager.addToast('Sign in was cancelled or failed', 'error', 3000);
       }
@@ -36,6 +51,26 @@ export default function LoginScreen({ onClose, showBackButton = true }: LoginScr
       ToastManager.addToast('Failed to sign in', 'error', 3000);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleUsernameSubmit = async (username: string) => {
+    if (!tempUserData) return;
+    
+    try {
+      await updateUsername(username);
+      const updatedUser: User = {
+        ...tempUserData,
+        user_name: username,
+        user_displayname: username
+      };
+      setUser(updatedUser);
+      if (onClose) onClose();
+      ToastManager.addToast('Successfully signed in!', 'success', 3000);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error updating username:', error);
+      throw error;
     }
   };
 
@@ -79,6 +114,26 @@ export default function LoginScreen({ onClose, showBackButton = true }: LoginScr
       }
     }
   };
+
+  if (showUsernameSelection) {
+    return (
+      <motion.div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        initial="hidden"
+        animate="visible"
+        exit="hidden"
+        variants={overlayVariants}
+      >
+        <UsernameSelection 
+          onSubmit={handleUsernameSubmit}
+          onClose={() => {
+            setShowUsernameSelection(false);
+            if (onClose) onClose();
+          }}
+        />
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

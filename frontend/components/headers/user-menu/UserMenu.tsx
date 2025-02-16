@@ -4,6 +4,7 @@ import Image from "next/image";
 import { UserMenuLinks } from "@/config/config";
 import Link from "next/link";
 import { MdLogout } from "react-icons/md";
+import type { User } from "@/config/types";
 
 interface UserMenuProps {
   user: User;
@@ -33,7 +34,7 @@ const UserMenu = forwardRef<HTMLElement, UserMenuProps>(
           />
         </div>
         <div className="">
-          <div className="font-semibold">{user.user_name}</div>
+          <div className="font-semibold">{user.user_displayname}</div>
           <div className="text-xs">{user.user_email}</div>
         </div>
       </div>

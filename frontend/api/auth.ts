@@ -1,11 +1,5 @@
 import { fetchUtil } from "@/api/fetch";
-
-interface User {
-  user_email: string;
-  user_name: string;
-  user_img: string;
-  user_id: number;
-}
+import type { User } from "@/config/types";
 
 /**
  * Test the authentication status of the user
@@ -104,4 +98,20 @@ export function openAuthPopup(url: string): Promise<User | null> {
       resolve(null);
     }, 120000);
   });
+}
+
+export async function updateUsername(username: string): Promise<void> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/username`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ username }),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to update username');
+  }
 }

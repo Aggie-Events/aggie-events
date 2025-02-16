@@ -19,6 +19,11 @@ export const authMiddleware = (
     return res.status(401).json({ message: "Unauthorized" });
   }
 
+  if (!req.user.user_displayname) {
+    console.error("Attempted to access protected route without username");
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
   // If the user is authenticated, continue to the next middleware
   next();
 };

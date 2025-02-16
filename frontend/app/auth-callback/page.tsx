@@ -37,12 +37,16 @@ export default function AuthCallback() {
             user: null
           }, window.location.origin);
         }
+
+        // Close the window
+        window.close();
       } catch (error) {
         console.error('Error fetching user data:', error);
         window.opener.postMessage({
           type: 'auth_complete',
           user: null
         }, window.location.origin);
+        window.close();
       }
     }
 
@@ -50,9 +54,11 @@ export default function AuthCallback() {
   }, [router]);
 
   return (
-    <div className="p-2">
-        <h1 className="text-2xl font-bold mb-4">Authentication Complete</h1>
-        <p>This window will close automatically.</p>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-2xl font-semibold mb-4">Authenticating...</h1>
+        <p className="text-gray-600">Please wait while we complete the authentication process.</p>
+      </div>
     </div>
   );
 } 

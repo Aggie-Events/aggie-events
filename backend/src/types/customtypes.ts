@@ -8,7 +8,7 @@ declare global {
 // Every request, if the user is authenticated, this type will be included in req.user
 export interface UserStorage {
   user_email: string;
-  user_name: string;
+  user_displayname: string;
   user_img: string;
   user_id: number;
 }
