@@ -119,6 +119,7 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
   } = req.body as EventCreate;
 
   try {
+    console.log("Req body: " + req.body)
     const event = await db
       .insertInto("events")
       .values({

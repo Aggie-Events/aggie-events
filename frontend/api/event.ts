@@ -93,6 +93,7 @@ export const fetchEventById = async (
 
 export const createEvent = async (event: EventCreate) => {
   try {
+    console.log(event)
     const response = await fetchUtil(
       `${process.env.NEXT_PUBLIC_API_URL}/events`,
       {

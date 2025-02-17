@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         })
         .catch((error) => {
           console.error("Error checking user authentication:", error);
-          setUser(null);
+                  setUser(null);
         });
     fetchUser();
   }, []);
