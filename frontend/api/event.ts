@@ -11,6 +11,7 @@ export interface SearchEventsReturn {
   contributor_name: string;
   event_name: string;
   event_description: string;
+  event_img: string | null;
   event_likes: number;
   start_time: Date;
   end_time: Date;
@@ -130,7 +131,7 @@ export const createEvent = async (event: EventCreate) => {
  * @param {number} user_id - The ID of the user
  * @returns {Promise<Event[]>} The events
  */
-export const getUserEvents = async (): Promise<Event[]> => {
+export const getUserEvents = async (user_id: number): Promise<Event[]> => {
   try {
     const response = await fetchUtil(`${process.env.NEXT_PUBLIC_API_URL}/events/user/${user_id}`, {
       method: "GET",

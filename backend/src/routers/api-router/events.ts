@@ -51,6 +51,7 @@ eventRouter.get("/:event_id", async (req, res) => {
         "e.event_name as event_name",
         "e.event_description as event_description",
         "e.event_location as event_location",
+        "e.event_img as event_img",
         "e.event_likes as event_likes",
         "e.start_time as start_time",
         "e.end_time as end_time",
@@ -94,6 +95,7 @@ eventRouter.get("/:event_id", async (req, res) => {
       event_name: string; 
       event_description: string | null; 
       event_location: string | null; 
+      event_img: string | null;
       event_likes: number; 
       start_time: Date; 
       end_time: Date; 
