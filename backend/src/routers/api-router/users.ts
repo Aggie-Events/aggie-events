@@ -238,7 +238,7 @@ usersRouter.get("/:username/profile", async (req, res) => {
         "e.event_name",
         "e.event_description",
         "e.event_location",
-        "e.event_likes",
+        "e.event_img",
         "e.start_time",
         "e.end_time",
         "e.date_created",

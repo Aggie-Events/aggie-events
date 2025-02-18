@@ -74,9 +74,9 @@ searchRouter.get("/events", async (req, res) => {
       case "start":
         query = query.orderBy("e.start_time", "asc");
         break;
-      case "heart":
-        query = query.orderBy("e.event_likes", "desc");
-        break;
+      // case "heart":
+      //   query = query.orderBy("e.event_likes", "desc");
+      //   break;
       case "posted":
         query = query.orderBy("e.date_created", "desc");
         break;
@@ -103,7 +103,6 @@ searchRouter.get("/events", async (req, res) => {
         "e.event_name as event_name",
         "e.event_location as event_location",
         "e.event_description as event_description",
-        "e.event_likes as event_likes",
         "e.start_time as start_time",
         "e.end_time as end_time",
         "e.date_created as date_created",

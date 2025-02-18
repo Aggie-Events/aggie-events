@@ -55,7 +55,6 @@ eventRouter.get("/:event_id", async (req, res) => {
         "e.event_description as event_description",
         "e.event_location as event_location",
         "e.event_img as event_img",
-        "e.event_likes as event_likes",
         "e.start_time as start_time",
         "e.end_time as end_time",
         "e.date_created as date_created",
@@ -217,7 +216,6 @@ eventRouter.get("/user/:user_name", async (req, res) => {
         "e.event_name",
         "e.event_description",
         "e.event_location",
-        "e.event_likes",
         "e.start_time",
         "e.end_time",
         "e.date_created",
@@ -238,6 +236,7 @@ eventRouter.get("/user/:user_name", async (req, res) => {
         tags: (event.tags as {tag_name: string}[]).map(t => t.tag_name),
         event_img: null,
         event_status: "published" as const,
+        event_likes: 0,
         event_views: 0,
         event_going: 0,
       })));
