@@ -39,6 +39,7 @@ searchRouter.get("/events", async (req, res) => {
     // Filtering by tags
     if (tags) {
       const tagArray = (tags as string).split(",");
+      // Adds a subquery that filters events that don't have all the tags in the tagArray
       query = query.where((eb) => {
         return eb(
           "e.event_id",
@@ -49,6 +50,8 @@ searchRouter.get("/events", async (req, res) => {
             .innerJoin("tags as t", "e_t.tag_id", "t.tag_id")
             .where("t.tag_name", "in", tagArray)
             .groupBy("e.event_id")
+            // Ensures that the event at least has all the tags in the tagArray
+            // For example, if the tagArray is ["tag1", "tag2"], this ensures that events with only "tag1" are not included
             .having((eb) => {
               return eb(
                 eb.fn.count<number>("e.event_id"),

@@ -1,7 +1,7 @@
 CREATE TABLE orgs
 (
     org_id          SERIAL PRIMARY KEY,
-    org_name        VARCHAR(255)          NOT NULL UNIQUE,
+    org_name        VARCHAR(255)          NOT NULL,
     org_email       VARCHAR(255)          NULL UNIQUE,
     org_description TEXT                  NULL,
     org_icon        VARCHAR(255)          NULL,
@@ -11,6 +11,7 @@ CREATE TABLE orgs
     org_building    VARCHAR(255)          NULL,
     org_room        VARCHAR(255)          NULL
 );
+CREATE UNIQUE INDEX org_name_unique_upper ON orgs (UPPER(org_name));
 
 CREATE TABLE users
 (
@@ -49,15 +50,15 @@ CREATE TABLE events
     contributor_id    INT                                 NOT NULL,
     event_name        VARCHAR(255)                        NOT NULL,
     event_description TEXT                                NULL,
-    event_likes       INT       DEFAULT 0                 NOT NULL,
-    event_views       INT       DEFAULT 0                 NOT NULL,
     event_location    VARCHAR(255),
+    event_views       INT       DEFAULT 0                 NOT NULL,
+
     event_img         VARCHAR(255)                        NULL,
 
-    start_time        TIMESTAMP                           NOT NULL,
-    end_time          TIMESTAMP                           NOT NULL,
-    date_created      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    date_modified     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    start_time        TIMESTAMPTZ                           NOT NULL,
+    end_time          TIMESTAMPTZ                           NOT NULL,
+    date_created      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    date_modified     TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
     -- If both start_time and end_time are not null, then start_time must be less than end_time
     CHECK (start_time < end_time),
@@ -184,7 +185,7 @@ CREATE TABLE friendships
     user2_id        INTEGER REFERENCES users (user_id),
     status          friendship_status        DEFAULT 'pending', -- Use the enum type here, and set a default
     friendship_type VARCHAR(50),
-    created_at      TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (user1_id, user2_id)
 );
 
@@ -203,7 +204,7 @@ CREATE TABLE reports
     reported_event_id INT                                   NULL REFERENCES events (event_id) ON DELETE CASCADE,
     reported_org_id   INT                                   NULL REFERENCES orgs (org_id) ON DELETE CASCADE,
     report_reason     TEXT                                  NULL,
-    report_date       TIMESTAMP   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    report_date       TIMESTAMPTZ   DEFAULT CURRENT_TIMESTAMP NOT NULL,
     report_status     report_status DEFAULT 'pending'       NOT NULL,
     admin_notes       TEXT                                  NULL,
     resolution_date   TIMESTAMP                             NULL

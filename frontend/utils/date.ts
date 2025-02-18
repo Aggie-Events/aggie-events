@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 /**
  * Checks if two dates fall on the same day.
  *
@@ -73,3 +75,24 @@ export const formatTimeInterval = (start: Date, end: Date): string => {
 
   return `${startTimeStr} - ${endTimeStr}`;
 };
+
+/**
+ * Converts local date and time to CST
+ * 
+ * @param {string} date - The date in YYYY-MM-DD format
+ * @param {string} time - The time in HH:mm format
+ * @returns {Date} - Date object in CST
+ */
+export function toCST(date: string, time: string): Date {
+  return DateTime.fromFormat(`${date} ${time}`, 'yyyy-MM-dd HH:mm', { zone: 'America/Chicago' })
+    .toJSDate();
+}
+
+/**
+ * Converts a date to UTC midnight for all-day events
+ */
+export function dateToUTCMidnight(date: string): Date {
+  return DateTime.fromFormat(date, 'yyyy-MM-dd', { zone: 'UTC' })
+    .startOf('day')
+    .toJSDate();
+}

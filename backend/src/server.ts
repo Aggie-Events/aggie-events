@@ -12,7 +12,7 @@ import { authRouter } from "./routers/auth-router";
 import { db } from "./database";
 import MemoryStore from "memorystore";
 import cors from "cors";
-import { UserStorage } from "./types/customtypes";
+import { UserStorage } from "./types/user-storage";
 import { getUserById } from "./db-functions/user";
 
 /**

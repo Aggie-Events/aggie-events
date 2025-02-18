@@ -5,7 +5,7 @@
 
 import express from "express";
 import passport from "passport";
-import { UserStorage } from "../types/customtypes";
+import { UserStorage } from "../types/user-storage";
 
 export const authRouter = express.Router();
 

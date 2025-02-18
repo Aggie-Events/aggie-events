@@ -1,6 +1,7 @@
 import { fetchUtil } from "@/api/fetch";
+import { EventForm } from "@/app/dashboard/events/create/page";
 import { Event } from "@/config/dbtypes";
-import { EventCreate, EventPageInformation } from "@/config/query-types";
+import { EventCreate, EventPageInformation, EventStatus } from "@/config/query-types";
 import { SearchFilters } from "@/config/query-types";
 
 export interface SearchEventsReturn {
@@ -19,6 +20,18 @@ export interface SearchEventsReturn {
   date_modified: Date;
   tags: string[];
 }
+
+// Add this interface to match the API expectations
+export interface CreateEventData {
+  event_name: string;
+  event_description: string | null;
+  event_location: string | null;
+  start_time: Date;
+  end_time: Date;
+  event_status: EventStatus;
+  tags: string[];
+}
+
 /**
  * Search for events based on query parameters
  * @param {string} queryString - The query string to search for
@@ -108,10 +121,12 @@ export const fetchEventById = async (
 /**
  * Create an event
  * @param {EventCreate} event - The event to create
- * @returns {Promise<Event>} The created event
+ * @returns {Promise<number>} The created event ID
  */
-export const createEvent = async (event: EventCreate) => {
+export const createEvent = async (event: CreateEventData) => {
   try {
+    console.log("Formatted event: ", event);
+    
     const response = await fetchUtil(
       `${process.env.NEXT_PUBLIC_API_URL}/events`,
       {
@@ -148,18 +163,3 @@ export const getEventsByUser = async (username: string): Promise<SearchEventsRet
     throw new Error("Error getting user events: " + error);
   }
 };
-
-// export const getEventTags = async (event_id: number): Promise<string[]> => {
-//     try {
-//         const IDs = await fetchUtil(`${process.env.NEXT_PUBLIC_API_URL}/events/${event_id}/tags`, {
-//             method: 'GET',
-//         }); // NOTE: currently working on making the event tags populate with the actual db data
-
-//         const response = await fetchUtil(`${process.env.NEXT_PUBLIC_API_URL}/tags`, {
-//             method: 'GET',
-//             body: JSON.stringify({ query }),
-//         });
-//         return response.json() ?? [];
-//     } catch (error) {
-//         throw new Error('Error getting event tags' + error);
-//     }

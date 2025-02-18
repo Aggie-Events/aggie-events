@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MdAdd, MdEdit, MdDelete } from "react-icons/md";
 import ToastManager from "@/components/toast/ToastManager";
-import { getUserEvents } from "@/api/event";
+import { getEventsByUser } from "@/api/event";
 import { Event } from "@/config/dbtypes";
 import { useAuth } from "@/components/auth/AuthContext";
 
@@ -20,8 +20,9 @@ export default function EventsPage() {
       if (!user) return;
       
       try {
-        const userEvents = await getUserEvents(user.user_id);
+        const userEvents = await getEventsByUser(user.user_name);
         setEvents(userEvents);
+
       } catch (error) {
         ToastManager.addToast("Failed to fetch events", "error");
         console.error("Error fetching events:", error);

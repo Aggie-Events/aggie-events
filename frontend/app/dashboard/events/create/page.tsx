@@ -9,15 +9,18 @@ import {
   MdClose,
   MdAdd,
   MdPublish,
+  MdSchedule,
 } from "react-icons/md";
 import { FaTag } from "react-icons/fa";
 import { fetchTags } from "@/api/tags";
 import ToastManager from "@/components/toast/ToastManager";
 import { useRouter } from "next/navigation";
+import { createEvent } from "@/api/event";
+import { EventStatus } from "@/config/query-types";
+import { CreateEventData } from "@/api/event";
+import { toCST, dateToUTCMidnight } from "@/utils/date";
 
-type EventStatus = 'draft' | 'published' | 'cancelled';
-
-interface EventForm {
+export interface EventForm {
   event_name: string;
   event_description: string;
   event_location: string;
@@ -49,7 +52,9 @@ export default function CreateEventPage() {
   const [focused, setFocused] = useState(false);
   const tagRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAllDay, setIsAllDay] = useState(false);
 
+  // Fetch tag suggestions when the user types in the tag input
   useEffect(() => {
     if (tagInput.length > 0) {
       fetchTags(tagInput).then((tags) => {
@@ -64,6 +69,7 @@ export default function CreateEventPage() {
     }
   }, [tagInput, formData.tags]);
 
+  // Close the tag suggestions when the user clicks outside of the tag input
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (tagRef.current && !tagRef.current.contains(event.target as Node)) {
@@ -112,15 +118,22 @@ export default function CreateEventPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const combinedData = {
-        ...formData,
-        start_time: `${formData.start_date}T${formData.start_time}`,
-        end_time: `${formData.end_date}T${formData.end_time}`,
+      const eventData: CreateEventData = {
+        event_name: formData.event_name,
+        event_description: formData.event_description || null,
+        event_location: formData.event_location || null,
+        start_time: isAllDay 
+          ? dateToUTCMidnight(formData.start_date)
+          : toCST(formData.start_date, formData.start_time),
+        end_time: isAllDay 
+          ? dateToUTCMidnight(formData.end_date)
+          : toCST(formData.end_date, formData.end_time),
+        event_status: formData.status,
+        tags: formData.tags
       };
 
-      console.log(combinedData);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-
+      await createEvent(eventData);
+      
       ToastManager.addToast(
         formData.status === 'published' 
           ? "Event published successfully!" 
@@ -204,8 +217,21 @@ export default function CreateEventPage() {
 
             {/* Date and Time */}
             <div className="space-y-4">
-              {/* Start Date/Time */}
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={isAllDay}
+                    onChange={(e) => setIsAllDay(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <span className="text-sm font-medium text-gray-700">All day</span>
+                </label>
+              </div>
+
+              {/* Date/Time Inputs */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Start Date */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     <MdAccessTime className="inline mr-1" />
@@ -215,27 +241,31 @@ export default function CreateEventPage() {
                     type="date"
                     required
                     value={formData.start_date}
-                    onChange={(e) =>
-                      setFormData({ ...formData, start_date: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, start_date: e.target.value });
+                    }}
                     className="w-full px-3 py-2 border rounded-md"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    <MdAccessTime className="inline mr-1" />
-                    Start Time *
-                  </label>
-                  <input
-                    type="time"
-                    required
-                    value={formData.start_time}
-                    onChange={(e) =>
-                      setFormData({ ...formData, start_time: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
-                </div>
+                
+                {/* Start Time */}
+                {!isAllDay && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <MdAccessTime className="inline mr-1" />
+                      Start Time (CST)*
+                    </label>
+                    <input
+                      type="time"
+                      required
+                      value={formData.start_time}
+                      onChange={(e) => {
+                        setFormData({ ...formData, start_time: e.target.value });
+                      }}
+                      className="w-full px-3 py-2 border rounded-md"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* End Date/Time */}
@@ -258,7 +288,7 @@ export default function CreateEventPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     <MdAccessTime className="inline mr-1" />
-                    End Time *
+                    End Time (CST)*
                   </label>
                   <input
                     type="time"

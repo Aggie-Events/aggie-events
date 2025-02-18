@@ -1,14 +1,18 @@
 export interface Event {
   event_id: number;
-  contributer_id: number;
+  contributor_id: number;
+  org_id?: number;
+  org_name?: string;
+  contributor_name: string;
   event_name: string;
   event_description: string;
+  event_location: string | null;
   event_likes: number;
   start_time: Date;
   end_time: Date;
-  event_location: string | null;
   date_created: Date;
   date_modified: Date;
+  tags: string[];
 }
 
 export interface Organization {

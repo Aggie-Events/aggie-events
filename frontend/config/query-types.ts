@@ -14,12 +14,16 @@ export interface EventPageInformation {
   tags: string[];
 }
 
+export type EventStatus = 'draft' | 'published' | 'cancelled';
+
 export interface EventCreate {
   event_name: string;
+  event_img: string | null;
   event_description: string | null;
   event_location: string | null;
-  start_time: Date;
-  end_time: Date;
+  start_time: string;
+  end_time: string;
+  event_status: EventStatus;
   tags: string[];
 }
 

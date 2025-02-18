@@ -3,7 +3,7 @@
  * @module database
  */
 
-import { DB } from "./types/dbtypes";
+import { DB } from "./types/schema";
 import { Pool } from "pg";
 import { Kysely, PostgresDialect } from "kysely";
 
