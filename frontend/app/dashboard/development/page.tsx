@@ -12,7 +12,7 @@ import TagSelector from "@/components/tag/TagSelector";
 export default function DevelopmentPage() {
   const { user } = useAuth();
   const [page, setPage] = useState<number>(0);
-  const options = ["Overview", "Users", "Events", "Organizations"];
+  const options = ["Overview", "Users"];
 
   return (
     <div className="space-y-6">
@@ -84,7 +84,6 @@ export default function DevelopmentPage() {
             <h2 className="text-xl font-bold mb-4">Welcome, {user.user_name}!</h2>
           )}
           {page === 1 && <UserForm />}
-          {page === 2 && <EventForm />}
           {page === 0 && (
             <div className="space-y-4">
               {/* Recent Activity Section */}
@@ -142,70 +141,3 @@ function UserForm() {
     </div>
   );
 }
-
-function EventForm() {
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
-  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-
-  const addEvent = async () => {
-    if (!title || !description || !location) return;
-
-    const event: EventCreate = {
-      event_name: title,
-      event_description: description,
-      event_location: location,
-      start_time: new Date(),
-      end_time: new Date(),
-      tags: Array.from(selectedTags),
-    };
-
-    try {
-      await createEvent(event);
-      ToastManager.addToast("Event created successfully!", "success");
-    } catch (error) {
-      ToastManager.addToast("Failed to create event", "error");
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      <input
-        type="text"
-        placeholder="Event Title"
-        className="w-full px-4 py-2 rounded border"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <textarea
-        placeholder="Event Description"
-        className="w-full px-4 py-2 rounded border"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-      <div className="flex gap-4">
-        <IconLabel text="Location" >
-        <FaLocationDot />
-          <input
-            type="text"
-            placeholder="Location"
-            className="px-4 py-2 rounded border"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-        </IconLabel>
-      </div>
-      <TagSelector 
-        selectedTags={selectedTags} 
-        onTagsChange={setSelectedTags}
-      />
-      <button
-        className="px-4 py-2 bg-maroon text-white rounded hover:bg-darkmaroon transition-colors"
-        onClick={addEvent}
-      >
-        Create Event
-      </button>
-    </div>
-  );
-} 

@@ -1,17 +1,12 @@
-import { notFound } from "next/navigation";
+"use client";
+import { notFound, useParams } from "next/navigation";
 import { getUser } from "@/api/user";
 import EventCard from "@/app/(other)/search/_components/event-display/EventCard";
 import Image from "next/image";
 import Link from "next/link";
 
-interface UserPageProps {
-  params: {
-    username: string;
-  };
-}
-
-export default async function UserPage({ params }: UserPageProps) {
-  const { username } = params;
+export default async function UserPage() {
+  const { username } = useParams<{ username: string }>();
   
   try {
     const userData = await getUser(username);
