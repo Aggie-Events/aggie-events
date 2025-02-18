@@ -164,3 +164,133 @@ usersRouter.put("/username", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Failed to update username" });
   }
 });
+
+/**
+ * @route GET /api/users/:username
+ * @description Get user information by username
+ * @access Public
+ * @param {string} req.params.username - The username of the user to get
+ * @returns {Object} User information
+ */
+usersRouter.get("/:username", async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const user = await db
+      .selectFrom("users")
+      .where("user_name", "=", username)
+      .selectAll()
+      .executeTakeFirst();
+
+    if (!user) {  
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Error fetching user" });
+  }
+});
+
+/**
+ * @route GET /api/users/:username/profile
+ * @description Get comprehensive user profile information
+ * @access Public
+ * @param {string} req.params.username - The username of the user to get
+ * @returns {Object} User profile information including events and organizations
+ */
+usersRouter.get("/:username/profile", async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    // Get user information
+    const user = await db
+      .selectFrom("users as u")
+      .where("u.user_name", "=", username)
+      .select([
+        "u.user_id",
+        "u.user_name",
+        "u.user_displayname",
+        "u.user_email",
+        "u.user_verified",
+        "u.user_major",
+        "u.user_year",
+        "u.user_description",
+        "u.user_profile_img",
+      ])
+      .executeTakeFirst();
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Get user's events with tags
+    const events = await db
+      .selectFrom("events as e")
+      .where("e.contributor_id", "=", user.user_id)
+      .leftJoin("eventtags as et", "e.event_id", "et.event_id")
+      .leftJoin("tags as t", "et.tag_id", "t.tag_id")
+      .leftJoin("eventorgs as eo", "e.event_id", "eo.event_id")
+      .leftJoin("orgs as o", "eo.org_id", "o.org_id")
+      .select([
+        "e.event_id",
+        "e.event_name",
+        "e.event_description",
+        "e.event_location",
+        "e.event_likes",
+        "e.start_time",
+        "e.end_time",
+        "e.date_created",
+        "e.date_modified",
+        "o.org_id",
+        "o.org_name",
+        "t.tag_name",
+      ])
+      .execute();
+
+    // Get user's organization affiliations
+    const organizations = await db
+      .selectFrom("userorgs as uo")
+      .where("uo.user_id", "=", user.user_id)
+      .innerJoin("orgs as o", "uo.org_id", "o.org_id")
+      .select([
+        "o.org_id",
+        "o.org_name",
+        "o.org_description",
+        "o.org_icon",
+      ])
+      .execute();
+
+    // Process events to group tags
+    const processedEvents = events.reduce((acc: any[], event) => {
+      const existingEvent = acc.find(e => e.event_id === event.event_id);
+      if (existingEvent) {
+        if (event.tag_name && !existingEvent.tags.includes(event.tag_name)) {
+          existingEvent.tags.push(event.tag_name);
+        }
+      } else {
+        acc.push({
+          ...event,
+          tags: event.tag_name ? [event.tag_name] : [],
+        });
+      }
+      return acc;
+    }, []);
+
+    console.log({
+      ...user,
+      events: processedEvents,
+      organizations,
+    });
+
+    res.json({
+      ...user,
+      events: processedEvents,
+      organizations,
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ message: "Error fetching user profile" });
+  }
+});

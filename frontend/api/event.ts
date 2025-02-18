@@ -128,19 +128,27 @@ export const createEvent = async (event: EventCreate) => {
 
 /**
  * Get all events created by a user
- * @param {number} user_id - The ID of the user
- * @returns {Promise<Event[]>} The events
+ * @param {string} username - The username of the user
+ * @returns {Promise<SearchEventsReturn[]>} The events
  */
-export const getUserEvents = async (user_id: number): Promise<Event[]> => {
+export const getEventsByUser = async (username: string): Promise<SearchEventsReturn[]> => {
   try {
-    const response = await fetchUtil(`${process.env.NEXT_PUBLIC_API_URL}/events/user/${user_id}`, {
+    const response = await fetchUtil(`${process.env.NEXT_PUBLIC_API_URL}/events/user/${username}`, {
       method: "GET",
     });
-    return response.json() ?? [];
+    const events = await response.json();
+    return events.map((e: any) => ({
+      ...e,
+      start_time: new Date(e.start_time),
+      end_time: new Date(e.end_time),
+      date_created: new Date(e.date_created),
+      date_modified: new Date(e.date_modified),
+      tags: e.tags || []
+    }));
   } catch (error) {
-    throw new Error("Error getting user events");
+    throw new Error("Error getting user events: " + error);
   }
-}
+};
 
 // export const getEventTags = async (event_id: number): Promise<string[]> => {
 //     try {
