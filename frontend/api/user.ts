@@ -117,7 +117,7 @@ export const verifyUserUpdate = async (username: string) => {
     return response.status === 200;
 };
 
-interface UserProfile {
+export interface UserProfile {
     user_id: number;
     user_name: string | null;
     user_displayname: string;
@@ -141,7 +141,7 @@ interface UserProfile {
  * @param {string} username - The username of the user to fetch
  * @returns {Promise<UserProfile | null>} The user profile information
  */
-export const getUser = async (username: string): Promise<UserProfile | null> => {
+export const getUserProfile = async (username: string): Promise<UserProfile | null> => {
     try {
         const response = await fetchUtil(`${process.env.NEXT_PUBLIC_API_URL}/users/${username}/profile`, {
             method: "GET",

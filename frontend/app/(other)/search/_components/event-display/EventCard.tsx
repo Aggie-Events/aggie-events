@@ -1,12 +1,10 @@
-"use client";
 import React from "react";
 import Image from "next/image";
-import { HiEye } from "react-icons/hi";
 import { FaHeart, FaTag } from "react-icons/fa";
-import { Event } from "@/config/dbtypes";
-import EventTagList from "@/components/tag/EventTagList";
 import Link from "next/link";
 import { SearchEventsReturn } from "@/api/event";
+import IconLabel from "@/components/common/IconLabel";
+import { HiEye } from "react-icons/hi";
 
 export default function EventCard({ event }: { event: SearchEventsReturn }) {
   return (
@@ -65,18 +63,18 @@ export default function EventCard({ event }: { event: SearchEventsReturn }) {
       <hr />
       <p className="text-sm w-fit ">
         Posted by{" "}
-        <Link className="text-maroon" href={`/users/${event.contributor_id}`}>
+        <Link className="text-maroon" href={`/users/${event.contributor_name}`}>
           {event.contributor_name}
         </Link>
       </p>
-      {/*<div className="flex gap-2">*/}
-      {/*  <IconLabel text={"1000"}>*/}
-      {/*    <HiEye color="maroon" />*/}
-      {/*  </IconLabel>*/}
-      {/*  <IconLabel text={"1000"}>*/}
-      {/*    <FaHeart color="maroon" />*/}
-      {/*  </IconLabel>*/}
-      {/*</div>*/}
+      <div className="flex gap-2">
+        <IconLabel text={"1000"}>
+          <HiEye color="maroon" />
+        </IconLabel>
+        <IconLabel text={"1000"}>
+          <FaHeart color="maroon" />
+        </IconLabel>
+      </div>
     </div>
   );
 }

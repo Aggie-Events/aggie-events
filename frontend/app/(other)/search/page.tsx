@@ -10,7 +10,6 @@ import {
 import { searchEvents, SearchEventsReturn } from "@/api/event";
 import EventList from "@/app/(other)/search/_components/EventList";
 import PageSelect from "@/app/(other)/search/_components/PageSelect";
-// import { FilterListOutput } from "./_components/filter-list/FilterList";
 
 // Filters
 // - Date Range
@@ -63,9 +62,8 @@ export default function Search() {
   const searchParams = useSearchParams();
   const filters = useRef<SearchFilters>(getFilters());
   const { push } = useRouter();
-  const [results, setResults] = useState<SearchEventsReturn[] | undefined>(
-    undefined,
-  );
+  const [results, setResults] = useState<SearchEventsReturn[] | undefined>(undefined);
+  
   // Mostly to trigger a re-render when the tags are updated
   const [tags, setTags] = useState<string[]>(
     filters.current.tags ? Array.from(filters.current.tags) : [],
@@ -153,27 +151,6 @@ export default function Search() {
     }
     push(`/search?${params.toString()}`);
   }
-
-  // function updateFilters(filtersUpdate: FilterListOutput) {
-  //   if (filtersUpdate.name !== undefined) {
-  //     filters.current.name = filtersUpdate.name.trim();
-  //   }
-
-  //   if (filtersUpdate.tag) {
-  //     const newTag = filtersUpdate.tag.trim();
-  //     const currentTags = filters.current.tags || new Set();
-
-  //     if (!currentTags.has(newTag)) {
-  //       filters.current.tags = new Set([...currentTags, newTag]);
-  //       // Reset selected category when adding custom tags
-  //       setSelectedCategory("All Events");
-  //     }
-  //   }
-
-  //   // Reset to page 1 when changing filters
-  //   filters.current.page = 1;
-  //   updateUrl();
-  // }
 
   // Change the function signature to use Category type
   function handleCategorySelect(category: Category) {
