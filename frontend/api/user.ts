@@ -1,5 +1,6 @@
 import ToastManager from "@/components/toast/ToastManager";
 import { fetchUtil } from "@/api/fetch";
+import { SearchEventsReturn } from "./event";
 
 export interface User {
     user_email: string;
@@ -114,4 +115,55 @@ export const verifyUserUpdate = async (username: string) => {
     ToastManager.addToast("API Message: " + message, "success", 1000);
 
     return response.status === 200;
+};
+
+interface UserProfile {
+    user_id: number;
+    user_name: string | null;
+    user_displayname: string;
+    user_email: string;
+    user_verified: boolean;
+    user_major: string | null;
+    user_year: number | null;
+    user_description: string | null;
+    user_profile_img: string | null;
+    events: SearchEventsReturn[];
+    organizations: {
+        org_id: number;
+        org_name: string;
+        org_description: string | null;
+        org_icon: string | null;
+    }[];
+}
+
+/**
+ * Get user profile information including their events and organization affiliations
+ * @param {string} username - The username of the user to fetch
+ * @returns {Promise<UserProfile | null>} The user profile information
+ */
+export const getUser = async (username: string): Promise<UserProfile | null> => {
+    try {
+        const response = await fetchUtil(`${process.env.NEXT_PUBLIC_API_URL}/users/${username}/profile`, {
+            method: "GET",
+        });
+        const userData = await response.json();
+        
+        if (!userData || userData.message === "User not found") {
+            return null;
+        }
+
+        return {
+            ...userData,
+            events: userData.events.map((e: any) => ({
+                ...e,
+                start_time: new Date(e.start_time),
+                end_time: new Date(e.end_time),
+                date_created: new Date(e.date_created),
+                date_modified: new Date(e.date_modified),
+            }))
+        };
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        return null;
+    }
 };

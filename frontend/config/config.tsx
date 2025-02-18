@@ -15,7 +15,7 @@ export const UserMenuLinks: {
   label: string;
   icon: ReactElement<IconType>;
 }[] = [
-  { href: "/profile", label: "Profile", icon: <FaUserCircle /> },
+  // { href: "/users/", label: "Profile", icon: <FaUserCircle /> },
   { href: "/dashboard", label: "Dashboard", icon: <MdDashboard /> },
   { href: "/friends", label: "Friends", icon: <FaUserFriends /> },
   { href: "/settings", label: "Settings", icon: <IoMdSettings /> },

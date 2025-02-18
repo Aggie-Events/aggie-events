@@ -5,6 +5,7 @@ import { UserMenuLinks } from "@/config/config";
 import Link from "next/link";
 import { MdLogout } from "react-icons/md";
 import type { User } from "@/config/types";
+import { FaUserCircle } from "react-icons/fa";
 
 interface UserMenuProps {
   user: User;
@@ -39,6 +40,16 @@ const UserMenu = forwardRef<HTMLElement, UserMenuProps>(
         </div>
       </div>
       <div className="flex flex-col gap-1">
+      <button
+            className="text-md font-semibold rounded-md hover:bg-gray-200 px-2 py-1 text-left"
+          >
+            <Link href={`/users/${user.user_name}`}>
+              <div className="inline-block align-middle mr-2 h-full">
+                <FaUserCircle />
+              </div>
+              <div className="inline-block align-middle h-full">Profile</div>
+            </Link>
+          </button>
         {UserMenuLinks.map(({ href, label, icon }, index) => (
           <button
             key={index}
