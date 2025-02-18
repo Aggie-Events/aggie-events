@@ -54,6 +54,7 @@ eventRouter.get("/:event_id", async (req, res) => {
         "e.event_name as event_name",
         "e.event_description as event_description",
         "e.event_location as event_location",
+        "e.event_img as event_img",
         "e.event_likes as event_likes",
         "e.start_time as start_time",
         "e.end_time as end_time",
@@ -93,7 +94,6 @@ eventRouter.get("/:event_id", async (req, res) => {
     const event_info = {
        ...page_data, 
        tags: tags as string[],
-       event_img: null,
        event_status: "published",
        event_views: 0,
        event_going: 0,

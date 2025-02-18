@@ -7,6 +7,7 @@ export interface Event {
   event_name: string;
   event_description: string;
   event_location: string | null;
+  event_img: string | null;
   event_likes: number;
   start_time: Date;
   end_time: Date;
