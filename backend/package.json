@@ -34,7 +34,7 @@
     "clean": "rimraf dist",
     "build": "tsc",
     "watch:build": "tsc --watch",
-    "watch:server": "nodemon --env-file=.env ./dist/index.js --watch ./dist",
+    "watch:server": "SET \"NODE_ENV=development\" && nodemon --env-file=.env ./dist/index.js --watch ./dist",
     "start": "npm-run-all clean build --parallel watch:build watch:server --print-label"
   }
 }
