@@ -3,8 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaSearch } from "react-icons/fa";
 import SearchPrompt from "@/components/search/SearchPrompt";
-import { searchEvents } from "@/api/event";
-import { SearchFilters } from "@/config/query-types";
 
 export default function SearchBar() {
   const [searchInput, setSearchInput] = useState<string>("");

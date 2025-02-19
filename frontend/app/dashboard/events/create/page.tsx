@@ -345,7 +345,6 @@ export default function CreateEventPage() {
                 {focused && tagSuggestions.length > 0 && (
                   <div className="absolute z-10 w-full bg-white border rounded-md mt-1 shadow-lg">
                     {tagSuggestions
-                      .map((tag) => tag.tag_name)
                       .filter((tag) => !formData.tags.includes(tag))
                       .map((tag) => (
                         <button

@@ -1,53 +1,15 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { MdAdd, MdEdit, MdDelete } from "react-icons/md";
 import ToastManager from "@/components/toast/ToastManager";
-import { getEventsByUser } from "@/api/event";
-import { Event } from "@/config/dbtypes";
+import { useEventsByUser } from "@/api/event";
 import { useAuth } from "@/components/auth/AuthContext";
-
-type EventStatus = 'draft' | 'published' | 'cancelled';
+import { EventStatus } from "@/config/query-types";
 
 export default function EventsPage() {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-
-  useEffect(() => {
-    const fetchUserEvents = async () => {
-      if (!user) return;
-      
-      try {
-        const userEvents = await getEventsByUser(user.user_name);
-        setEvents(userEvents);
-
-      } catch (error) {
-        ToastManager.addToast("Failed to fetch events", "error");
-        console.error("Error fetching events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserEvents();
-  }, [user]);
-
-  const updateEventStatus = async (eventId: number, newStatus: EventStatus) => {
-    try {
-      // TODO: Add API call to update status
-      // await updateEvent(eventId, { status: newStatus });
-      
-      setEvents(events.map(event => 
-        event.event_id === eventId ? { ...event, status: newStatus } : event
-      ));
-      
-      ToastManager.addToast("Event status updated", "success");
-    } catch (error) {
-      ToastManager.addToast("Failed to update event status", "error");
-    }
-  };
+  const { data: events, isLoading } = useEventsByUser(user?.user_name ?? "");
 
   const getStatusColor = (status: EventStatus) => {
     switch (status) {
@@ -62,8 +24,17 @@ export default function EventsPage() {
     }
   };
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
+  const handleStatusUpdate = async (eventId: number, status: EventStatus) => {
+    // TODO: Implement status update
+    ToastManager.addToast(`Status updated to ${status}`, "success");
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="w-12 h-12 border-4 border-maroon border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -79,7 +50,7 @@ export default function EventsPage() {
         </Link>
       </div>
 
-      {events.length === 0 ? (
+      {!events || events.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-6 text-center">
           <p className="text-gray-500">You haven't created any events yet.</p>
           <Link
@@ -137,9 +108,9 @@ export default function EventsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
-                        value="published" // TODO: Add status to event type
-                        onChange={(e) => updateEventStatus(event.event_id, e.target.value as EventStatus)}
-                        className={`px-2 py-1 text-xs font-semibold rounded-full border-0 ${getStatusColor('published')}`}
+                        value={event.event_status ?? 'published'}
+                        onChange={(e) => handleStatusUpdate(event.event_id, e.target.value as EventStatus)}
+                        className={`px-2 py-1 text-xs font-semibold rounded-full border-0 ${getStatusColor(event.event_status ?? 'published')}`}
                       >
                         <option value="draft">Draft</option>
                         <option value="published">Published</option>

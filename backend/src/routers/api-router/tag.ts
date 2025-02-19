@@ -20,8 +20,7 @@ tagRouter.get("/search", async (req, res) => {
       .select("t.tag_name")
       .limit(5)
       .execute();
-    res.json(tags);
-    console.log("Tags requested!");
+    res.json({ tags: tags.map((tag: { tag_name: string }) => tag.tag_name) });
   } catch (error) {
     console.error("Error fetching tags:", error);
     res.status(500).send("Error fetching tags!");

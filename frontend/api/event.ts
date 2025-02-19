@@ -19,6 +19,7 @@ export interface SearchEventsReturn {
   event_description: string;
   event_img: string | null;
   event_likes: number;
+  event_status: EventStatus;
   start_time: Date;
   end_time: Date;
   event_location: string | null;
@@ -79,32 +80,32 @@ export const createEvent = async (event: CreateEventData) => {
 };
 
 /**
- * Get all events created by a user
+ * React Query hook to get all events created by a user
  * @param {string} username - The username of the user
- * @returns {Promise<SearchEventsReturn[]>} The events
+ * @returns {UseQueryResult<SearchEventsReturn[], Error>} The events
  */
-export const getEventsByUser = async (
-  username: string,
-): Promise<SearchEventsReturn[]> => {
-  try {
-    const response = await fetchUtil(
-      `${process.env.NEXT_PUBLIC_API_URL}/events/user/${username}`,
-      {
-        method: "GET",
-      },
-    );
-    const events = await response.json();
-    return events.map((e: any) => ({
-      ...e,
-      start_time: new Date(e.start_time),
-      end_time: new Date(e.end_time),
-      date_created: new Date(e.date_created),
-      date_modified: new Date(e.date_modified),
-      tags: e.tags || [],
-    }));
-  } catch (error) {
-    throw new Error("Error getting user events: " + error);
-  }
+export const useEventsByUser = (username: string) => {
+  return useQuery<SearchEventsReturn[], Error>({
+    queryKey: ['events', 'user', username],
+    queryFn: async () => {
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/events/user/${username}`,
+        {
+          method: "GET",
+        },
+      );
+      const events = await response.json();
+      return events.map((e: any) => ({
+        ...e,
+        start_time: new Date(e.start_time),
+        end_time: new Date(e.end_time),
+        date_created: new Date(e.date_created),
+        date_modified: new Date(e.date_modified),
+        tags: e.tags || [],
+      }));
+    },
+    enabled: !!username, // Only run the query if username is provided
+  });
 };
 
 /**
