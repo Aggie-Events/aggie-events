@@ -16,7 +16,7 @@ const UserMenu = forwardRef<HTMLElement, UserMenuProps>(
     <motion.nav
       className="bg-white absolute right-0
     shadow-md rounded-md text-black
-    z-50 min-w-fit flex flex-col gap-2 p-1.5"
+    z-50 min-w-fit flex flex-col gap-2 p-1.5 w-max"
       ref={ref}
       transition={{ duration: 0.1, type: "linear" }}
       initial={{ opacity: 0 }}
@@ -34,26 +34,25 @@ const UserMenu = forwardRef<HTMLElement, UserMenuProps>(
             className="rounded-full shrink-0"
           />
         </div>
-        <div className="">
+        <div className="w-fit">
           <div className="font-semibold">{user.user_displayname}</div>
           <div className="text-xs">@{user.user_name}</div>
         </div>
       </div>
+
       <div className="flex flex-col gap-1">
-      <button
-            className="text-md font-semibold rounded-md hover:bg-gray-200 px-2 py-1 text-left"
-          >
-            <Link href={`/users/${user.user_name}`}>
-              <div className="inline-block align-middle mr-2 h-full">
-                <FaUserCircle />
-              </div>
-              <div className="inline-block align-middle h-full">Profile</div>
-            </Link>
-          </button>
+        <button className="text-md font-semibold rounded-md hover:bg-gray-200 px-2 py-1 text-left">
+          <Link href={`/users/${user.user_name}`}>
+            <div className="inline-block align-middle mr-2 h-full">
+              <FaUserCircle />
+            </div>
+            <div className="inline-block align-middle h-full">Profile</div>
+          </Link>
+        </button>
         {UserMenuLinks.map(({ href, label, icon }, index) => (
           <button
             key={index}
-            className="text-md font-semibold rounded-md hover:bg-gray-200 px-2 py-1 text-left"
+            className="text-md font-semibold rounded-md hover:bg-gray-200 px-2 py-1 text-left min-w-fit"
           >
             <Link href={href}>
               <div className="inline-block align-middle mr-2 h-full">
