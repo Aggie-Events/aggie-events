@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Logo from "@/components/common/Logo";
-import { FaGithub, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { FaGithub, FaTwitter, FaInstagram, FaLinkedin, FaXTwitter } from "react-icons/fa6";
 
 const footerLinks = {
   About: [
@@ -26,7 +26,7 @@ const footerLinks = {
 
 const socialLinks = [
   { icon: <FaGithub className="text-xl" />, href: "https://github.com/Aggie-Events/aggie-events" },
-  { icon: <FaTwitter className="text-xl" />, href: "https://twitter.com/aggieevents" },
+  { icon: <FaXTwitter className="text-xl" />, href: "https://twitter.com/aggieevents" },
   { icon: <FaInstagram className="text-xl" />, href: "https://instagram.com/aggieevents" },
   { icon: <FaLinkedin className="text-xl" />, href: "https://linkedin.com/company/aggieevents" },
 ];
