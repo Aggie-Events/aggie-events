@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@tanstack/react-query": "^5.0.0",
     "lodash.debounce": "^4.0.8",
     "luxon": "^3.5.0",
     "motion": "^11.11.17",

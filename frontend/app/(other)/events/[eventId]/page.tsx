@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { fetchEventById } from "@/api/event";
 import { useParams, useRouter } from "next/navigation";
+import { useEvent } from "@/api/event";
 import { FaLocationDot, FaCalendarDay, FaHeart, FaShare, FaArrowLeft } from "react-icons/fa6";
 import { FiEdit, FiClock } from "react-icons/fi";
 import { MdGroup, MdCalendarMonth } from "react-icons/md";
@@ -11,27 +11,13 @@ import { EventPageInformation } from "@/config/query-types";
 import EventTagList from "@/components/tag/EventTagList";
 
 export default function EventDetails() {
-  const [event, setEvent] = useState<EventPageInformation | undefined | null>(
-    undefined,
-  );
   const { eventId } = useParams<{ eventId: string }>();
-
-  useEffect(() => {
-    fetchEventById(parseInt(eventId, 10))
-      .then((eventData) => {
-        setEvent(eventData as EventPageInformation);
-        console.log(eventData);
-      })
-      .catch((error) => {
-        console.error("Error fetching event:", error);
-        setEvent(null);
-      });
-  }, []);
-
+  const { data: event, isPending, isError } = useEvent(eventId);
+  
   return (
     <div className="min-h-screen bg-gray-50">
-      {event === undefined && <Loading />}
-      {event === null && <EventNotFound />}
+      {isPending && <Loading />}
+      {isError && <EventNotFound />}
       {event && <EventData event={event} />}
     </div>
   );

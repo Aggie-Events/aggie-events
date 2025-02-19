@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { FaSearch, FaTag } from "react-icons/fa";
-import { fetchTags } from "@/api/tags";
+import { useTagAutocomplete } from "@/api/tags";
 
 export default function SearchPrompt({
   prompt,
@@ -11,15 +11,8 @@ export default function SearchPrompt({
   onNameSearch: () => void;
   onTagSearch: (tag: string) => void;
 }) {
-  const [tagCompletion, setTagCompletion] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (prompt.length > 0) {
-      fetchTags(prompt).then((tags) => {
-        setTagCompletion(tags.map((tag: { tag_name: string }) => tag.tag_name));
-      });
-    }
-  }, [prompt]);
+  const { data: tags = [] } = useTagAutocomplete(prompt);
+  const tagCompletion = tags.map(tag => tag.tag_name);
 
   return (
     <>

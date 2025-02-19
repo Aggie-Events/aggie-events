@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthContext";
 import { ToastRenderer } from "@/components/toast/ToastRenderer";
 import { Metadata } from "next";
+import QueryProvider from "@/app/providers";
 
 export const metadata: Metadata = {
   title: "Aggie Events",
@@ -22,7 +23,9 @@ export default function RootLayout({
       </head>
       <body className="flex flex-col min-h-screen relative">
         <ToastRenderer />
-        <AuthProvider>{children}</AuthProvider>
+        <QueryProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );
