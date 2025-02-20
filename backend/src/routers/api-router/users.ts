@@ -125,6 +125,35 @@ usersRouter.post("/exists", async (req, res) => {
     });
   }
 });
+usersRouter.post("/validate", async (req, res) => {
+  const { username } = req.body;
+
+  if (!username || typeof username !== "string") {
+    return res.status(400).json({
+      message: "Username is required",
+      isValid: false
+    });
+  }
+
+  // Check length constraints or other format validations
+  if (username.length > 20 || username.length < 3) {
+    return res.status(400).json({
+      isValid: false,
+      message: "Username is too long"
+    });
+  }
+  if (!/^[a-zA-Z0-9]+$/.test(username)) {
+    return res.status(400).json({
+      isValid: false,
+      message: "Username must be alphanumeric"
+    });
+  }
+      return res.json({
+        isValid: true,
+        message: "Username is valid"
+  })
+});
+
 /**
  * @route PUT /api/users/username
  * @description Update the username of the authenticated user
