@@ -125,6 +125,15 @@ usersRouter.post("/exists", async (req, res) => {
     });
   }
 });
+
+/**
+ * @route POST /api/users/validate
+ * @description Validate a username
+ * @access Public
+ * @param {Object} req.body - The request body.
+ * @param {string} req.body.username - The username to validate.
+ * @returns {Object} A message indicating if the username is valid.
+ */
 usersRouter.post("/validate", async (req, res) => {
   const { username } = req.body;
 
@@ -136,12 +145,20 @@ usersRouter.post("/validate", async (req, res) => {
   }
 
   // Check length constraints or other format validations
-  if (username.length > 20 || username.length < 3) {
+  if (username.length < 3) {
+    return res.status(400).json({
+      isValid: false,
+      message: "Username is too short"
+    });
+  }
+
+  if (username.length > 20) {
     return res.status(400).json({
       isValid: false,
       message: "Username is too long"
     });
   }
+
   if (!/^[a-zA-Z0-9]+$/.test(username)) {
     return res.status(400).json({
       isValid: false,
