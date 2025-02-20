@@ -100,7 +100,7 @@ export function useUserProfile(username: string) {
               method: "GET",
             },
           );
-        
+        ``
           const userData = await response.json();
         
           if (!userData || userData.message === "User not found") {
@@ -121,7 +121,7 @@ export function useUserProfile(username: string) {
       retry: false,
     });
 }
-export function useValidation(username: string) {
+export function isUsernameValid(username: string) {
   if (!username || typeof username !== "string") {
     return ({
       message: "Username is required",

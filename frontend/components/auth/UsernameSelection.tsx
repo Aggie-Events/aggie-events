@@ -4,7 +4,7 @@ import { MdClose, MdCheck, MdWarning } from 'react-icons/md';
 import ToastManager from '@/components/toast/ToastManager';
 import Image from 'next/image';
 import debounce from 'lodash.debounce';
-import {useValidation} from '../../api/user'
+import {isUsernameValid} from '../../api/user'
 interface UsernameSelectionProps {
   onSubmit: (username: string) => Promise<void>;
   onClose?: () => void;
@@ -49,7 +49,7 @@ export default function UsernameSelection({ onSubmit, onClose }: UsernameSelecti
 useEffect(() => {
     // If username changes, validate it
     if (username) {
-      const validationResult = useValidation(username).isValid;  // Assume validateUsername is a function
+      const validationResult = isUsernameValid(username).isValid;  // Assume validateUsername is a function
         setValidUsername(validationResult);
     }
   }, [username]);  // useEffect will run whenever 'username' changes
