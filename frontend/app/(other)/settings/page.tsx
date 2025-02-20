@@ -1,11 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MdPerson, MdNotifications, MdSecurity, MdEdit } from 'react-icons/md';
-import { updateUser } from "@/api/user";
 import { useAuth } from "@/components/auth/AuthContext";
-import ToastManager from "@/components/toast/ToastManager";
 import AuthSuspense from "@/components/auth/AuthSuspense";
-import Image from 'next/image';
+import Image from 'next/image'; 
 
 interface SettingsForm {
   username: string;

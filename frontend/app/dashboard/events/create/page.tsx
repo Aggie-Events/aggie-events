@@ -12,7 +12,7 @@ import {
   MdSchedule,
 } from "react-icons/md";
 import { FaTag } from "react-icons/fa";
-import { fetchTags } from "@/api/tags";
+import { useTagAutocomplete } from "@/api/tags";
 import ToastManager from "@/components/toast/ToastManager";
 import { useRouter } from "next/navigation";
 import { createEvent } from "@/api/event";
@@ -33,7 +33,6 @@ export interface EventForm {
 }
 
 export default function CreateEventPage() {
-  const { user } = useAuth();
   const router = useRouter();
   const [formData, setFormData] = useState<EventForm>({
     event_name: "",
@@ -48,26 +47,11 @@ export default function CreateEventPage() {
   });
 
   const [tagInput, setTagInput] = useState("");
-  const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
+  const { data: tagSuggestions = [] } = useTagAutocomplete(tagInput);
   const [focused, setFocused] = useState(false);
   const tagRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAllDay, setIsAllDay] = useState(false);
-
-  // Fetch tag suggestions when the user types in the tag input
-  useEffect(() => {
-    if (tagInput.length > 0) {
-      fetchTags(tagInput).then((tags) => {
-        setTagSuggestions(
-          tags
-            .map((tag: { tag_name: string }) => tag.tag_name)
-            .filter((tag: string) => !formData.tags.includes(tag)),
-        );
-      });
-    } else {
-      setTagSuggestions([]);
-    }
-  }, [tagInput, formData.tags]);
 
   // Close the tag suggestions when the user clicks outside of the tag input
   useEffect(() => {
@@ -360,17 +344,19 @@ export default function CreateEventPage() {
                 {/* Tag Suggestions */}
                 {focused && tagSuggestions.length > 0 && (
                   <div className="absolute z-10 w-full bg-white border rounded-md mt-1 shadow-lg">
-                    {tagSuggestions.map((tag) => (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => addTag(tag)}
-                        className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-left"
-                      >
-                        <FaTag className="text-primary" size={12} />
-                        <span>{tag}</span>
-                      </button>
-                    ))}
+                    {tagSuggestions
+                      .filter((tag) => !formData.tags.includes(tag))
+                      .map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => addTag(tag)}
+                          className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-left"
+                        >
+                          <FaTag className="text-primary" size={12} />
+                          <span>{tag}</span>
+                        </button>
+                      ))}
                   </div>
                 )}
               </div>

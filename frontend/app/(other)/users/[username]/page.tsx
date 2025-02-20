@@ -1,32 +1,21 @@
 "use client";
-import { notFound, useParams } from "next/navigation";
-import { getUserProfile, UserProfile } from "@/api/user";
+import { useParams } from "next/navigation";
+import { UserProfile } from "@/api/user";
 import EventCard from "@/app/(other)/search/_components/event-display/EventCard";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useUserProfile } from "@/api/user";
 import { FaArrowLeft } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 
 export default function UserPage() {
   const { username } = useParams<{ username: string }>();
-  const [userData, setUserData] = useState<UserProfile | undefined | null>(undefined);
-
-  useEffect(() => {
-    getUserProfile(username)
-      .then((data) => {
-        setUserData(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching user data:", error);
-        setUserData(null);
-      });
-  }, [username]);
+  const { data: userData, isPending, isError } = useUserProfile(username);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {userData === undefined && <Loading />}
-      {userData === null && <UserNotFound />}
+      {isPending && <Loading />}
+      {isError && <UserNotFound />}
       {userData && <UserData userData={userData} />}
     </div>
   );

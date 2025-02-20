@@ -2,6 +2,7 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "express-rate-limit": "^7.5.0",
     "express-session": "^1.18.0",
     "jsonwebtoken": "^9.0.2",
     "kysely": "^0.27.4",
@@ -34,7 +35,7 @@
     "clean": "rimraf dist",
     "build": "tsc",
     "watch:build": "tsc --watch",
-    "watch:server": "nodemon --env-file=.env ./dist/index.js --watch ./dist",
+    "watch:server": "SET \"NODE_ENV=development\" && nodemon --env-file=.env ./dist/index.js --watch ./dist",
     "start": "npm-run-all clean build --parallel watch:build watch:server --print-label"
   }
 }

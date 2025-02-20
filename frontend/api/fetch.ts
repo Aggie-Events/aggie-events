@@ -27,24 +27,24 @@ export const fetchUtil = async (
     credentials: "include",
     body: body ? JSON.stringify(body) : undefined,
   }).catch((error) => {
-    ToastManager.addToast("Fetch Error", "error", 1000);
+    // ToastManager.addToast("Fetch Error", "error", 1000);
     console.error("Fetch error:", error);
     throw error;
   });
 
   if (!response.ok && response.status !== 401) {
-    ToastManager.addToast(
-      `Server Error ${response.status}: ${(await response.json()).message}`,
-      "error",
-      1000,
-    );
+    // ToastManager.addToast(
+    //   `Server Error ${response.status}: ${(await response.json()).message}`,
+    //   "error",
+    //   1000,
+    // );
     throw new Error(response.statusText);
   }
 
   if (response.status === 401 && throwErrOnUnauthorized) {
     const errorText = response.text();
     console.error("Unauthorized:", errorText);
-    ToastManager.addToast("Unauthorized", "error", 1000);
+    // ToastManager.addToast("Unauthorized", "error", 1000);
     throw new Error("Unauthorized resource");
   }
 

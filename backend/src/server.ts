@@ -14,6 +14,7 @@ import MemoryStore from "memorystore";
 import cors from "cors";
 import { UserStorage } from "./types/user-storage";
 import { getUserById } from "./db-functions/user";
+import { limiter } from "./utils/rate-limiter";
 
 /**
  * Initializes the Express server, sets up middleware, and configures authentication.
@@ -28,6 +29,8 @@ const init = async (): Promise<express.Application> => {
   }
 
   const app = express();
+
+  app.use(limiter);
 
   app.use(express.json()); // Use JSON body parser middleware
 
