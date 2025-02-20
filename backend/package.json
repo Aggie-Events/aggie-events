@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@tanstack/react-query": "^5.66.7",
+    "@tanstack/react-query": "^5.66.8",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "express-session": "^1.18.0",
@@ -38,5 +38,4 @@
     "watch:server": "export NODE_ENV=development && nodemon --env-file=.env ./dist/index.js --watch ./dist",
     "start": "npm-run-all clean build --parallel watch:build watch:server --print-label"
   }
-  
 }

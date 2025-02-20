@@ -4,7 +4,7 @@ import { MdClose, MdCheck, MdWarning } from 'react-icons/md';
 import ToastManager from '@/components/toast/ToastManager';
 import Image from 'next/image';
 import debounce from 'lodash.debounce';
-
+import {useValidation} from '../../api/user'
 interface UsernameSelectionProps {
   onSubmit: (username: string) => Promise<void>;
   onClose?: () => void;
@@ -43,24 +43,16 @@ export default function UsernameSelection({ onSubmit, onClose }: UsernameSelecti
       } finally {
         setIsChecking(false);
       }
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/validate`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username: value }),
-        });
-        const data = await response.json();
-        console.log('Validation Response:', data);  // Log the response data
-        setValidUsername(data.isValid);
-    } catch (error) {
-        console.error('Error checking username validation:', error);
-        setValidUsername(null);
-    }
     }, 300),
     []
   );
+useEffect(() => {
+    // If username changes, validate it
+    if (username) {
+      const validationResult = useValidation(username).isValid;  // Assume validateUsername is a function
+        setValidUsername(validationResult);
+    }
+  }, [username]);  // useEffect will run whenever 'username' changes
 
   useEffect(() => {
     checkUsername(username);

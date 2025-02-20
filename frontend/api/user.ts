@@ -121,4 +121,31 @@ export function useUserProfile(username: string) {
       retry: false,
     });
 }
+export function useValidation(username: string) {
+  if (!username || typeof username !== "string") {
+    return ({
+      message: "Username is required",
+      isValid: false
+    });
+  }
+
+  // Check length constraints or other format validations
+  if (username.length > 20 || username.length < 3) {
+    return ({
+      isValid: false,
+      message: "Username is too long"
+    });
+  }
+  if (!/^[a-zA-Z0-9]+$/.test(username)) {
+    return ({
+      isValid: false,
+      message: "Username must be alphanumeric"
+    });
+  }
+      return ({
+        isValid: true,
+        message: "Username is valid"
+  })
+}
+
 

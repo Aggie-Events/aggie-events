@@ -29,7 +29,10 @@ CREATE TABLE users
     user_profile_img VARCHAR(255)          NULL,
     user_banned      BOOLEAN DEFAULT FALSE NOT NULL
 );
-
+ALTER TABLE users
+  ADD CONSTRAINT username_length CHECK (length(user_name) >= 3 AND length(user_name) <= 20),
+  ADD CONSTRAINT username_no_special_chars CHECK (user_name ~ '^[a-zA-Z0-9]+$'),
+  ADD CONSTRAINT username_no_spaces CHECK (user_name NOT LIKE '% %');
 CREATE TABLE tags
 (
     tag_id          SERIAL PRIMARY KEY,
