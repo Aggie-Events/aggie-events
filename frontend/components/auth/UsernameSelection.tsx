@@ -4,7 +4,7 @@ import { MdClose, MdCheck, MdWarning } from 'react-icons/md';
 import ToastManager from '@/components/toast/ToastManager';
 import Image from 'next/image';
 import debounce from 'lodash.debounce';
-
+import {isUsernameValid} from '../../api/user'
 interface UsernameSelectionProps {
   onSubmit: (username: string) => Promise<void>;
   onClose?: () => void;
@@ -15,11 +15,13 @@ export default function UsernameSelection({ onSubmit, onClose }: UsernameSelecti
   const [isLoading, setIsLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+  const [ValidUsername, setValidUsername] = useState<boolean | null>(null);
 
   const checkUsername = useCallback(
     debounce(async (value: string) => {
       if (!value.trim()) {
         setIsAvailable(null);
+        setValidUsername(null);
         return;
       }
 
@@ -33,6 +35,7 @@ export default function UsernameSelection({ onSubmit, onClose }: UsernameSelecti
           body: JSON.stringify({ username: value }),
         });
         const data = await response.json();
+        console.log(data);
         setIsAvailable(!data.exists);
       } catch (error) {
         console.error('Error checking username:', error);
@@ -43,6 +46,13 @@ export default function UsernameSelection({ onSubmit, onClose }: UsernameSelecti
     }, 300),
     []
   );
+useEffect(() => {
+    // If username changes, validate it
+    if (username) {
+      const validationResult = isUsernameValid(username).isValid;  // Assume validateUsername is a function
+        setValidUsername(validationResult);
+    }
+  }, [username]);  // useEffect will run whenever 'username' changes
 
   useEffect(() => {
     checkUsername(username);
@@ -139,8 +149,8 @@ export default function UsernameSelection({ onSubmit, onClose }: UsernameSelecti
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className={`w-full px-4 py-3 bg-white/5 border rounded-lg outline-none transition-all
-                ${isAvailable === true ? 'border-green-500/50 focus:border-green-500' : 
-                  isAvailable === false ? 'border-red-500/50 focus:border-red-500' : 
+                ${isAvailable === true && ValidUsername === true ? 'border-green-500/50 focus:border-green-500' : 
+                  isAvailable === false || ValidUsername ===false ? 'border-red-500/50 focus:border-red-500' : 
                   'border-white/10 focus:border-white/30'}
                 text-white placeholder-white/50`}
               placeholder="Enter your username"
@@ -154,27 +164,28 @@ export default function UsernameSelection({ onSubmit, onClose }: UsernameSelecti
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 />
               ) : username && (
-                isAvailable === true ? (
+                isAvailable === true && ValidUsername === true ? (
                   <MdCheck className="text-green-500 text-xl" />
-                ) : isAvailable === false ? (
+                ) : isAvailable === false || ValidUsername === false ? (
                   <MdWarning className="text-red-500 text-xl" />
                 ) : null
               )}
             </div>
           </div>
-
+         
           {username && !isChecking && (
             <motion.p
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className={`text-sm ${
-                isAvailable === true ? 'text-green-400' :
-                isAvailable === false ? 'text-red-400' :
+                isAvailable === true && ValidUsername === true ? 'text-green-400' :
+                isAvailable === false || ValidUsername === false  ? 'text-red-400' :
                 'text-white/60'
               }`}
             >
-              {isAvailable === true ? '✓ Username is available' :
-               isAvailable === false ? '✗ Username is already taken' :
+              {isAvailable === true && ValidUsername === true ? '✓ Username is available' :
+               isAvailable === false  ? '✗ Username is already taken' :
+               ValidUsername === false ? '✗ Please use a valid username without special characters or spaces.' :
                'Checking username availability...'}
             </motion.p>
           )}
