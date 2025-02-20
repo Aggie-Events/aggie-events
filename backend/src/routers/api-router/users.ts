@@ -1,7 +1,7 @@
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { db } from "../../database";
 import express from "express";
-import { useQuery } from "@tanstack/react-query";
+
 export const usersRouter = express.Router();
 
 /**
