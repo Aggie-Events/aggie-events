@@ -1,12 +1,10 @@
 import { fetchUtil } from "@/api/fetch";
-import { EventForm } from "@/app/dashboard/events/create/page";
 import { Event } from "@/config/dbtypes";
 import {
   EventCreate,
   EventPageInformation,
   EventStatus,
 } from "@/config/query-types";
-import { SearchFilters } from "@/config/query-types";
 import { useQuery } from "@tanstack/react-query";
 
 export interface SearchEventsReturn {

@@ -8,7 +8,7 @@ import { db } from "../../database";
 import express from "express";
 
 export const orgRouter = express.Router();
-
+import {Orgs} from "../../types/schema";
 /**
  * @route POST /api/orgs
  * @description Create a new organization
@@ -18,12 +18,13 @@ export const orgRouter = express.Router();
  * @returns {string} A message indicating the organization creation status.
  * @returns {Error} 500 - Server error if organizations cannot be created
  */
+
 orgRouter.post("/", authMiddleware, async (req, res) => {
-  const { org_name, org_email } = req.body;
+  const { org_name, org_email, org_description, org_icon, org_verified, org_repuation, org_building, org_room } = req.body;
   try {
     await db
       .insertInto("orgs")
-      .values({ org_name: org_name, org_email: org_email })
+      .values({ org_name: org_name, org_email: org_email, org_description: org_description, org_icon: org_icon, org_verified: org_verified, org_reputation: org_repuation, org_building: org_building, org_room:org_room })
       .execute();
     res.send("Org created!");
   } catch (error) {
@@ -67,3 +68,21 @@ orgRouter.delete("/", authMiddleware, async (req, res) => {
     res.status(500).send("Error deleting Orgs!");
   }
 });
+// orgRouter.get("/allOrgs", async (req, res) => {
+//   try {
+//     const orgs: Orgs[] = (await db
+//       .selectFrom("orgs")
+//       .selectAll()
+//       .execute()
+//     ).map(org => ({
+//       ...org,
+//       org_id: Number(org.org_id), 
+//     }));
+     
+//     res.json(orgs);
+//     console.log("User events requested!");
+//   } catch (error) {
+//     console.error("Error fetching events:", error);
+//     res.status(500).send("Error fetching events!");
+//   }
+// });

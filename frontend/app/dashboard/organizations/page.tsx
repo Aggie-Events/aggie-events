@@ -29,7 +29,7 @@ export default function OrganizationsPage() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">Organizations</h1>
         <Link
-          href="/dashboard/organizations/create"
+          href="/dashboard/createorg"
           className="flex items-center gap-2 px-4 py-2 bg-maroon text-white rounded-md hover:bg-darkmaroon transition-colors"
         >
           <MdAdd className="text-xl" />
