@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SearchFilters, setFilterParam, castFilterParam } from "@/config/query-types";
 import { useEventSearch } from "@/api/event";
@@ -8,6 +8,9 @@ import PageSelect from "./_components/PageSelect";
 import Sidebar from "./_components/Sidebar";
 import SortOption from "./_components/SortOption";
 import QuickFilters, { Category, categories } from "./_components/QuickFilters";
+import LoadingBar from "@/components/LoadingBar";
+import { AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 // Filters
 // - Date Range
@@ -39,13 +42,17 @@ export default function Search() {
   const filters = useRef<SearchFilters>(getFilters());
   const { push } = useRouter();
   
-  const { data: searchResults, isLoading } = useEventSearch(searchParams.toString());
+  const { data: searchResults, isLoading, isFetching } = useEventSearch(searchParams.toString());
   const results = searchResults?.events;
   
   const [tags, setTags] = useState<string[]>(
     filters.current.tags ? Array.from(filters.current.tags) : []
   );
   const [selectedCategory, setSelectedCategory] = useState<Category>("All Events");
+  const [sidebarWidth, setSidebarWidth] = useState(320);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(0);
 
   function getFilters(): SearchFilters {
     const params = new URLSearchParams(searchParams);
@@ -93,8 +100,45 @@ export default function Search() {
     updateUrl();
   };
 
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    isDragging.current = true;
+    startX.current = e.clientX;
+    startWidth.current = sidebarWidth;
+    document.body.classList.add('select-none');
+  }, [sidebarWidth]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging.current) return;
+    
+    const delta = e.clientX - startX.current;
+    const newWidth = startWidth.current + delta;
+    
+    if (newWidth >= 200 && newWidth <= 600) {
+      setSidebarWidth(newWidth);
+    }
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    isDragging.current = false;
+    document.body.classList.remove('select-none');
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
+
   return (
-    <div className="flex flex-col w-full h-[calc(100vh-4rem)]">
+    <div className="flex flex-col w-full h-[calc(100vh-4rem)] relative">
+      <AnimatePresence>
+        {isFetching && <LoadingBar />}
+      </AnimatePresence>
+      
       {/* Top bar with category tags */}
       <div className="w-full bg-white border-b">
         <div className="max-w-7xl mx-auto p-4">
@@ -138,11 +182,20 @@ export default function Search() {
       {/* Main content area with filters and results */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left sidebar */}
-        <div className="w-80 bg-white border-r overflow-y-auto h-full">
+        <div 
+          className="bg-white border-r overflow-y-auto h-full"
+          style={{ width: sidebarWidth }}
+        >
           <div className="h-full p-4">
             <Sidebar onFilterChange={handleFilterChange} />
           </div>
         </div>
+
+        {/* Drag handle */}
+        <div
+          className="w-1 h-full bg-transparent hover:bg-gray-200 active:bg-gray-300 transition-colors cursor-col-resize"
+          onMouseDown={handleMouseDown}
+        />
 
         {/* Results area */}
         <div className="flex-1 overflow-y-auto">

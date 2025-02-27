@@ -5,7 +5,7 @@ import {
   EventPageInformation,
   EventStatus,
 } from "@/config/query-types";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 export interface SearchEventsReturn {
   event_id: number;
@@ -173,5 +173,6 @@ export function useEventSearch(searchParams: string) {
       };
     },
     staleTime: Infinity, // Never stale (don't want the event search results to change while the user is interacting with the page)
+    placeholderData: keepPreviousData, // Keep the previous data while the new data is being fetched (prevents flickering)
   });
 }
