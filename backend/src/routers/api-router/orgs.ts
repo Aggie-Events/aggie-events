@@ -8,7 +8,7 @@ import { db } from "../../database";
 import express from "express";
 
 export const orgRouter = express.Router();
-import {Orgs} from "../../types/schema";
+
 /**
  * @route POST /api/orgs
  * @description Create a new organization
@@ -18,7 +18,6 @@ import {Orgs} from "../../types/schema";
  * @returns {string} A message indicating the organization creation status.
  * @returns {Error} 500 - Server error if organizations cannot be created
  */
-
 orgRouter.post("/", authMiddleware, async (req, res) => {
   const { org_name, org_email, org_description, org_icon, org_verified, org_repuation, org_building, org_room } = req.body;
   try {

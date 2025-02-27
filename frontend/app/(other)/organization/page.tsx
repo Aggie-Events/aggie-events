@@ -8,15 +8,11 @@ import { getAllOrg } from "@/api/organizations";
 import { useAuth } from "@/components/auth/AuthContext";
 import { EventStatus } from "@/config/query-types";
 import { CreateOrgData } from "@/api/organizations";
+
 const orgs: CreateOrgData[] = await getAllOrg();
 export default function AllOrganizations() {
-  
-  const { user } = useAuth();
-
-
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-5">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">My Organizations</h1>
       </div>

@@ -5,9 +5,9 @@ import { authMiddleware } from '../../middlewares/authMiddleware'; // Import aut
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-export const picRouter = express.Router();
+export const uploadRouter = express.Router();
 
-picRouter.post('/', upload.single('image'), async (req: Request, res: Response) => {
+uploadRouter.post('/', authMiddleware, upload.single('image'), async (req: Request, res: Response) => {
     try {
       const file = req.file;
       if (!file) return res.status(400).json({ error: 'No file uploaded' });
