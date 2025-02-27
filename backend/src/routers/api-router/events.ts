@@ -145,6 +145,34 @@ eventRouter.post("/:event_id/like", authMiddleware, async (req, res) => {
 });
 
 /**
+ * @route DELETE /api/:event_id/like
+ * @description Unlike an event
+ * @access Private - Requires authentication
+ * @param {Object} req.body - No request body
+ * @returns 204 No content
+ * @returns 409 Conflict - Already unliked
+ * @returns {Error} 500 - Server error if event cannot be unliked
+ */
+eventRouter.delete("/:event_id/like", authMiddleware, async (req, res) => {
+    const event_id = parseInt(req.params.event_id, 10);
+    const user_id = req.user!.user_id;
+    
+    const { numDeletedRows } = await db
+        .deleteFrom("userlikes")
+        .where("user_id", "=", user_id)
+        .where("event_id", "=", event_id)
+        .executeTakeFirst();
+
+    if(numDeletedRows > 0) {
+        res.status(204).send();
+        console.log(`User ${user_id} unliked event ${event_id}`);
+    } else {
+        res.status(409).send();
+        console.log(`User ${user_id} tried to remove nonexistent like for event ${event_id}`);
+    }
+});
+
+/**
  * @route POST /api/events
  * @description Create a new event
  * @access Private - Requires authentication
