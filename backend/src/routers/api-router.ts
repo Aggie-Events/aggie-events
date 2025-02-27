@@ -43,6 +43,6 @@ apiRouter.use("/search", searchRouter);
 apiRouter.use("/events", eventRouter);
 apiRouter.use("/tags", tagRouter);
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   apiRouter.use("/dev", devRouter);
 }
