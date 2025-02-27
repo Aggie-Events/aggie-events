@@ -60,7 +60,9 @@ eventRouter.get("/:event_id", async (req, res) => {
         "e.date_created as date_created",
         "e.date_modified as date_modified",
         // Kinda hacky, just pray that there is never a user who added an event with a null user_name
-        eb.fn.coalesce('u.user_name', sql<string>`'null_user'`).as("contributor_name"),
+        eb.fn
+          .coalesce("u.user_name", sql<string>`'null_user'`)
+          .as("contributor_name"),
         "o.org_name as org_name",
         "o.org_id as org_id",
       ])
@@ -91,13 +93,13 @@ eventRouter.get("/:event_id", async (req, res) => {
       });
 
     const event_info = {
-       ...page_data, 
-       tags: tags as string[],
-       event_status: "published",
-       event_views: 0,
-       event_going: 0,
+      ...page_data,
+      tags: tags as string[],
+      event_status: "published",
+      event_views: 0,
+      event_going: 0,
     };
-    
+
     res.json(event_info);
 
     console.log("Event requested!");
@@ -174,10 +176,12 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
           .select(["tag_id"])
           .execute();
 
-          await db.insertInto("eventtags").values(
-          tagIds.map((tag) => ({ event_id: event_id, tag_id: tag.tag_id })),
-        )
-        .execute();
+        await db
+          .insertInto("eventtags")
+          .values(
+            tagIds.map((tag) => ({ event_id: event_id, tag_id: tag.tag_id })),
+          )
+          .execute();
       }
     } catch (tagError) {
       console.error("Error inserting tags:", tagError);
@@ -220,26 +224,30 @@ eventRouter.get("/user/:user_name", async (req, res) => {
         "e.end_time",
         "e.date_created",
         "e.date_modified",
-        eb.fn.coalesce('u.user_name', sql<string>`'null_user'`).as("contributor_name"),
+        eb.fn
+          .coalesce("u.user_name", sql<string>`'null_user'`)
+          .as("contributor_name"),
         "o.org_name",
         jsonArrayFrom(
           eb
             .selectFrom("eventtags as e_t")
             .whereRef("e_t.event_id", "=", "e.event_id")
             .innerJoin("tags as t", "e_t.tag_id", "t.tag_id")
-            .select("t.tag_name")
+            .select("t.tag_name"),
         ).as("tags"),
-      ])  
+      ])
       .execute()
-      .then(events => events.map(event => ({
-        ...event,
-        tags: (event.tags as {tag_name: string}[]).map(t => t.tag_name),
-        event_img: null,
-        event_status: "published" as const,
-        event_likes: 0,
-        event_views: 0,
-        event_going: 0,
-      })));
+      .then((events) =>
+        events.map((event) => ({
+          ...event,
+          tags: (event.tags as { tag_name: string }[]).map((t) => t.tag_name),
+          event_img: null,
+          event_status: "published" as const,
+          event_likes: 0,
+          event_views: 0,
+          event_going: 0,
+        })),
+      );
 
     res.json(events);
     console.log("User events requested!");

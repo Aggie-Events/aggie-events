@@ -6,9 +6,11 @@ import { db } from "../database";
  * @returns {Promise<Users>} A promise that resolves to the user object.
  * @throws {Error} If there is an error fetching the user.
  */
-export async function getUserById(
-  userId: number,
-): Promise<{ user_displayname: string; user_email: string, user_name: string | null }> {
+export async function getUserById(userId: number): Promise<{
+  user_displayname: string;
+  user_email: string;
+  user_name: string | null;
+}> {
   try {
     // Find the user by their user ID
     const result = await db
@@ -21,4 +23,3 @@ export async function getUserById(
     throw new Error("Error fetching user!");
   }
 }
-

@@ -12,9 +12,9 @@ export type Generated<T> =
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export type EventStatus = 'draft' | 'published' | 'cancelled';
-export type FriendshipStatus = 'pending' | 'accepted' | 'rejected' | 'blocked';
-export type ReportStatus = 'pending' | 'reviewed' | 'resolved' | 'rejected';
+export type EventStatus = "draft" | "published" | "cancelled";
+export type FriendshipStatus = "pending" | "accepted" | "rejected" | "blocked";
+export type ReportStatus = "pending" | "reviewed" | "resolved" | "rejected";
 
 export interface Alternateorgnames {
   alternate_name_id: Generated<number>;
