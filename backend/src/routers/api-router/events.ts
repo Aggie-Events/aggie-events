@@ -76,6 +76,14 @@ eventRouter.get("/:event_id", async (req, res) => {
       return;
     }
 
+      const { event_likes } = await db
+          .selectFrom("events as e")
+          .leftJoin("userlikes", "e.event_id", "userlikes.event_id")
+          .select(db.fn.count("userlikes.user_id").as("event_likes"))
+          .where("e.event_id", "=", event_id)
+          .groupBy("e.event_id")
+          .executeTakeFirstOrThrow();
+
     const tags = await db
       .selectFrom("eventtags as e_t")
       .where("e_t.event_id", "=", page_data.event_id)
@@ -94,6 +102,7 @@ eventRouter.get("/:event_id", async (req, res) => {
        ...page_data, 
        tags: tags as string[],
        event_status: "published",
+       event_likes: Number(event_likes),
        event_views: 0,
        event_going: 0,
     };
