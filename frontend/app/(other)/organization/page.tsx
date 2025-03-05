@@ -1,20 +1,41 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { MdAdd, MdEdit, MdDelete } from "react-icons/md";
 import ToastManager from "@/components/toast/ToastManager";
 import { useEventsByUser } from "@/api/event";
-import { getAllOrg } from "@/api/organizations";
+import { useOrganizations } from "@/api/organizations";
 import { useAuth } from "@/components/auth/AuthContext";
 import { EventStatus } from "@/config/query-types";
 import { CreateOrgData } from "@/api/organizations";
 
-const orgs: CreateOrgData[] = await getAllOrg();
 export default function AllOrganizations() {
+  const { data: orgs, isLoading, error } = useOrganizations();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-5">
+        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+          <p className="text-gray-500">Loading organizations...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6 p-5">
+        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+          <p className="text-red-500">Error loading organizations</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-5">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">My Organizations</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Organizations</h1>
       </div>
 
       {!orgs || orgs.length === 0 ? (

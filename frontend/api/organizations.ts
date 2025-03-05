@@ -24,37 +24,60 @@ export interface CreateOrgData {
   }
 /**
  * Create an organization
- * @param {Organization} org - The event to create
- * @returns {Promise<number>} The created event ID
+ * @param {CreateOrgData} org - The organization to create
+ * @returns {Promise<number>} The created organization ID
  */
 export const createOrg = async (org: CreateOrgData) => {
     try {
-      console.log("Formatted org: ", org);
-  
-      const response = await fetchUtil(
-        `${process.env.NEXT_PUBLIC_API_URL}/orgs`,
-        {
-          method: "POST",
-          body: org,
-        },
-      );
-      return response.json() ?? null;
+        const response = await fetchUtil(
+            `${process.env.NEXT_PUBLIC_API_URL}/orgs`,
+            {
+                method: "POST",
+                body: org,
+            },
+        );
+        return response.json() ?? null;
     } catch (error) {
-      throw new Error("Error creating event");
+        throw new Error("Error creating organization");
     }
-  };
-  export const getAllOrg = async () => {
-    try {
-      const response = await fetchUtil(
-        `${process.env.NEXT_PUBLIC_API_URL}/orgs`,
-        {
-          method: "GET"
+};
+
+/**
+ * React Query hook to fetch all organizations
+ * @returns {UseQueryResult<CreateOrgData[], Error>} The organizations
+ */
+export function useOrganizations() {
+    return useQuery<CreateOrgData[], Error>({
+        queryKey: ["organizations"],
+        queryFn: async () => {
+            const response = await fetchUtil(
+                `${process.env.NEXT_PUBLIC_API_URL}/orgs`,
+                {
+                    method: "GET",
+                },
+            );
+            return response.json() ?? [];
         },
-      );
-      // Wait for the response to be parsed into JSON
-      const orgs = await response.json();
-      return orgs; // Return the parsed JSON data (array or object)
-    } catch (error) {
-      throw new Error("Error getting organizations");
-    }
-  };
+    });
+}
+
+/**
+ * React Query hook to fetch an organization by ID
+ * @param {string} orgId - The ID of the organization to fetch
+ * @returns {UseQueryResult<CreateOrgData | null, Error>} The organization
+ */
+export function useOrganization(orgId: string) {
+    return useQuery<CreateOrgData | null, Error>({
+        queryKey: ["organization", orgId],
+        queryFn: async () => {
+            const response = await fetchUtil(
+                `${process.env.NEXT_PUBLIC_API_URL}/orgs/${orgId}`,
+                {
+                    method: "GET",
+                },
+            );
+            return response.json() ?? null;
+        },
+        retry: false,
+    });
+}

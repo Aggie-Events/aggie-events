@@ -113,6 +113,15 @@ CREATE TRIGGER set_timestamp
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+-- Stores all of the slugs for each verified organization
+CREATE TABLE orgslugs
+(
+    org_id INT NOT NULL,
+    slug VARCHAR(255) NOT NULL,
+    PRIMARY KEY (org_id, slug),
+    FOREIGN KEY (org_id) REFERENCES orgs (org_id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX orgslug_unique_lower ON orgslugs (LOWER(slug));
 
 -- Stores all of the events that a user saves
 CREATE TABLE savedevents

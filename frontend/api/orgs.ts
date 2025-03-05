@@ -1,5 +1,7 @@
 import { fetchUtil } from "@/api/fetch";
 import { Organization } from "@/config/dbtypes";
+import { OrgPageInformation } from "@/config/query-types";
+import { useQuery } from "@tanstack/react-query";
 
 /**
  * Add an organization
@@ -20,6 +22,19 @@ export const addOrganization = async (username: string, email: string) => {
   } catch (error) {
     throw new Error("Error adding Organization");
   }
+};
+
+export const useOrgPageInformation = async (org_name: string) => {
+  return useQuery<OrgPageInformation | null, Error>({
+    queryKey: ["org", org_name],
+    queryFn: async () => {
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/orgs/${org_name}`,
+      );
+      return response.json() ?? null;
+    },
+    retry: false,
+  });
 };
 
 /**

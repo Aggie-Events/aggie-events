@@ -52,6 +52,49 @@ orgRouter.get("/", async (req, res) => {
 });
 
 /**
+ * @route GET /api/orgs/:org_name
+ * @description Fetch an organization by name
+ * @access Public
+ * @returns {OrgInfo} The organization object with full info
+ * @returns {Error} 404 - Organization not found
+ * @returns {Error} 500 - Server error if organization cannot be fetched
+ */
+orgRouter.get("/:org_param", async (req, res) => {
+  try {
+    const { org_param } = req.params;
+    if (isNaN(Number(org_param))) { // If the param is not the org_id, then we search through slugs
+
+    }
+    
+    const org = await db
+      .selectFrom("orgs")
+      .where("org_id", "=", Number(org_param))
+      .select([
+        "org_id",
+        "org_name",
+        "org_description",
+        "org_icon",
+        "org_verified",
+        "org_reputation",
+        "org_building",
+        "org_room",
+        "org_email"
+      ])
+      .executeTakeFirst();
+
+    if (!org) {
+      res.status(404).json({ message: "Organization not found" });
+      return;
+    }
+
+    res.json(org);
+  } catch (error) {
+    console.error("Error fetching Organization:", error);
+    res.status(500).send("Error fetching Organization!");
+  }
+});
+
+/**
  * @route DELETE /api/orgs
  * @description Delete all organizations
  * @access Private - Requires authentication
@@ -67,21 +110,4 @@ orgRouter.delete("/", authMiddleware, async (req, res) => {
     res.status(500).send("Error deleting Orgs!");
   }
 });
-// orgRouter.get("/allOrgs", async (req, res) => {
-//   try {
-//     const orgs: Orgs[] = (await db
-//       .selectFrom("orgs")
-//       .selectAll()
-//       .execute()
-//     ).map(org => ({
-//       ...org,
-//       org_id: Number(org.org_id), 
-//     }));
-     
-//     res.json(orgs);
-//     console.log("User events requested!");
-//   } catch (error) {
-//     console.error("Error fetching events:", error);
-//     res.status(500).send("Error fetching events!");
-//   }
-// });
+
