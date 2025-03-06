@@ -45,6 +45,6 @@ apiRouter.use("/events", eventRouter);
 apiRouter.use("/tags", tagRouter);
 apiRouter.use("/upload", uploadRouter)
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   apiRouter.use("/dev", devRouter);
 }

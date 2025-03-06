@@ -30,6 +30,8 @@
     "@types/react": "^18.3.5",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3",
     "nodemon": "^3.1.9",
     "npm-run-all": "^4.1.5",
     "prettier": "3.3.3",
@@ -40,6 +42,11 @@
     "build": "tsc",
     "watch:build": "tsc --watch",
     "watch:server": "cross-env NODE_ENV=development nodemon --env-file=.env ./dist/index.js --watch ./dist",
-    "start": "npm-run-all clean build --parallel watch:build watch:server --print-label"
+    "start": "npm-run-all clean build --parallel watch:build watch:server --print-label",
+    "prepare": "cd .. && husky backend/.husky",
+    "format-all": "prettier . --write"
+  },
+  "lint-staged": {
+    "*": "prettier --ignore-unknown --write"
   }
 }
