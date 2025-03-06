@@ -1,24 +1,22 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { fetchOrganization } from "@/api/orgs";
+import React from "react";
+import { useOrganizationList } from "@/api/orgs";
 import { Organization } from "@/config/dbtypes";
 
-export default function UserList({ update = false }: { update: boolean }) {
-  const [users, setUsers] = useState<Organization[]>();
+function Loading() {
+  return <div>Loading organizations...</div>;
+}
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await fetchOrganization();
-      console.log(data);
-      setUsers(data);
-    };
-    fetchData();
-  }, [update]);
+export default function OrganizationList() {
+  const { data: organizations, isLoading, error } = useOrganizationList();
+
+  if (isLoading) return <Loading />;
+  if (error) return <div>Error loading organizations: {error.message}</div>;
 
   return (
     <>
       <div className="my-3">
-        <h2 className="text-xl font-bold">All users: </h2>
+        <h2 className="text-xl font-bold">All Organizations: </h2>
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
             <tr>
@@ -28,12 +26,12 @@ export default function UserList({ update = false }: { update: boolean }) {
             </tr>
           </thead>
           <tbody>
-            {users &&
-              users.map((user, index) => (
+            {organizations &&
+              organizations.map((org, index) => (
                 <tr key={index}>
-                  <td className="py-2 px-4 border-b">{user.org_name}</td>
-                  <td className="py-2 px-4 border-b">{user.org_email}</td>
-                  <td className="py-2 px-4 border-b">{user.org_id}</td>
+                  <td className="py-2 px-4 border-b">{org.org_name}</td>
+                  <td className="py-2 px-4 border-b">{org.org_email}</td>
+                  <td className="py-2 px-4 border-b">{org.org_id}</td>
                 </tr>
               ))}
           </tbody>

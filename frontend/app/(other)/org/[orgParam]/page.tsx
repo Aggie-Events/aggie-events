@@ -1,15 +1,25 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useOrganization } from "@/api/organizations";
 import { FaLocationDot, FaArrowLeft, FaEnvelope } from "react-icons/fa6";
 import { FiEdit } from "react-icons/fi";
 import { MdVerified } from "react-icons/md";
 import IconLabel from "@/components/common/IconLabel";
+import { useOrgPageInformation } from "@/api/orgs";
+import { OrgPageInformation } from "@/config/query-types";
 
 export default function OrgPage() {
-  const { orgId } = useParams<{ orgId: string }>();
-  const { data: org, isPending, isError } = useOrganization(orgId);
+  const { orgParam } = useParams<{ orgParam: string }>();
+  const { data: org, isLoading: isPending, isError } = useOrgPageInformation(orgParam);
+  const router = useRouter();
+  
+  // Redirect to slug URL if organization is verified, has a slug, and current URL is using ID
+  useEffect(() => {
+    if (org && org.org_verified && org.org_slug && !isNaN(Number(orgParam))) {
+      // Only redirect if we're currently using the ID in the URL
+      router.replace(`/org/${org.org_slug}`);
+    }
+  }, [org, orgParam, router]);
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -20,7 +30,7 @@ export default function OrgPage() {
   );
 }
 
-function OrgData({ org }: { org: any }) {
+function OrgData({ org }: { org: OrgPageInformation }) {
   const router = useRouter();
 
   const handleBack = () => {

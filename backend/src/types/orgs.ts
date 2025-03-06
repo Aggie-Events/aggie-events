@@ -8,4 +8,5 @@ export interface OrgInfo {
     org_building: string | null;
     org_room: string | null;
     org_email: string | null;
+    org_slug: string | null;
 }

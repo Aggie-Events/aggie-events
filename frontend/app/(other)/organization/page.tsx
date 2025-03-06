@@ -1,16 +1,9 @@
 "use client";
 import React from "react";
-import Link from "next/link";
-import { MdAdd, MdEdit, MdDelete } from "react-icons/md";
-import ToastManager from "@/components/toast/ToastManager";
-import { useEventsByUser } from "@/api/event";
-import { useOrganizations } from "@/api/organizations";
-import { useAuth } from "@/components/auth/AuthContext";
-import { EventStatus } from "@/config/query-types";
-import { CreateOrgData } from "@/api/organizations";
+import { useOrganizationList } from "@/api/orgs";
 
 export default function AllOrganizations() {
-  const { data: orgs, isLoading, error } = useOrganizations();
+  const { data: orgs, isLoading, error } = useOrganizationList();
 
   if (isLoading) {
     return (
@@ -68,9 +61,9 @@ export default function AllOrganizations() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                          <a className="text-sm font-medium text-gray-900 hover:underline" href={org.org_slug ? `/org/${org.org_slug}` : `/org/${org.org_id}`}>
                             {org.org_name}
-                          </div>
+                          </a>
                         </div>
                       </div>
                     </td>

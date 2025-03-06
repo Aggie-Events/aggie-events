@@ -6,6 +6,7 @@
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { db } from "../../database";
 import express from "express";
+import { OrgInfo } from "../../types/orgs";
 
 export const orgRouter = express.Router();
 
@@ -19,11 +20,29 @@ export const orgRouter = express.Router();
  * @returns {Error} 500 - Server error if organizations cannot be created
  */
 orgRouter.post("/", authMiddleware, async (req, res) => {
-  const { org_name, org_email, org_description, org_icon, org_verified, org_repuation, org_building, org_room } = req.body;
+  const {
+    org_name,
+    org_email,
+    org_description,
+    org_icon,
+    org_verified,
+    org_repuation,
+    org_building,
+    org_room,
+  } = req.body;
   try {
     await db
       .insertInto("orgs")
-      .values({ org_name: org_name, org_email: org_email, org_description: org_description, org_icon: org_icon, org_verified: org_verified, org_reputation: org_repuation, org_building: org_building, org_room:org_room })
+      .values({
+        org_name: org_name,
+        org_email: org_email,
+        org_description: org_description,
+        org_icon: org_icon,
+        org_verified: org_verified,
+        org_reputation: org_repuation,
+        org_building: org_building,
+        org_room: org_room,
+      })
       .execute();
     res.send("Org created!");
   } catch (error) {
@@ -41,9 +60,24 @@ orgRouter.post("/", authMiddleware, async (req, res) => {
  */
 orgRouter.get("/", async (req, res) => {
   try {
-    const orgs = await db.selectFrom("orgs").selectAll().execute();
-    res.json(orgs);
-    console.log(orgs);
+    const orgs = await db
+      .selectFrom("orgs as o")
+      .leftJoin("orgslugs as s", "o.org_id", "s.org_id")
+      .select([
+        "o.org_id",
+        "o.org_name",
+        "o.org_email",
+        "o.org_description",
+        "o.org_icon",
+        "o.org_verified",
+        "o.org_reputation",
+        "o.org_building",
+        "o.org_room",
+        "s.slug as org_slug"
+      ])
+      .execute();
+    
+    res.json(orgs as OrgInfo[]);
     console.log("Org requested!");
   } catch (error) {
     console.error("Error fetching Orgs:", error);
@@ -52,8 +86,8 @@ orgRouter.get("/", async (req, res) => {
 });
 
 /**
- * @route GET /api/orgs/:org_name
- * @description Fetch an organization by name
+ * @route GET /api/orgs/:org_param
+ * @description Fetch an organization by ID or slug
  * @access Public
  * @returns {OrgInfo} The organization object with full info
  * @returns {Error} 404 - Organization not found
@@ -62,30 +96,53 @@ orgRouter.get("/", async (req, res) => {
 orgRouter.get("/:org_param", async (req, res) => {
   try {
     const { org_param } = req.params;
-    if (isNaN(Number(org_param))) { // If the param is not the org_id, then we search through slugs
-
-    }
+    let org: OrgInfo | null = null;
     
-    const org = await db
-      .selectFrom("orgs")
-      .where("org_id", "=", Number(org_param))
-      .select([
-        "org_id",
-        "org_name",
-        "org_description",
-        "org_icon",
-        "org_verified",
-        "org_reputation",
-        "org_building",
-        "org_room",
-        "org_email"
-      ])
-      .executeTakeFirst();
+    if (isNaN(Number(org_param))) {
+      // If param is not a number, treat it as a slug (org_name)
+      org = await db
+        .selectFrom("orgslugs")
+        .where("slug", "=", org_param)
+        .innerJoin("orgs as o", "orgslugs.org_id", "o.org_id")
+        .select([
+          "o.org_id",
+          "o.org_name",
+          "o.org_description",
+          "o.org_icon",
+          "o.org_verified",
+          "o.org_reputation",
+          "o.org_building",
+          "o.org_room",
+          "o.org_email",
+          "orgslugs.slug as org_slug"
+        ])
+        .executeTakeFirst() || null;
+    } else {
+      // If param is a number, treat it as org_id
+      org = await db
+        .selectFrom("orgs as o")
+        .where("o.org_id", "=", Number(org_param))
+        .leftJoin("orgslugs as s", "o.org_id", "s.org_id")
+        .select([
+          "o.org_id",
+          "o.org_name",
+          "o.org_description",
+          "o.org_icon",
+          "o.org_verified",
+          "o.org_reputation",
+          "o.org_building",
+          "o.org_room",
+          "o.org_email",
+          "s.slug as org_slug"
+        ])
+        .executeTakeFirst() || null;
+    }
 
     if (!org) {
       res.status(404).json({ message: "Organization not found" });
       return;
     }
+    
 
     res.json(org);
   } catch (error) {
@@ -110,4 +167,3 @@ orgRouter.delete("/", authMiddleware, async (req, res) => {
     res.status(500).send("Error deleting Orgs!");
   }
 });
-

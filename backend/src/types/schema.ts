@@ -73,6 +73,11 @@ export interface Orgtags {
   tag_id: number;
 }
 
+export interface Orgslugs {
+  org_id: number;
+  slug: string;
+}
+
 export interface Reports {
   report_id: Generated<number>;
   reporter_user_id: number | null;
@@ -138,6 +143,7 @@ export interface DB {
   friendships: Friendships;
   orgs: Orgs;
   orgtags: Orgtags;
+  orgslugs: Orgslugs;
   reports: Reports;
   savedevents: Savedevents;
   tags: Tags;
