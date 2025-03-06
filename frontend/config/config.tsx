@@ -8,6 +8,7 @@ export const HeaderLinks: { href: string; label: string }[] = [
   { href: "/search", label: "Browse" },
   { href: "/dashboard/events/create", label: "Create" },
   { href: "/calendar", label: "Calendar" },
+  { href: "/organization", label: "Organizations" },
 ];
 
 export const UserMenuLinks: {
@@ -19,6 +20,7 @@ export const UserMenuLinks: {
   { href: "/dashboard", label: "Dashboard", icon: <MdDashboard /> },
   { href: "/friends", label: "Friends", icon: <FaUserFriends /> },
   { href: "/settings", label: "Settings", icon: <IoMdSettings /> },
+  
 ];
 
 export const TypingTextBase = "Find ";
