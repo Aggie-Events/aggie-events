@@ -52,20 +52,28 @@ CREATE TABLE events
 (
     event_id          SERIAL PRIMARY KEY,
     contributor_id    INT                                   NOT NULL,
-    event_name        VARCHAR(255)                          NOT NULL,
+    event_name        VARCHAR(255)                          NULL,
     event_description TEXT                                  NULL,
-    event_location    VARCHAR(255),
+    event_location    VARCHAR(255)                          NULL,
     event_views       INT         DEFAULT 0                 NOT NULL,
 
     event_img         VARCHAR(255)                          NULL,
 
-    start_time        TIMESTAMPTZ                           NOT NULL,
-    end_time          TIMESTAMPTZ                           NOT NULL,
+    start_time        TIMESTAMPTZ                           NULL,
+    end_time          TIMESTAMPTZ                           NULL,
     date_created      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_modified     TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
+    status            event_status                          NOT NULL,
+
     -- If both start_time and end_time are not null, then start_time must be less than end_time
     CHECK (start_time < end_time),
+    -- Ensure that when status is not 'draft', all required fields are populated
+    CHECK (status = 'draft' OR (
+        event_name IS NOT NULL AND 
+        start_time IS NOT NULL AND
+        end_time IS NOT NULL
+    )),
     FOREIGN KEY (contributor_id) REFERENCES users (user_id) ON DELETE CASCADE
 );
 

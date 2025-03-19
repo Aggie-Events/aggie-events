@@ -11,6 +11,7 @@ export interface SearchEventsReturn {
   event_id: number;
   org_id?: number;
   org_name?: string;
+  org_slug?: string;
   contributor_id: number;
   contributor_name: string;
   event_name: string;
@@ -35,6 +36,7 @@ export interface CreateEventData {
   end_time: Date;
   event_status: EventStatus;
   tags: string[];
+  event_img: string | null;
 }
 
 /**

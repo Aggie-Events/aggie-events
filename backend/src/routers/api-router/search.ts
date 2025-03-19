@@ -98,6 +98,7 @@ searchRouter.get("/events", async (req, res) => {
       .innerJoin("users as u", "e.contributor_id", "u.user_id")
       .leftJoin("eventorgs as e_o", "e.event_id", "e_o.event_id")
       .leftJoin("orgs as o", "e_o.org_id", "o.org_id")
+      .leftJoin("orgslugs as o_s", "o.org_id", "o_s.org_id")
       .select((eb) => [
         "e.event_id as event_id",
         "e.event_name as event_name",
@@ -110,6 +111,7 @@ searchRouter.get("/events", async (req, res) => {
         "u.user_name as contributor_name",
         "o.org_name as org_name",
         "o.org_id as org_id",
+        "o_s.slug as org_slug",
         jsonArrayFrom(
           eb
             .selectFrom("eventtags as e_t")

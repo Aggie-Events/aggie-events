@@ -15,6 +15,7 @@ import cors from "cors";
 import { UserStorage } from "./types/user-storage";
 import { getUserById } from "./db-functions/user";
 import { limiter } from "./utils/rate-limiter";
+import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
 
 /**
  * Initializes the Express server, sets up middleware, and configures authentication.
@@ -148,6 +149,17 @@ const init = async (): Promise<express.Application> => {
       });
     });
   });
+
+  // Return "https" URLs by setting secure: true
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: process.env.NODE_ENV === "production"
+  });
+
+  // // Log the configuration
+  // console.log(cloudinary.config());
 
   app.use(passport.initialize());
   app.use(passport.session());

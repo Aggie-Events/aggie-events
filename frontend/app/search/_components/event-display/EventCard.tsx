@@ -50,7 +50,7 @@ export default function EventCard({ event }: { event: SearchEventsReturn }) {
               <h3 className="flex flex-col justify-center grow">
                 <Link
                   className="text-md font-medium text-maroon hover:underline"
-                  href={`/org/${event.org_id}`}
+                  href={event.org_slug ? `/org/${event.org_slug}` : `/org/${event.org_id}`}
                 >
                   {event.org_name}
                 </Link>

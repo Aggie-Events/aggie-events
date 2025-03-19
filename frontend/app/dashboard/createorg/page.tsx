@@ -15,35 +15,36 @@ import { FaTag } from "react-icons/fa";
 import { useTagAutocomplete } from "@/api/tags";
 import ToastManager from "@/components/toast/ToastManager";
 import { useRouter } from "next/navigation";
-import { createOrg } from "@/api/organizations";
+import { createOrg } from "@/api/orgs";
 import { EventStatus } from "@/config/query-types";
-import { CreateOrgData } from "@/api/organizations";
+import { CreateOrgData } from "@/api/orgs";
 import { toCST, dateToUTCMidnight } from "@/utils/date";
 import { useDropzone } from "react-dropzone";
 import { fetchUtil } from "@/api/fetch";
 import { uploadImage } from "@/api/uploadImage";
+
 export interface Organization {
-        org_name: string;
-        org_email: string | null;
-        org_description: string;
-        org_icon: string;
-        org_verified: boolean;
-        org_reputation: number;
-        org_building: string | null;
-        org_room: string | null;
+  org_name: string;
+  org_email: string | null;
+  org_description: string;
+  org_icon: string;
+  org_verified: boolean;
+  org_reputation: number;
+  org_building: string | null;
+  org_room: string | null;
 }
 
 export default function CreateEventPage() {
   const router = useRouter();
   const [formData, setFormData] = useState<Organization>({
-        org_name: "",
-        org_email: "",
-        org_description: "",
-        org_icon: "",
-        org_verified: false,
-        org_reputation: 0,
-        org_building: "",
-        org_room: "",
+    org_name: "",
+    org_email: "",
+    org_description: "",
+    org_icon: "",
+    org_verified: false,
+    org_reputation: 0,
+    org_building: "",
+    org_room: "",
   });
 
   const [tagInput, setTagInput] = useState("");
@@ -67,7 +68,6 @@ export default function CreateEventPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [focused]);
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -80,11 +80,10 @@ export default function CreateEventPage() {
         org_verified: false,
         org_reputation: 0,
         org_building: formData.org_building,
-        org_room: formData.org_room
+        org_room: formData.org_room,
       };
 
       await createOrg(eventData);
-      
     } finally {
       setIsSubmitting(false);
     }
@@ -94,7 +93,7 @@ export default function CreateEventPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">Create New Organization</h1>
-  
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Event Name */}
             <div>
@@ -119,7 +118,7 @@ export default function CreateEventPage() {
               <input
                 type="text"
                 required
-                value={formData.org_email || ''}
+                value={formData.org_email || ""}
                 onChange={(e) =>
                   setFormData({ ...formData, org_email: e.target.value })
                 }
@@ -149,22 +148,21 @@ export default function CreateEventPage() {
                 Organization icon *
               </label>
               <input
-  type="file"
-  required
-  onChange={(e) => {
-    // const file = e.target.files?.[0];  // Optional chaining to check for null
-    // if (file) {
-    //   uploadImage(file).then((url) => {
-    //     console.log(url)
-    //     setFormData({ ...formData, org_icon: url });  // Save the URL returned from the upload function
-    //   });
-    // } else {
-    //   console.log("No file selected");
-    // }
-  }}
-  className="w-full px-3 py-2 border rounded-md"
-  placeholder="Enter organization icon"
-/>
+                type="file"
+                required
+                onChange={(e) => {
+                  const file = e.target.files?.[0];  // Optional chaining to check for null
+                  if (file) {
+                    uploadImage(file).then((url) => {
+                      setFormData({ ...formData, org_icon: url });  // Save the URL returned from the upload function
+                    });
+                  } else {
+                    console.log("No file selected");
+                  }
+                }}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="Enter organization icon"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -173,7 +171,7 @@ export default function CreateEventPage() {
               <input
                 type="text"
                 required
-                value={formData.org_building || ''}
+                value={formData.org_building || ""}
                 onChange={(e) =>
                   setFormData({ ...formData, org_building: e.target.value })
                 }
@@ -188,7 +186,7 @@ export default function CreateEventPage() {
               <input
                 type="text"
                 required
-                value={formData.org_room || ''}
+                value={formData.org_room || ""}
                 onChange={(e) =>
                   setFormData({ ...formData, org_room: e.target.value })
                 }
@@ -228,5 +226,4 @@ export default function CreateEventPage() {
       </div>
     </AuthSuspense>
   );
-                }
-  
+}

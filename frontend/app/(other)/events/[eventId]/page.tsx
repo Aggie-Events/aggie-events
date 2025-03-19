@@ -54,6 +54,19 @@ function EventData({ event }: { event: EventPageInformation }) {
         <span>Back</span>
       </button>
 
+      {/* Event Image */}
+      {event.event_img && (
+        <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+          <div className="relative w-full h-[400px]">
+            <img
+              src={event.event_img}
+              alt={event.event_name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
         <div className="bg-maroon h-3" />
@@ -80,16 +93,20 @@ function EventData({ event }: { event: EventPageInformation }) {
           </div>
 
           {/* Organization & Host Info */}
-          <div className="flex items-center gap-2 text-gray-600 mb-6">
-            <MdGroup className="text-maroon" />
-            <span>Hosted by</span>
-            <span className="font-medium">{event.org_name || event.contributor_name}</span>
-          </div>
+          {event.org_name && (
+            <div className="flex items-center gap-2 text-gray-600 mb-6">
+              <MdGroup className="text-maroon" />
+              <span>Hosted by</span>
+              <span className="font-medium">{event.org_name}</span>
+            </div>
+          )}
 
           {/* Tags */}
-          <div className="mb-6">
-            <EventTagList tags={event.tags} />
-          </div>
+          {event.tags && event.tags.length > 0 && (
+            <div className="mb-6">
+              <EventTagList tags={event.tags} />
+            </div>
+          )}
         </div>
       </div>
 

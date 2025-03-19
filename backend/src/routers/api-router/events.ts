@@ -132,6 +132,7 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
     start_time,
     end_time,
     tags,
+    event_img,
   }: {
     event_name: string;
     event_description: string | null;
@@ -139,6 +140,7 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
     start_time: Date;
     end_time: Date;
     tags: string[];
+    event_img: string | null;
   } = req.body;
 
   try {
@@ -152,6 +154,7 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
         start_time: start_time,
         end_time: end_time,
         contributor_id: (req.user! as SerializedUser).user_id,
+        event_img: event_img,
       })
       .returning("event_id")
       .executeTakeFirstOrThrow()
