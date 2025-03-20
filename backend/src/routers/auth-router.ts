@@ -6,6 +6,8 @@
 import express from "express";
 import passport from "passport";
 import { UserStorage } from "../types/user-storage";
+import { verifyGoogleToken } from "../server";
+import { db } from "../database";
 
 export const authRouter = express.Router();
 
@@ -69,3 +71,51 @@ authRouter.post("/logout", (req, res) => {
     });
   });
 });
+
+authRouter.post("/google-signin", async (req, res) => {
+  const { idToken } = req.body;
+
+  if (!idToken) {
+    return res.status(400).json({ message: "ID token is required" });
+  }
+
+  try {
+    const payload = await verifyGoogleToken(idToken);
+    if (!payload || !payload.email) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    const user_email = payload.email;
+    let user = await db
+      .selectFrom("users")
+      .select(["user_id", "user_name", "user_displayname"])
+      .where("user_email", "=", user_email)
+      .executeTakeFirst();
+
+    if (!user) {
+      const { user_id } = await db
+        .insertInto("users")
+        .values({
+          user_email,
+          user_displayname: payload.name!,
+        })
+        .returning("user_id")
+        .executeTakeFirstOrThrow();
+      user = { user_id, user_name: null, user_displayname: payload.name! }; // TODO: fix !
+    }
+
+    req.user = {
+      user_id: user.user_id,
+      user_email,
+      user_name: user.user_name,
+      user_displayname: user.user_displayname,
+      user_img: payload.picture ?? "",
+    };
+
+    return res.json({ message: "Login successful", user: req.user });
+  } catch (error) {
+    console.error("Google sign-in error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
