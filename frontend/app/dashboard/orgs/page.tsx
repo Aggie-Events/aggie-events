@@ -53,7 +53,7 @@ export default function OrganizationsPage() {
                   />
                 )}
                 <div className="flex flex-col">
-                  <Link href={`/org/${org.org_slug ? org.org_slug : org.org_id}`} className="text-lg font-semibold text-gray-900 hover:text-maroon hover:underline transition-colors">{org.org_name}</Link>
+                  <Link href={`/orgs/${org.org_slug ? org.org_slug : org.org_id}`} className="text-lg font-semibold text-gray-900 hover:text-maroon hover:underline transition-colors">{org.org_name}</Link>
                   <span className="text-sm text-gray-500">Member</span>
                 </div>
               </div>

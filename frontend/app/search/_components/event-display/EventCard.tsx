@@ -60,7 +60,7 @@ export default function EventCard({ event }: { event: SearchEventsReturn }) {
 
           <Link
             className="text-2xl font-semibold text-maroon w-fit hover:underline"
-            href={`/event/${event.event_id}`}
+            href={`/events/${event.event_id}`}
           >
             {event.event_name}
           </Link>
