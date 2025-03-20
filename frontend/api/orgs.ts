@@ -1,20 +1,8 @@
 import { fetchUtil } from "@/api/fetch";
-import { Organization } from "@/config/dbtypes";
 import { OrgPageInformation } from "@/config/query-types";
 import { useQuery } from "@tanstack/react-query";
 
-// Add this interface to match the API expectations
 export interface CreateOrgData {
-  // org_id          SERIAL PRIMARY KEY,
-  // org_name        VARCHAR(255)          NOT NULL,
-  // org_email       VARCHAR(255)          NULL UNIQUE,
-  // org_description TEXT                  NULL,
-  // org_icon        VARCHAR(255)          NULL,
-  // org_verified    BOOLEAN DEFAULT FALSE NOT NULL,
-  // org_reputation  INT     DEFAULT 0     NOT NULL,
-
-  // org_building    VARCHAR(255)          NULL,
-  // org_room        VARCHAR(255)          NULL
   org_name: string;
   org_email: string | null;
   org_description: string | null;
@@ -24,6 +12,21 @@ export interface CreateOrgData {
   org_building: string | null;
   org_room: string | null;
 }
+
+export interface UserOrgInfo {
+  org_id: number;
+  org_name: string;
+  org_description: string | null;
+  org_icon: string | null;
+  org_verified: boolean;
+  org_reputation: number;
+  org_building: string | null;
+  org_room: string | null;
+  org_email: string | null;
+  org_slug: string | null;
+  org_role: string;
+}
+
 /**
 * Create an organization
 * @param {CreateOrgData} org - The organization to create
@@ -113,5 +116,26 @@ export function useOrganizationList() {
           );
           return response.json() ?? [];
       },
+  });
+}
+
+/**
+ * React Query hook to fetch organizations for a specific user
+ * @param {string} username - The username of the user
+ * @returns {UseQueryResult<UserOrgInfo[], Error>} The user's organizations
+ */
+export function useUserOrgs(username: string) {
+  return useQuery<UserOrgInfo[], Error>({
+    queryKey: ['organizations', { 'user': username }],
+    queryFn: async () => {
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/orgs/user/${username}`,
+        {
+          method: "GET",
+        },
+      );
+      return response.json() ?? [];
+    },
+    enabled: !!username, // Only run the query if username is provided
   });
 }

@@ -207,7 +207,7 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
 });
 
 /**
- * @route GET /api/events/user/:user_id
+ * @route GET /api/events/user/:user_name
  * @description Fetch all events created by a specific user
  * @access Public
  * @param {number} user_id - The ID of the user whose events to fetch
@@ -225,7 +225,7 @@ eventRouter.get("/user/:user_name", async (req, res) => {
       .leftJoin("orgs as o", "e_o.org_id", "o.org_id")
       .select((eb) => [
         "e.event_id",
-        "e.event_name",
+        eb.fn.coalesce("e.event_name", sql<string>`'Untitled Event'`).as("event_name"),
         "e.event_description",
         "e.event_location",
         "e.start_time",

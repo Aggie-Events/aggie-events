@@ -8,6 +8,7 @@ import UserLogoToggle from "@/components/headers/user-menu/UserLogoToggle";
 import DashboardHeader from "@/app/dashboard/_components/DashboardHeader";
 import DashboardSidebar from "@/app/dashboard/_components/DashboardSidebar";
 import { SidebarProvider } from "@/components/layout/SidebarContext";
+import AuthSuspense from "@/components/auth/AuthSuspense";
 
 const sidebarLinks = [
   { href: "/dashboard", label: "Dashboard", icon: <MdDashboard /> },
@@ -22,9 +23,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex flex-col">
-        <DashboardHeader />
+    
+      <SidebarProvider>
+        <div className="min-h-screen flex flex-col">
+          <DashboardHeader />
 
         {/* Main Content with Sidebar */}
         <div className="flex flex-1">
@@ -32,10 +34,13 @@ export default function DashboardLayout({
 
           {/* Main Content */}
           <main className="flex-1 bg-gray-100">
+          <AuthSuspense>
             <div className="p-6">{children}</div>
+            </AuthSuspense> 
           </main>
         </div>
       </div>
     </SidebarProvider>
+    
   );
 }

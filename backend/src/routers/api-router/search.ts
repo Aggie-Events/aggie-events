@@ -111,7 +111,7 @@ searchRouter.get("/events", async (req, res) => {
         "u.user_name as contributor_name",
         "o.org_name as org_name",
         "o.org_id as org_id",
-        "o_s.slug as org_slug",
+        "o_s.org_slug",
         jsonArrayFrom(
           eb
             .selectFrom("eventtags as e_t")

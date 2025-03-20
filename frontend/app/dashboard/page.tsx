@@ -2,21 +2,16 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MdHistory, MdAccessTime, MdThumbUp, MdPlaylistPlay } from "react-icons/md";
-import AuthSuspense from "@/components/auth/AuthSuspense";
+import {
+  MdHistory,
+  MdAccessTime,
+  MdThumbUp,
+  MdPlaylistPlay,
+} from "react-icons/md";
 import { useAuth } from "@/components/auth/AuthContext";
 
 export default function DashboardPage() {
-  return (
-    <AuthSuspense>
-      <Dashboard />
-    </AuthSuspense>
-  );
-}
-
-function Dashboard() {
   const { user } = useAuth();
-
   const recentEvents = [
     {
       id: 1,
@@ -137,7 +132,7 @@ function Dashboard() {
             </Link>
           </div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-lg font-semibold mb-4">Your Organizations</h2>
           <div className="space-y-3">

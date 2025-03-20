@@ -106,7 +106,7 @@ CREATE TABLE userorgs
 (
     user_id       INT                                   NOT NULL,
     org_id        INT                                   NOT NULL,
-    role          membership_type,
+    user_role      membership_type,
     date_created  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_modified TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     PRIMARY KEY (user_id, org_id),
@@ -125,11 +125,11 @@ EXECUTE FUNCTION update_timestamp();
 CREATE TABLE orgslugs
 (
     org_id INT NOT NULL,
-    slug VARCHAR(255) NOT NULL,
-    PRIMARY KEY (org_id, slug),
+    org_slug VARCHAR(255) NOT NULL,
+    PRIMARY KEY (org_id, org_slug),
     FOREIGN KEY (org_id) REFERENCES orgs (org_id) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX orgslug_unique_lower ON orgslugs (LOWER(slug));
+CREATE UNIQUE INDEX orgslug_unique_lower ON orgslugs (LOWER(org_slug));
 
 -- Stores all of the events that a user saves
 CREATE TABLE savedevents

@@ -12,8 +12,8 @@ export interface EventInfo {
   event_likes: number;
   event_going: number;
 
-  start_time: Date;
-  end_time: Date;
+  start_time: Date | null;
+  end_time: Date | null;
   date_created: Date;
   date_modified: Date;
 
