@@ -123,6 +123,8 @@ eventRouter.get("/:event_id", async (req, res) => {
  * @returns {Error} 500 - Server error if event cannot be created
  */
 eventRouter.post("/", authMiddleware, async (req, res) => {
+  console.log("hello alex");
+
   const {
     event_name,
     event_description,
@@ -138,6 +140,7 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
     end_time: Date;
     tags: string[];
   } = req.body;
+
 
   try {
     // Insert the event into the database and return the event_id

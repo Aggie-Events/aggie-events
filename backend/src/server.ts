@@ -18,12 +18,13 @@ import { limiter } from "./utils/rate-limiter";
 import { OAuth2Client } from "google-auth-library";
 
 
-export const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+export const mobileClient = new OAuth2Client(process.env.MOBILE_CLIENT_ID);
 
+// ONLY FOR MOBILE
 export async function verifyGoogleToken(token: string) {
-  const ticket = await client.verifyIdToken({
+  const ticket = await mobileClient.verifyIdToken({
     idToken: token,
-    audience: process.env.GOOGLE_CLIENT_ID,
+    audience: process.env.MOBILE_CLIENT_ID,
   });
   return ticket.getPayload();
 }
@@ -77,6 +78,11 @@ const init = async (): Promise<express.Application> => {
     }),
   );
 
+
+  // TODO FOR MOBILE:
+  // 1. pull from main. gonna be lots of conflicts and pain
+  // 2. make new google strategy for mobile (use AI)
+  // 3. profit
   // Configure Google OAuth strategy
   passport.use(
     new GoogleStrategy(
