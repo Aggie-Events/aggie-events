@@ -5,8 +5,8 @@ import {
   EventPageInformation,
   EventStatus,
 } from "@/config/query-types";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { EventFormData } from "@/app/dashboard/events/_components/EventForm";
 export interface SearchEventsReturn {
   event_id: number;
   org_id?: number;
@@ -86,7 +86,7 @@ export const createEvent = async (event: CreateEventData) => {
  */
 export const useEventsByUser = (username: string) => {
   return useQuery<SearchEventsReturn[], Error>({
-    queryKey: ['events', 'user', username],
+    queryKey: ['event', { 'user': username }],
     queryFn: async () => {
       const response = await fetchUtil(
         `${process.env.NEXT_PUBLIC_API_URL}/events/user/${username}`,
@@ -129,6 +129,33 @@ export function useEvent(eventId: string) {
   });
 }
 
+export function useEventMutation(eventId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation<EventPageInformation | null, Error, EventFormData>({
+    mutationKey: ["event", eventId],
+    mutationFn: async (eventData: EventFormData) => {
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`,
+        {
+          method: "PUT",
+          body: eventData,
+        },
+      );
+    
+      if (!response.ok) {
+        throw new Error('Failed to update event');
+      }
+    
+      return response.json();
+    },
+    onSuccess: () => {
+      console.log("Invalidating event query");
+      queryClient.invalidateQueries({ queryKey: ["event"] });
+    },
+  });
+}
+
 /**
  * React Query hook to search for events
  * @param {string} searchParams - The search parameters
@@ -141,7 +168,7 @@ export function useEventSearch(searchParams: string) {
     pageSize: number;
     resultSize: number;
   }>({
-    queryKey: ["events", "search", searchParams],
+    queryKey: ["eventSearch", "search", searchParams],
     queryFn: async () => {
       const startTime = performance.now();
 

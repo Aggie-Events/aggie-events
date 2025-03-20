@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db } from "../../database";
 import { authMiddleware } from "../../middlewares/authMiddleware";
+import { EventStatus } from "../../types/schema";
 
 export const devRouter = Router();
 
@@ -133,18 +134,27 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         org_verified: true,
       },
       {
-        org_name: "TAMU Computing Society",
+        org_name: "TAMU Unofficial Computing Society",
         org_email: "tacs@tamu.edu",
         org_description: "Computing enthusiasts unite",
         org_building: "PETR",
         org_room: "207",
-        org_verified: true,
+        org_verified: false,
       },
     ];
 
     // Insert organizations
+    let orgIds: number[] = [];
     for (const org of sampleOrgs) {
-      await db.insertInto("orgs").values(org).execute();
+      const insertedOrg = await db
+        .insertInto("orgs")
+        .values(org)
+        .returningAll()
+        .executeTakeFirst();
+
+      if (!insertedOrg) continue;
+
+      orgIds.push(insertedOrg.org_id);
     }
 
     // Create sample events
@@ -157,10 +167,11 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         event_description:
           "Fall 2024 Engineering Career Fair - Meet top employers in engineering fields",
         event_location: "Reed Arena",
-        start_time: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+        start_time: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000),
         end_time: new Date(
-          now.getTime() + 7 * 24 * 60 * 60 * 1000 + 8 * 60 * 60 * 1000,
+          now.getTime() + 1 * 24 * 60 * 60 * 1000 + 8 * 60 * 60 * 1000,
         ),
+        event_status: "published" as EventStatus,
       },
       {
         contributor_id: user_id,
@@ -172,6 +183,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         end_time: new Date(
           now.getTime() + 14 * 24 * 60 * 60 * 1000 + 6 * 60 * 60 * 1000,
         ),
+        event_status: "published" as EventStatus,
       },
 
       // Workshops
@@ -185,6 +197,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         end_time: new Date(
           now.getTime() + 3 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000,
         ),
+        event_status: "published" as EventStatus,
       },
       {
         contributor_id: user_id,
@@ -196,6 +209,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         end_time: new Date(
           now.getTime() + 5 * 24 * 60 * 60 * 1000 + 1.5 * 60 * 60 * 1000,
         ),
+        event_status: "published" as EventStatus,
       },
 
       // Social Events
@@ -208,6 +222,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         end_time: new Date(
           now.getTime() + 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000,
         ),
+        event_status: "published" as EventStatus,
       },
       {
         contributor_id: user_id,
@@ -218,6 +233,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         end_time: new Date(
           now.getTime() + 4 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000,
         ),
+        event_status: "published" as EventStatus,
       },
 
       // Academic Events
@@ -231,6 +247,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         end_time: new Date(
           now.getTime() + 10 * 24 * 60 * 60 * 1000 + 8 * 60 * 60 * 1000,
         ),
+        event_status: "published" as EventStatus,
       },
       {
         contributor_id: user_id,
@@ -242,6 +259,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         end_time: new Date(
           now.getTime() + 6 * 24 * 60 * 60 * 1000 + 1.5 * 60 * 60 * 1000,
         ),
+        event_status: "published" as EventStatus,
       },
 
       // Sports Events
@@ -254,6 +272,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         end_time: new Date(
           now.getTime() + 8 * 24 * 60 * 60 * 1000 + 6 * 60 * 60 * 1000,
         ),
+        event_status: "published" as EventStatus,
       },
       {
         contributor_id: user_id,
@@ -264,6 +283,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         end_time: new Date(
           now.getTime() + 9 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000,
         ),
+        event_status: "published" as EventStatus,
       },
 
       // Performance Events
@@ -276,6 +296,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         end_time: new Date(
           now.getTime() + 15 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000,
         ),
+        event_status: "published" as EventStatus,
       },
       {
         contributor_id: user_id,
@@ -287,6 +308,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         end_time: new Date(
           now.getTime() + 12 * 24 * 60 * 60 * 1000 + 2.5 * 60 * 60 * 1000,
         ),
+        event_status: "published" as EventStatus,
       },
     ];
 
@@ -306,6 +328,13 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
           "Career Fair",
           event.event_name.includes("Engineering") ? "Engineering" : "Business",
         ]);
+        await db
+          .insertInto("eventorgs")
+          .values({
+            event_id: insertedEvent.event_id,
+            org_id: orgIds[0],
+          })
+          .execute();
       } else if (event.event_name.includes("Workshop")) {
         await addEventTags(insertedEvent.event_id, [
           "Workshop",

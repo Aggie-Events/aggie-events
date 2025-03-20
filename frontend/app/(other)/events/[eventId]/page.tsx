@@ -2,18 +2,25 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useEvent } from "@/api/event";
-import { FaLocationDot, FaCalendarDay, FaHeart, FaShare, FaArrowLeft } from "react-icons/fa6";
+import {
+  FaLocationDot,
+  FaCalendarDay,
+  FaHeart,
+  FaShare,
+  FaArrowLeft,
+} from "react-icons/fa6";
 import { FiEdit, FiClock } from "react-icons/fi";
 import { MdGroup, MdCalendarMonth } from "react-icons/md";
 import IconLabel from "@/components/common/IconLabel";
 import { formatDateInterval } from "@/utils/date";
 import { EventPageInformation } from "@/config/query-types";
 import EventTagList from "@/components/tag/EventTagList";
+import Link from "next/link";
 
 export default function EventDetails() {
   const { eventId } = useParams<{ eventId: string }>();
   const { data: event, isPending, isError } = useEvent(eventId);
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {isPending && <Loading />}
@@ -35,11 +42,14 @@ function EventData({ event }: { event: EventPageInformation }) {
 
   const handleBack = () => {
     // Check if there's a previous page and it's from the same origin
-    if (document.referrer && new URL(document.referrer).origin === window.location.origin) {
+    if (
+      document.referrer &&
+      new URL(document.referrer).origin === window.location.origin
+    ) {
       router.back();
     } else {
       // If no previous page or different origin, go to home
-      router.push('/');
+      router.push("/");
     }
   };
 
@@ -54,30 +64,33 @@ function EventData({ event }: { event: EventPageInformation }) {
         <span>Back</span>
       </button>
 
-      {/* Event Image */}
-      {event.event_img && (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-          <div className="relative w-full h-[400px]">
-            <img
-              src={event.event_img}
-              alt={event.event_name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-      )}
-
       {/* Header Section */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
         <div className="bg-maroon h-3" />
-        <div className="p-6">
+        {/* Event Image */}
+        {event.event_img && (
+          <div className="bg-white rounded-b-xl overflow-hidden">
+            <div className="relative w-full h-[400px]">
+              <img
+                src={event.event_img}
+                alt={event.event_name}
+                className="w-full h-full object-cover"
+              />
+            </div> 
+          </div>
+        )}
+        <div className="px-6 py-4">
           <div className="flex justify-between items-start mb-4">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">{event.event_name}</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              {event.event_name}
+            </h1>
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={() => setIsLiked(!isLiked)}
                 className={`p-2 rounded-full transition-colors ${
-                  isLiked ? 'bg-red-50 text-red-500' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
+                  isLiked
+                    ? "bg-red-50 text-red-500"
+                    : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                 }`}
               >
                 <FaHeart className="text-xl" />
@@ -85,10 +98,12 @@ function EventData({ event }: { event: EventPageInformation }) {
               <button className="p-2 rounded-full bg-gray-50 text-gray-400 hover:bg-gray-100 transition-colors">
                 <FaShare className="text-xl" />
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-maroon text-white rounded-full hover:bg-darkmaroon transition-colors">
-                <FiEdit />
-                <span>Edit</span>
-              </button>
+              <Link href={`/dashboard/events/edit/${event.event_id}`}>
+                <button className="flex items-center gap-2 px-4 py-2 bg-maroon text-white rounded-full hover:bg-darkmaroon transition-colors">
+                  <FiEdit />
+                  <span>Edit</span>
+                </button>
+              </Link>
             </div>
           </div>
 
@@ -116,7 +131,9 @@ function EventData({ event }: { event: EventPageInformation }) {
         <div className="lg:col-span-2 space-y-8">
           {/* Time & Location Card */}
           <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Event Details</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Event Details
+            </h2>
             <div className="space-y-4">
               <IconLabel
                 text={formatDateInterval(
@@ -128,7 +145,7 @@ function EventData({ event }: { event: EventPageInformation }) {
                 <FaCalendarDay className="text-xl text-maroon" />
               </IconLabel>
               {event.event_location && (
-                <IconLabel 
+                <IconLabel
                   text={event.event_location}
                   className="flex items-center gap-3 text-gray-700"
                 >
@@ -140,8 +157,12 @@ function EventData({ event }: { event: EventPageInformation }) {
 
           {/* Description Card */}
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">About this Event</h2>
-            <p className="text-gray-600 whitespace-pre-wrap">{event.event_description}</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              About this Event
+            </h2>
+            <p className="text-gray-600 whitespace-pre-wrap">
+              {event.event_description}
+            </p>
           </div>
         </div>
 
@@ -149,7 +170,9 @@ function EventData({ event }: { event: EventPageInformation }) {
         <div className="space-y-8">
           {/* Quick Actions Card */}
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Quick Actions
+            </h2>
             <div className="space-y-3">
               {EventOptions.map((option, index) => (
                 <button
@@ -165,10 +188,14 @@ function EventData({ event }: { event: EventPageInformation }) {
 
           {/* Event Stats Card */}
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Event Stats</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Event Stats
+            </h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <p className="text-2xl font-bold text-maroon">{event.event_likes}</p>
+                <p className="text-2xl font-bold text-maroon">
+                  {event.event_likes}
+                </p>
                 <p className="text-sm text-gray-600">Likes</p>
               </div>
               <div className="text-center p-3 bg-gray-50 rounded-lg">
@@ -199,8 +226,10 @@ function EventNotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
       <h1 className="text-5xl font-bold text-maroon mb-4">Event Not Found</h1>
-      <p className="text-gray-600 mb-8">The event you're looking for doesn't exist or has been removed.</p>
-      <button 
+      <p className="text-gray-600 mb-8">
+        The event you're looking for doesn't exist or has been removed.
+      </p>
+      <button
         onClick={() => window.history.back()}
         className="px-6 py-3 bg-maroon text-white rounded-full hover:bg-darkmaroon transition-colors"
       >

@@ -5,6 +5,7 @@ import { EventInfo } from "../../types/events";
 import { SerializedUser } from "../../types/user-storage";
 import express from "express";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
+import { EventStatus } from "../../types/schema";
 
 export const eventRouter = express.Router();
 
@@ -59,6 +60,7 @@ eventRouter.get("/:event_id", async (req, res) => {
         "e.end_time as end_time",
         "e.date_created as date_created",
         "e.date_modified as date_modified",
+        "e.event_status as event_status",
         // Kinda hacky, just pray that there is never a user who added an event with a null user_name
         eb.fn
           .coalesce("u.user_name", sql<string>`'null_user'`)
@@ -131,6 +133,7 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
     event_location,
     start_time,
     end_time,
+    event_status,
     tags,
     event_img,
   }: {
@@ -141,6 +144,7 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
     end_time: Date;
     tags: string[];
     event_img: string | null;
+    event_status: EventStatus;
   } = req.body;
 
   try {
@@ -154,6 +158,7 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
         start_time: start_time,
         end_time: end_time,
         contributor_id: (req.user! as SerializedUser).user_id,
+        event_status: event_status,
         event_img: event_img,
       })
       .returning("event_id")
@@ -257,5 +262,103 @@ eventRouter.get("/user/:user_name", async (req, res) => {
   } catch (error) {
     console.error("Error fetching events:", error);
     res.status(500).send("Error fetching events!");
+  }
+});
+
+/**
+ * @route PUT /api/events/:event_id
+ * @description Update an existing event
+ * @access Private - Requires authentication and event ownership
+ * @param {number} event_id - The ID of the event to update
+ * @param {Object} req.body - Updated event data
+ * @param {string} [req.body.event_name] - Name of the event
+ * @param {string} [req.body.event_description] - Description of the event
+ * @param {string} [req.body.event_location] - Location of the event
+ * @param {Date} [req.body.start_time] - Start time of the event
+ * @param {Date} [req.body.end_time] - End time of the event
+ * @param {string[]} [req.body.tags] - Array of tag names for the event
+ * @param {string} [req.body.event_img] - Event image URL
+ * @returns {Object} Updated event object
+ * @returns {Error} 401 - Unauthorized if user is not the event contributor
+ * @returns {Error} 404 - Event not found
+ * @returns {Error} 500 - Server error if event cannot be updated
+ */
+eventRouter.put("/:event_id", authMiddleware, async (req, res) => {
+  const event_id: number = parseInt(req.params.event_id, 10);
+  const user_id = (req.user! as SerializedUser).user_id;
+
+  try {
+    // Check if event exists and user is authorized
+    const event = await db
+      .selectFrom("events")
+      .where("event_id", "=", event_id)
+      .select(["contributor_id"])
+      .executeTakeFirst();
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    if (event.contributor_id !== user_id) {
+      return res.status(401).json({ message: "Unauthorized to edit this event" });
+    }
+
+    const {
+      event_name,
+      event_description,
+      event_location,
+      start_time,
+      end_time,
+      tags,
+      event_img,
+      event_status,
+    } = req.body;
+
+    // Update event details
+    await db
+      .updateTable("events")
+      .set({
+        event_name: event_name,
+        event_description: event_description,
+        event_location: event_location,
+        start_time: start_time,
+        end_time: end_time,
+        event_img: event_img,
+        event_status: event_status,
+        date_modified: new Date(),
+      })
+      .where("event_id", "=", event_id)
+      .execute();
+
+    // Update tags if provided
+    if (tags && Array.isArray(tags)) {
+      // Remove existing tags
+      await db
+        .deleteFrom("eventtags")
+        .where("event_id", "=", event_id)
+        .execute();
+
+      if (tags.length > 0) {
+        // Get tag IDs for the provided tag names
+        const tagIds = await db
+          .selectFrom("tags")
+          .where("tag_name", "in", tags)
+          .select(["tag_id"])
+          .execute();
+
+        // Insert new tags
+        await db
+          .insertInto("eventtags")
+          .values(
+            tagIds.map((tag) => ({ event_id: event_id, tag_id: tag.tag_id }))
+          )
+          .execute();
+      }
+    }
+
+    res.json({ message: "Event updated successfully" });
+  } catch (error) {
+    console.error("Error updating event:", error);
+    res.status(500).json({ message: "Error updating event" });
   }
 });

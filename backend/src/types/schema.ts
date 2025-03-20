@@ -31,6 +31,7 @@ export interface Events {
   event_views: Generated<number>;
   event_location: string | null;
   event_img: string | null;
+  event_status: EventStatus;
   start_time: Timestamp;
   end_time: Timestamp;
   date_created: Generated<Timestamp>;

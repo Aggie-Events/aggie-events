@@ -64,12 +64,12 @@ CREATE TABLE events
     date_created      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_modified     TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    status            event_status                          NOT NULL,
+    event_status      event_status                          NOT NULL,
 
     -- If both start_time and end_time are not null, then start_time must be less than end_time
     CHECK (start_time < end_time),
     -- Ensure that when status is not 'draft', all required fields are populated
-    CHECK (status = 'draft' OR (
+    CHECK (event_status = 'draft' OR (
         event_name IS NOT NULL AND 
         start_time IS NOT NULL AND
         end_time IS NOT NULL

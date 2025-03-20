@@ -5,6 +5,7 @@ export interface EventPageInformation {
   event_location: string | null;
   event_likes: number;
   event_img: string | null;
+  event_status: EventStatus;
   start_time: Date;
   end_time: Date;
   date_created: Date;

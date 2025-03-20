@@ -6,12 +6,14 @@ interface EventFormActionsProps {
   status: EventStatus;
   isSubmitting: boolean;
   onCancel: () => void;
+  isEditing?: boolean;
 }
 
 export default function EventFormActions({ 
   status, 
   isSubmitting, 
-  onCancel 
+  onCancel, 
+  isEditing 
 }: EventFormActionsProps) {
   return (
     <div className="flex gap-4 justify-end mt-8 border-t pt-6">
