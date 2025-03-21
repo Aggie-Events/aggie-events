@@ -155,6 +155,22 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
       if (!insertedOrg) continue;
 
       orgIds.push(insertedOrg.org_id);
+
+      // Add orgslug for verified organizations
+      if (org.org_verified) {
+        const slug = org.org_name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+        
+        await db
+          .insertInto("orgslugs")
+          .values({
+            org_id: insertedOrg.org_id,
+            org_slug: slug,
+          })
+          .execute();
+      }
     }
 
     // Create sample events
