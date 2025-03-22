@@ -15,9 +15,12 @@ import cors from "cors";
 import { UserStorage } from "./types/user-storage";
 import { getUserById } from "./db-functions/user";
 import { limiter } from "./utils/rate-limiter";
-import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
+import {
+  v2 as cloudinary,
+  UploadApiResponse,
+  UploadApiErrorResponse,
+} from "cloudinary";
 import { OAuth2Client } from "google-auth-library";
-
 
 export const mobileClient = new OAuth2Client(process.env.MOBILE_CLIENT_ID);
 
@@ -27,6 +30,7 @@ export async function verifyGoogleToken(token: string) {
     idToken: token,
     audience: process.env.MOBILE_CLIENT_ID,
   });
+
   return ticket.getPayload();
 }
 
@@ -79,12 +83,18 @@ const init = async (): Promise<express.Application> => {
     }),
   );
 
-
   // TODO FOR MOBILE:
   // 1. pull from main. gonna be lots of conflicts and pain
   // 2. make new google strategy for mobile (use AI)
   // 3. profit
-  // Configure Google OAuth strategy
+
+  // idToken: req.body.idToken,
+  //     user_displayname: req.body.user_displayname,
+  //     user_img: req.body.user_img,
+  //     user_name: req.body.user_name,
+  //     user_email: req.body.user_email,
+
+  // Configure Google OAuth strategy for WEB
   passport.use(
     new GoogleStrategy(
       {
@@ -173,7 +183,7 @@ const init = async (): Promise<express.Application> => {
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure: process.env.NODE_ENV === "production"
+    secure: process.env.NODE_ENV === "production",
   });
 
   // // Log the configuration
