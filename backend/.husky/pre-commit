@@ -1,0 +1,3 @@
+cd backend
+echo $PWD
+npx lint-staged

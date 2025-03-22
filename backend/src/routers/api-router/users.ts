@@ -1,7 +1,7 @@
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { db } from "../../database";
 import express from "express";
-
+import { useQuery } from "@tanstack/react-query";
 export const usersRouter = express.Router();
 
 /**
@@ -37,7 +37,11 @@ usersRouter.post("/", authMiddleware, async (req, res) => {
   try {
     await db
       .insertInto("users")
-      .values({ user_name: username, user_email: email, user_displayname: username })
+      .values({
+        user_name: username,
+        user_email: email,
+        user_displayname: username,
+      })
       .execute();
     res.send("User created!");
   } catch (error) {
@@ -100,9 +104,9 @@ usersRouter.post("/exists", async (req, res) => {
   const { username } = req.body;
 
   if (!username || typeof username !== "string") {
-    return res.status(400).json({ 
+    return res.status(400).json({
       message: "Username is required",
-      exists: false 
+      exists: false,
     });
   }
 
@@ -113,15 +117,16 @@ usersRouter.post("/exists", async (req, res) => {
       .select("user_id")
       .executeTakeFirst();
 
-    res.json({ 
+    res.json({
       exists: user !== undefined,
-      message: user !== undefined ? "Username is taken" : "Username is available"
+      message:
+        user !== undefined ? "Username is taken" : "Username is available",
     });
   } catch (error) {
     console.error("Error checking username:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: "Error checking username",
-      exists: false 
+      exists: false,
     });
   }
 });
@@ -131,7 +136,7 @@ usersRouter.post("/validate", async (req, res) => {
   if (!username || typeof username !== "string") {
     return res.status(400).json({
       message: "Username is required",
-      isValid: false
+      isValid: false,
     });
   }
 
@@ -139,19 +144,19 @@ usersRouter.post("/validate", async (req, res) => {
   if (username.length > 20 || username.length < 3) {
     return res.status(400).json({
       isValid: false,
-      message: "Username is too long"
+      message: "Username is too long",
     });
   }
   if (!/^[a-zA-Z0-9]+$/.test(username)) {
     return res.status(400).json({
       isValid: false,
-      message: "Username must be alphanumeric"
+      message: "Username must be alphanumeric",
     });
   }
-      return res.json({
-        isValid: true,
-        message: "Username is valid"
-  })
+  return res.json({
+    isValid: true,
+    message: "Username is valid",
+  });
 });
 
 /**
@@ -210,7 +215,7 @@ usersRouter.get("/:username", async (req, res) => {
       .selectAll()
       .executeTakeFirst();
 
-    if (!user) {  
+    if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
@@ -282,17 +287,12 @@ usersRouter.get("/:username/profile", async (req, res) => {
       .selectFrom("userorgs as uo")
       .where("uo.user_id", "=", user.user_id)
       .innerJoin("orgs as o", "uo.org_id", "o.org_id")
-      .select([
-        "o.org_id",
-        "o.org_name",
-        "o.org_description",
-        "o.org_icon",
-      ])
+      .select(["o.org_id", "o.org_name", "o.org_description", "o.org_icon"])
       .execute();
 
     // Process events to group tags
     const processedEvents = events.reduce((acc: any[], event) => {
-      const existingEvent = acc.find(e => e.event_id === event.event_id);
+      const existingEvent = acc.find((e) => e.event_id === event.event_id);
       if (existingEvent) {
         if (event.tag_name && !existingEvent.tags.includes(event.tag_name)) {
           existingEvent.tags.push(event.tag_name);

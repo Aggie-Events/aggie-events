@@ -10,6 +10,7 @@ import { searchRouter } from "./api-router/search";
 import { eventRouter } from "./api-router/events";
 import { tagRouter } from "./api-router/tag";
 import { devRouter } from "./api-router/dev";
+import {uploadRouter} from "./api-router/upload"
 export const apiRouter = express.Router();
 
 /**
@@ -42,7 +43,8 @@ apiRouter.use("/orgs", orgRouter);
 apiRouter.use("/search", searchRouter);
 apiRouter.use("/events", eventRouter);
 apiRouter.use("/tags", tagRouter);
+apiRouter.use("/upload", uploadRouter)
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   apiRouter.use("/dev", devRouter);
 }

@@ -7,7 +7,7 @@ import { useSidebar } from "@/components/layout/SidebarContext";
 const sidebarLinks = [
   { href: "/dashboard", label: "Dashboard", icon: <MdDashboard /> },
   { href: "/dashboard/events", label: "Events", icon: <MdEvent /> },
-  { href: "/dashboard/organizations", label: "Organizations", icon: <MdGroup /> },
+  { href: "/dashboard/orgs", label: "Organizations", icon: <MdGroup /> },
   { href: "/dashboard/development", label: "Development", icon: <MdCode /> },
   { href: "/dashboard/settings", label: "Settings", icon: <MdSettings /> },
 ];
