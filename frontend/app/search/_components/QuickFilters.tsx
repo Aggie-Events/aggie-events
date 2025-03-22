@@ -25,7 +25,7 @@ interface CategoryTagsProps {
   onUpdateFilters: () => void;
 }
 
-export default function CategoryTags({ 
+export default function QuickFilters({ 
   filters, 
   selectedCategory, 
   tags, 

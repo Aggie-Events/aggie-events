@@ -1,6 +1,6 @@
 "use client";
 import React, { Suspense } from "react";
-import EventDisplay from "@/app/(other)/search/_components/event-display/EventDisplay";
+import EventDisplay from "@/app/search/_components/event-display/EventDisplay";
 import { SearchEventsReturn } from "@/api/event";
 
 export default function EventList({
@@ -18,7 +18,7 @@ export default function EventList({
     );
   } else {
     return (
-      <div className="flex flex-col gap-3 my-2 max-w-[800px] w-full">
+      <div className="flex flex-col gap-3 my-2 w-full">
         <Suspense fallback={<div>Loading...</div>}>
           {events.map((event: SearchEventsReturn) => (
             <EventDisplay event={event} key={event.event_id} />

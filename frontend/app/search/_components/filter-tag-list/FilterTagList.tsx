@@ -1,5 +1,5 @@
 import React from "react";
-import FilterTagDisplay from "@/app/(other)/search/_components/filter-tag-list/FilterTagDisplay";
+import FilterTagDisplay from "@/app/search/_components/filter-tag-list/FilterTagDisplay";
 
 export default function FilterTagList({
   tags,

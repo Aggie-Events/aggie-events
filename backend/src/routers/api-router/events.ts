@@ -76,6 +76,14 @@ eventRouter.get("/:event_id", async (req, res) => {
       return;
     }
 
+      const { event_likes } = await db
+          .selectFrom("events as e")
+          .leftJoin("userlikes", "e.event_id", "userlikes.event_id")
+          .select(db.fn.count("userlikes.user_id").as("event_likes"))
+          .where("e.event_id", "=", event_id)
+          .groupBy("e.event_id")
+          .executeTakeFirstOrThrow();
+
     const tags = await db
       .selectFrom("eventtags as e_t")
       .where("e_t.event_id", "=", page_data.event_id)
@@ -94,6 +102,7 @@ eventRouter.get("/:event_id", async (req, res) => {
        ...page_data, 
        tags: tags as string[],
        event_status: "published",
+       event_likes: Number(event_likes),
        event_views: 0,
        event_going: 0,
     };
@@ -106,6 +115,61 @@ eventRouter.get("/:event_id", async (req, res) => {
     console.error("Error fetching event:", error);
     res.status(500).send("Error fetching event!");
   }
+});
+
+/**
+ * @route POST /api/events/:event_id/like
+ * @description Like an event
+ * @access Private - Requires authentication
+ * @param {Object} req.body - No request body
+ * @returns 204 No content
+ * @returns 409 Conflict - Already liked
+ * @returns {Error} 500 - Server error if event cannot be liked
+ */
+eventRouter.post("/:event_id/like", authMiddleware, async (req, res) => {
+  const event_id = parseInt(req.params.event_id, 10);
+  const user_id = req.user!.user_id;
+
+  const { numInsertedOrUpdatedRows } = await db
+    .insertInto("userlikes")
+    .values({ user_id, event_id })
+    .executeTakeFirst();
+
+    if(numInsertedOrUpdatedRows ?? 0 > 0) {
+        res.status(204).send();
+        console.log(`User ${user_id} liked event ${event_id}`);
+    } else {
+        res.status(409).send();
+        console.log(`User ${user_id} tried to add preexisting like for event ${event_id}`);
+    }
+});
+
+/**
+ * @route DELETE /api/:event_id/like
+ * @description Unlike an event
+ * @access Private - Requires authentication
+ * @param {Object} req.body - No request body
+ * @returns 204 No content
+ * @returns 409 Conflict - Already unliked
+ * @returns {Error} 500 - Server error if event cannot be unliked
+ */
+eventRouter.delete("/:event_id/like", authMiddleware, async (req, res) => {
+    const event_id = parseInt(req.params.event_id, 10);
+    const user_id = req.user!.user_id;
+    
+    const { numDeletedRows } = await db
+        .deleteFrom("userlikes")
+        .where("user_id", "=", user_id)
+        .where("event_id", "=", event_id)
+        .executeTakeFirst();
+
+    if(numDeletedRows > 0) {
+        res.status(204).send();
+        console.log(`User ${user_id} unliked event ${event_id}`);
+    } else {
+        res.status(409).send();
+        console.log(`User ${user_id} tried to remove nonexistent like for event ${event_id}`);
+    }
 });
 
 /**

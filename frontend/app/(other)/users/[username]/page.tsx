@@ -1,7 +1,7 @@
 "use client";
 import { useParams } from "next/navigation";
 import { UserProfile } from "@/api/user";
-import EventCard from "@/app/(other)/search/_components/event-display/EventCard";
+import EventCard from "@/app/search/_components/event-display/EventCard";
 import Image from "next/image";
 import Link from "next/link";
 import { useUserProfile } from "@/api/user";

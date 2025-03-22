@@ -4,7 +4,7 @@ interface SidebarProps {
   onFilterChange: (filters: { tags?: string[]; dateRange?: [Date, Date]; timeRange?: [string, string] }) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
+export default function Sidebar({ onFilterChange }: SidebarProps) {
   const handleTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const tags = e.target.value.split(",").map(tag => tag.trim());
     onFilterChange({ tags });
@@ -19,7 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   };
 
   return (
-    <div className="sidebar bg-white shadow-lg p-4 rounded-lg w-64">
+    <div className="bg-white p-4 rounded-lg">
       <h3 className="text-lg font-semibold mb-4">Filters</h3>
       
       <div className="mb-4">
@@ -62,5 +62,3 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
     </div>
   );
 };
-
-export default Sidebar; 
