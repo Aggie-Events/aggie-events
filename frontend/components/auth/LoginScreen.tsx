@@ -164,15 +164,13 @@ export default function LoginScreen({ onClose, showBackButton = true }: LoginScr
       onClick={onClose}
     >
       <motion.div 
-        className="relative w-full max-w-md mx-4"
+        className="relative w-full max-w-md mx-4 bg-black/10 backdrop-blur-lg p-8 rounded-xl shadow-2xl border border-white/10"
         initial="hidden"
         animate="visible"
         exit="exit"
         variants={cardVariants}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Glass Card */}
-        <div className="relative w-full p-8 bg-white/10 backdrop-blur-lg rounded-xl shadow-2xl border border-white/10">
           {/* Back Button */}
           {showBackButton && (
             <button
@@ -260,7 +258,6 @@ export default function LoginScreen({ onClose, showBackButton = true }: LoginScr
               </a>
             </p>
           </div>
-        </div>
       </motion.div>
     </motion.div>
   );

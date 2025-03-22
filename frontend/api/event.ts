@@ -205,3 +205,58 @@ export function useEventSearch(searchParams: string) {
     placeholderData: keepPreviousData, // Keep the previous data while the new data is being fetched (prevents flickering)
   });
 }
+
+/**
+ * React Query hook to search for user's events with sorting and pagination
+ * @param {{ page?: number, pageSize?: number, sort?: string, order?: 'asc' | 'desc' }} options - Search options
+ * @returns {UseQueryResult<{events: SearchEventsReturn[], pageSize: number, resultSize: number, currentPage: number}>} The search results
+ */
+export function useEventSearchUser(options: {
+  page?: number;
+  pageSize?: number;
+  sort?: "name" | "eventDate" | "lastModified" | "status" | "likes";
+  order?: "asc" | "desc";
+} = {}) {
+  const { page = 1, pageSize = 10, sort = "eventDate", order = "desc" } = options;
+
+  return useQuery<{
+    events: SearchEventsReturn[];
+    pageSize: number;
+    resultSize: number;
+    currentPage: number;
+  }>({
+    queryKey: ["eventSearch", "user", { page, pageSize, sort, order }],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+        sort: sort,
+        order: order
+      });
+
+      const { results, resultSize, pageSize: returnedPageSize, currentPage } = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/search/events/user?${params}`,
+        {
+          method: "GET",
+        },
+      ).then((res) => res.json());
+
+      return {
+        events: results.map((e: any) => ({
+          ...e,
+          start_time: new Date(e.start_time),
+          end_time: new Date(e.end_time),
+          date_created: new Date(e.date_created),
+          date_modified: new Date(e.date_modified),
+          tags: e.tags || [],
+          event_likes: e.event_likes || 0
+        })),
+        pageSize: returnedPageSize,
+        resultSize,
+        currentPage
+      };
+    },
+    staleTime: Infinity, // Never stale (don't want the event search results to change while the user is interacting with the page)
+    placeholderData: keepPreviousData, // Keep the previous data while the new data is being fetched (prevents flickering)
+  });
+}
