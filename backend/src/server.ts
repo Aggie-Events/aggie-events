@@ -84,10 +84,6 @@ const init = async (): Promise<express.Application> => {
     }),
   );
 
-  // TODO FOR MOBILE:
-  // 1. pull from main. gonna be lots of conflicts and pain
-  // 2. make new google strategy for mobile (use AI)
-  // 3. profit
 
   // idToken: req.body.idToken,
   //     user_displayname: req.body.user_displayname,
@@ -160,14 +156,11 @@ const init = async (): Promise<express.Application> => {
     ),
   );
 
-  // Configure Local Strategy for mobile Google sign-in
-  passport.use(
-    "google-token",
+  // Configure Local Strategy for MOBILE Google sign-in
+  passport.use("google-token",
     new Strategy(async (req: any, done: any) => {
       try {
-        const { idToken, user_displayname, user_img, user_name, user_email } =
-          req.body;
-        console.log(req.body);
+        const { idToken, user_displayname, user_img, user_name, user_email } = req.body;
         if (!idToken) {
           return done(null, false, { message: "ID token is required" });
         }
@@ -184,12 +177,14 @@ const init = async (): Promise<express.Application> => {
           });
         }
 
+        // Attempts to retrieve user from db
         let user = await db
           .selectFrom("users")
           .select(["user_id", "user_name", "user_displayname"])
           .where("user_email", "=", user_email)
           .executeTakeFirst();
 
+        // Creates new user if it doesn't exist
         if (!user) {
           const { user_id } = await db
             .insertInto("users")
@@ -203,6 +198,7 @@ const init = async (): Promise<express.Application> => {
           user = { user_id, user_name, user_displayname };
         }
 
+        // Return function?
         return done(null, {
           user_email,
           user_name: user.user_name,
