@@ -12,27 +12,28 @@ export type Generated<T> =
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export type EventStatus = 'draft' | 'published' | 'cancelled';
-export type FriendshipStatus = 'pending' | 'accepted' | 'rejected' | 'blocked';
-export type ReportStatus = 'pending' | 'reviewed' | 'resolved' | 'rejected';
+export type EventStatus = "draft" | "published" | "cancelled";
+export type FriendshipStatus = "pending" | "accepted" | "rejected" | "blocked";
+export type ReportStatus = "pending" | "reviewed" | "resolved" | "rejected";
+export type MembershipType = "owner" | "editor";
 
 export interface Alternateorgnames {
   alternate_name_id: Generated<number>;
-  org_id: number | null;
-  alternate_name: string | null;
+  org_id: number;
+  alternate_name: string;
 }
 
 export interface Events {
   event_id: Generated<number>;
   contributor_id: number;
-  event_name: string;
+  event_name: string | null;
   event_description: string | null;
-  event_likes: Generated<number>;
-  event_views: Generated<number>;
   event_location: string | null;
+  event_views: Generated<number>;
   event_img: string | null;
-  start_time: Timestamp;
-  end_time: Timestamp;
+  event_status: EventStatus;
+  start_time: Timestamp | null;
+  end_time: Timestamp | null;
   date_created: Generated<Timestamp>;
   date_modified: Generated<Timestamp>;
 }
@@ -40,6 +41,7 @@ export interface Events {
 export interface Eventorgs {
   event_id: number;
   org_id: number;
+  official: Generated<boolean>;
 }
 
 export interface Eventtags {
@@ -48,12 +50,10 @@ export interface Eventtags {
 }
 
 export interface Friendships {
-  id: Generated<number>;
   user1_id: number;
   user2_id: number;
   status: FriendshipStatus;
-  friendship_type: string | null;
-  created_at: Generated<Timestamp>;
+  date_created: Generated<Timestamp>;
 }
 
 export interface Orgs {
@@ -73,21 +73,28 @@ export interface Orgtags {
   tag_id: number;
 }
 
+export interface Orgslugs {
+  org_id: number;
+  org_slug: string;
+}
+
 export interface Reports {
   report_id: Generated<number>;
   reporter_user_id: number | null;
   reported_event_id: number | null;
   reported_org_id: number | null;
-  report_reason: string | null;
-  report_date: Generated<Timestamp>;
+  report_reason: string;
   report_status: ReportStatus;
   admin_notes: string | null;
+  date_created: Generated<Timestamp>;
+  date_modified: Generated<Timestamp>;
   resolution_date: Timestamp | null;
 }
 
 export interface Savedevents {
   user_id: number;
   event_id: number;
+  date_created: Generated<Timestamp>;
 }
 
 export interface Tags {
@@ -100,16 +107,21 @@ export interface Tags {
 export interface Userattendance {
   user_id: number;
   event_id: number;
+  date_created: Generated<Timestamp>;
 }
 
 export interface Userlikes {
   user_id: number;
   event_id: number;
+  date_created: Generated<Timestamp>;
 }
 
 export interface Userorgs {
   user_id: number;
   org_id: number;
+  user_role: MembershipType;
+  date_created: Generated<Timestamp>;
+  date_modified: Generated<Timestamp>;
 }
 
 export interface Users {
@@ -123,11 +135,19 @@ export interface Users {
   user_year: number | null;
   user_description: string | null;
   user_profile_img: string | null;
+  user_banned: Generated<boolean>;
 }
 
 export interface Usersubs {
   user_id: number;
   org_id: number;
+  date_created: Generated<Timestamp>;
+}
+
+export interface Blocks {
+  user_id: number;
+  blocked_id: number;
+  date_created: Generated<Timestamp>;
 }
 
 export interface DB {
@@ -138,6 +158,7 @@ export interface DB {
   friendships: Friendships;
   orgs: Orgs;
   orgtags: Orgtags;
+  orgslugs: Orgslugs;
   reports: Reports;
   savedevents: Savedevents;
   tags: Tags;
@@ -146,4 +167,5 @@ export interface DB {
   userorgs: Userorgs;
   users: Users;
   usersubs: Usersubs;
+  blocks: Blocks;
 }

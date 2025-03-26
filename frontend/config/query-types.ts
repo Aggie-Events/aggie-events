@@ -4,6 +4,8 @@ export interface EventPageInformation {
   event_description: string | null;
   event_location: string | null;
   event_likes: number;
+  event_img: string | null;
+  event_status: EventStatus;
   start_time: Date;
   end_time: Date;
   date_created: Date;
@@ -38,6 +40,19 @@ export type SearchFilters = {
   organizations?: string[];
   sort?: string;
 };
+
+export interface OrgPageInformation {
+  org_id: number;
+  org_name: string;
+  org_description: string | null;
+  org_icon: string | null;
+  org_verified: boolean;
+  org_reputation: number;
+  org_building: string | null;
+  org_room: string | null;
+  org_email: string | null;
+  org_slug: string | null;
+}
 
 // Set a filter in the filters object
 // This is a function because typescript shenanigans

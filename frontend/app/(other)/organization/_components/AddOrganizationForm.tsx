@@ -9,7 +9,6 @@ export default function AddUserForm() {
   const { user } = useAuth();
   const [username, setUsername] = useState<string>();
   const [email, setEmail] = useState<string>();
-  const [update, setUpdate] = useState<boolean>(false);
 
   return (
     <>
@@ -35,7 +34,6 @@ export default function AddUserForm() {
           <button
             onClick={() => {
               addOrganization(username!, email!);
-              setUpdate(!update);
             }}
             className="bg-blue-500 rounded-md px-2 py-1"
           >
@@ -47,7 +45,6 @@ export default function AddUserForm() {
             className="bg-red-400 rounded-md px-2 py-1"
             onClick={() => {
               deleteOrganization();
-              setUpdate(!update);
             }}
           >
             Delete Organization
@@ -62,7 +59,7 @@ export default function AddUserForm() {
           </button>
         </div>
         <div className="mx-3 w-2/5">
-          <OrganizationList update={update} />
+          <OrganizationList />
         </div>
       </div>
       {/* ):(

@@ -4,8 +4,6 @@ import { SearchFilters } from "@/config/query-types";
 
 const categories = [
   "All Events",
-  "Today",
-  "This Week",
   "Free Food",
   "Career Fairs",
   "Sports",

@@ -18,12 +18,10 @@ export default function EventList({
     );
   } else {
     return (
-      <div className="flex flex-col gap-3 my-2 w-full">
-        <Suspense fallback={<div>Loading...</div>}>
-          {events.map((event: SearchEventsReturn) => (
-            <EventDisplay event={event} key={event.event_id} />
-          ))}
-        </Suspense>
+      <div className="space-y-4">
+        {events.map((event: SearchEventsReturn) => (
+          <EventDisplay key={event.event_id} event={event} />
+        ))}
       </div>
     );
   }

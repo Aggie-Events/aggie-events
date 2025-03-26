@@ -17,11 +17,12 @@ export interface Event {
 }
 
 export interface Organization {
-  org_description: string | null;
-  org_email: string | null;
-  org_icon: string | null;
-  org_id: number;
   org_name: string;
-  org_reputation: number;
+  org_email: string | null;
+  org_description: string;
+  org_icon: string;
   org_verified: boolean;
+  org_reputation: number;
+  org_building: string | null;
+  org_room: string | null;
 }

@@ -52,20 +52,29 @@ CREATE TABLE events
 (
     event_id          SERIAL PRIMARY KEY,
     contributor_id    INT                                   NOT NULL,
-    event_name        VARCHAR(255)                          NOT NULL,
+    event_name        VARCHAR(255)                          NULL,
     event_description TEXT                                  NULL,
-    event_location    VARCHAR(255),
-    event_views       INT         DEFAULT 0                 NOT NULL,
+    event_location    VARCHAR(255)                          NULL,
 
     event_img         VARCHAR(255)                          NULL,
 
-    start_time        TIMESTAMPTZ                           NOT NULL,
-    end_time          TIMESTAMPTZ                           NOT NULL,
+    start_time        TIMESTAMPTZ                           NULL,
+    end_time          TIMESTAMPTZ                           NULL,
     date_created      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_modified     TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
+    event_status      event_status                          NOT NULL,
+    like_count        INT                  DEFAULT 0         NOT NULL,
+    save_count        INT                  DEFAULT 0         NOT NULL,
+
     -- If both start_time and end_time are not null, then start_time must be less than end_time
     CHECK (start_time < end_time),
+    -- Ensure that when status is not 'draft', all required fields are populated
+    CHECK (event_status = 'draft' OR (
+        event_name IS NOT NULL AND 
+        start_time IS NOT NULL AND
+        end_time IS NOT NULL
+    )),
     FOREIGN KEY (contributor_id) REFERENCES users (user_id) ON DELETE CASCADE
 );
 
@@ -98,7 +107,7 @@ CREATE TABLE userorgs
 (
     user_id       INT                                   NOT NULL,
     org_id        INT                                   NOT NULL,
-    role          membership_type,
+    user_role      membership_type,
     date_created  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_modified TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     PRIMARY KEY (user_id, org_id),
@@ -113,6 +122,15 @@ CREATE TRIGGER set_timestamp
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+-- Stores all of the slugs for each verified organization
+CREATE TABLE orgslugs
+(
+    org_id INT NOT NULL,
+    org_slug VARCHAR(255) NOT NULL,
+    PRIMARY KEY (org_id, org_slug),
+    FOREIGN KEY (org_id) REFERENCES orgs (org_id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX orgslug_unique_lower ON orgslugs (LOWER(org_slug));
 
 -- Stores all of the events that a user saves
 CREATE TABLE savedevents
@@ -270,5 +288,44 @@ CREATE TRIGGER set_timestamp
     ON reports
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
+
+-- Create triggers to maintain like and save counts
+CREATE OR REPLACE FUNCTION update_event_like_count()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE events SET like_count = like_count + 1 WHERE event_id = NEW.event_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE events SET like_count = like_count - 1 WHERE event_id = OLD.event_id;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER maintain_like_count
+    AFTER INSERT OR DELETE
+    ON userlikes
+    FOR EACH ROW
+EXECUTE FUNCTION update_event_like_count();
+
+CREATE OR REPLACE FUNCTION update_event_save_count()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE events SET save_count = save_count + 1 WHERE event_id = NEW.event_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE events SET save_count = save_count - 1 WHERE event_id = OLD.event_id;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER maintain_save_count
+    AFTER INSERT OR DELETE
+    ON savedevents
+    FOR EACH ROW
+EXECUTE FUNCTION update_event_save_count();
 
 
