@@ -80,7 +80,12 @@ export default function SearchBar() {
           }
             `}
         >
-          <FaSearch className="text-gray-700 mx-2" />
+          <button
+            onClick={handleSearch}
+            className="text-gray-700 rounded-full p-1.5 m-1 hover:bg-gray-200 transition-colors"
+          >
+            <FaSearch />
+          </button>
           <input
             id="search-input"
             alt="Test"
