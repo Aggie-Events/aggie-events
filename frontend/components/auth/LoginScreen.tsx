@@ -34,6 +34,7 @@ export default function LoginScreen({ onClose, showBackButton = true }: LoginScr
       console.error('Logout error:', error);
     } finally {
       setUser(null);
+      window.location.reload();
     }
   };
 

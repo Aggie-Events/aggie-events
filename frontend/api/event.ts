@@ -17,7 +17,8 @@ export interface SearchEventsReturn {
   event_name: string;
   event_description: string;
   event_img: string | null;
-  event_likes: number;
+  event_saves: number;
+  event_saved?: boolean;
   event_status: EventStatus;
   start_time: Date;
   end_time: Date;
@@ -258,5 +259,29 @@ export function useEventSearchUser(options: {
     },
     staleTime: Infinity, // Never stale (don't want the event search results to change while the user is interacting with the page)
     placeholderData: keepPreviousData, // Keep the previous data while the new data is being fetched (prevents flickering)
+  });
+}
+
+/**
+ * React Query hook to toggle event save status
+ * @param {string} eventId - The ID of the event to toggle
+ * @param {boolean} isCurrentlySaved - Whether the event is currently saved
+ * @returns {UseMutationResult} The mutation result
+ */
+export function useToggleEventSave(eventId: string, isCurrentlySaved: boolean) {
+  return useMutation({
+    mutationFn: async () => {
+      console.log("Toggling event save status for event " + eventId + " to " + isCurrentlySaved);
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}/save`,
+        {
+          method: isCurrentlySaved ? "DELETE" : "POST",
+        },
+      );
+      return response.json();
+    },
+    onSuccess: () => {
+      // TODO: Invalidate relevant queries to update UI
+    },
   });
 }

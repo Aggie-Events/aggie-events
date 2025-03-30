@@ -12,7 +12,6 @@ async function clearDatabase() {
   await db.deleteFrom("orgtags").execute();
   await db.deleteFrom("eventorgs").execute();
   await db.deleteFrom("savedevents").execute();
-  await db.deleteFrom("userlikes").execute();
   await db.deleteFrom("userattendance").execute();
   await db.deleteFrom("usersubs").execute();
   await db.deleteFrom("userorgs").execute();
@@ -160,9 +159,9 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
       if (org.org_verified) {
         const slug = org.org_name
           .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '');
-        
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
+
         await db
           .insertInto("orgslugs")
           .values({

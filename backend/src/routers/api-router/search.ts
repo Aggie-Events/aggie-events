@@ -109,6 +109,7 @@ searchRouter.get("/events", async (req, res) => {
         "e.end_time as end_time",
         "e.date_created as date_created",
         "e.date_modified as date_modified",
+        "e.event_saves as event_saves",
         "u.user_name as contributor_name",
         "o.org_name as org_name",
         "o.org_id as org_id",
@@ -122,10 +123,32 @@ searchRouter.get("/events", async (req, res) => {
         ).as("tags"),
       ]);
 
-    const results = await query
+    let results = await query
       .limit(pageSize as number)
       .offset(((page as number) - 1) * (pageSize as number))
       .execute();
+
+    // If user is authenticated, check if they have saved each event
+    // TODO: Could possibly make more efficient with a subquery
+    if (req.user) {
+      const savedEvents = await db
+        .selectFrom("savedevents")
+        .where("user_id", "=", req.user.user_id)
+        .where(
+          "event_id",
+          "in",
+          results.map((r: any) => r.event_id),
+        )
+        .select(["event_id"])
+        .execute();
+
+      const savedEventIds = new Set(savedEvents.map((se) => se.event_id));
+
+      results = results.map((event: any) => ({
+        ...event,
+        event_saved: savedEventIds.has(event.event_id),
+      }));
+    }
 
     console.log(results);
     res
@@ -144,7 +167,11 @@ searchRouter.get("/events", async (req, res) => {
  * @returns {Error} 500 error if organizations cannot be searched
  */
 searchRouter.get("/orgs", async (req, res) => {
-  const { query: queryString, page: page = 1, pageSize: pageSize = 3 } = req.query;
+  const {
+    query: queryString,
+    page: page = 1,
+    pageSize: pageSize = 3,
+  } = req.query;
 
   try {
     let query = db.selectFrom("orgs as o").where((ob) => {
@@ -201,7 +228,7 @@ searchRouter.get("/events/user", authMiddleware, async (req, res) => {
     page = 1,
     pageSize = 10,
     sort: sortBy = "eventDate",
-    order = "desc"
+    order = "desc",
   } = req.query;
 
   try {
@@ -215,8 +242,9 @@ searchRouter.get("/events/user", authMiddleware, async (req, res) => {
       .executeTakeFirstOrThrow();
 
     // Apply sorting
-    const orderDir = (order as string)?.toLowerCase() === "asc" ? "asc" : "desc";
-    
+    const orderDir =
+      (order as string)?.toLowerCase() === "asc" ? "asc" : "desc";
+
     switch (sortBy) {
       case "name":
         query = query.orderBy("e.event_name", orderDir);
@@ -275,26 +303,46 @@ searchRouter.get("/events/user", authMiddleware, async (req, res) => {
       .selectFrom("savedevents")
       .select([
         "event_id",
-        (eb) => eb.fn.count<number>("user_id").as("likes_count")
+        (eb) => eb.fn.count<number>("user_id").as("likes_count"),
       ])
-      .where("event_id", "in", results.map((r: any) => r.event_id))
+      .where(
+        "event_id",
+        "in",
+        results.map((r: any) => r.event_id),
+      )
       .groupBy("event_id")
       .execute();
 
     // Map likes to events
-    const likesMap = new Map(likesQuery.map(l => [l.event_id, l.likes_count]));
-    results = results.map(event => ({
+    const likesMap = new Map(
+      likesQuery.map((l) => [l.event_id, l.likes_count]),
+    );
+    results = results.map((event) => ({
       ...event,
-      event_likes: 0
+      event_likes: 0,
+      event_saved: false, // Default value
     }));
 
-    // // Handle likes sorting if needed
-    // if (sortBy === "likes") {
-    //   results.sort((a, b) => {
-    //     const multiplier = orderDir === "asc" ? 1 : -1;
-    //     return multiplier * ((a.event_likes || 0) - (b.event_likes || 0));
-    //   });
-    // }
+    // If user is authenticated, check if they have saved each event
+    if (req.user) {
+      const savedEvents = await db
+        .selectFrom("savedevents")
+        .where("user_id", "=", req.user.user_id)
+        .where(
+          "event_id",
+          "in",
+          results.map((r: any) => r.event_id),
+        )
+        .select(["event_id"])
+        .execute();
+
+      const savedEventIds = new Set(savedEvents.map((se) => se.event_id));
+
+      results = results.map((event: any) => ({
+        ...event,
+        event_saved: savedEventIds.has(event.event_id),
+      }));
+    }
 
     res.status(200).json({
       results,
@@ -306,5 +354,4 @@ searchRouter.get("/events/user", authMiddleware, async (req, res) => {
     console.error("Error fetching user events:", error);
     res.status(500).json({ message: "Error fetching user events" });
   }
-}); 
-
+});

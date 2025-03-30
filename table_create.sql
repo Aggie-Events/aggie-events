@@ -64,8 +64,7 @@ CREATE TABLE events
     date_modified     TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
     event_status      event_status                          NOT NULL,
-    like_count        INT                  DEFAULT 0         NOT NULL,
-    save_count        INT                  DEFAULT 0         NOT NULL,
+    event_saves       INT                  DEFAULT 0         NOT NULL,
 
     -- If both start_time and end_time are not null, then start_time must be less than end_time
     CHECK (start_time < end_time),
@@ -187,17 +186,6 @@ CREATE TABLE alternateorgnames
     FOREIGN KEY (org_id) REFERENCES orgs (org_id) ON DELETE CASCADE
 );
 
--- Stores what users have liked
-CREATE TABLE userlikes
-(
-    user_id      INT                                   NOT NULL,
-    event_id     INT                                   NOT NULL,
-    date_created TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    PRIMARY KEY (user_id, event_id),
-    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
-    FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE
-);
-
 -- Stores where a user has marked that they are attending an event
 CREATE TABLE userattendance
 (
@@ -211,6 +199,17 @@ CREATE TABLE userattendance
 
 -- Stores all user subscriptions
 CREATE TABLE usersubs
+(
+    user_id      INT                                   NOT NULL,
+    org_id       INT                                   NOT NULL,
+    date_created TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY (user_id, org_id),
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
+    FOREIGN KEY (org_id) REFERENCES orgs (org_id) ON DELETE CASCADE
+);
+
+-- Stores user follows for organizations
+CREATE TABLE userfollows
 (
     user_id      INT                                   NOT NULL,
     org_id       INT                                   NOT NULL,
@@ -289,34 +288,15 @@ CREATE TRIGGER set_timestamp
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
--- Create triggers to maintain like and save counts
-CREATE OR REPLACE FUNCTION update_event_like_count()
-    RETURNS TRIGGER AS
-$$
-BEGIN
-    IF TG_OP = 'INSERT' THEN
-        UPDATE events SET like_count = like_count + 1 WHERE event_id = NEW.event_id;
-    ELSIF TG_OP = 'DELETE' THEN
-        UPDATE events SET like_count = like_count - 1 WHERE event_id = OLD.event_id;
-    END IF;
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER maintain_like_count
-    AFTER INSERT OR DELETE
-    ON userlikes
-    FOR EACH ROW
-EXECUTE FUNCTION update_event_like_count();
-
+-- Create trigger to maintain save count
 CREATE OR REPLACE FUNCTION update_event_save_count()
     RETURNS TRIGGER AS
 $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
-        UPDATE events SET save_count = save_count + 1 WHERE event_id = NEW.event_id;
+        UPDATE events SET event_saves = event_saves + 1 WHERE event_id = NEW.event_id;
     ELSIF TG_OP = 'DELETE' THEN
-        UPDATE events SET save_count = save_count - 1 WHERE event_id = OLD.event_id;
+        UPDATE events SET event_saves = event_saves - 1 WHERE event_id = OLD.event_id;
     END IF;
     RETURN NULL;
 END;
