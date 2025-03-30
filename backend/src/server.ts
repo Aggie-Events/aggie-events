@@ -15,7 +15,11 @@ import cors from "cors";
 import { UserStorage } from "./types/user-storage";
 import { getUserById } from "./db-functions/user";
 import { limiter } from "./utils/rate-limiter";
-import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
+import {
+  v2 as cloudinary,
+  UploadApiResponse,
+  UploadApiErrorResponse,
+} from "cloudinary";
 
 /**
  * Initializes the Express server, sets up middleware, and configures authentication.
@@ -31,7 +35,7 @@ const init = async (): Promise<express.Application> => {
 
   const app = express();
 
-  app.use(limiter);
+  // app.use(limiter);
 
   app.use(express.json()); // Use JSON body parser middleware
 
@@ -155,7 +159,7 @@ const init = async (): Promise<express.Application> => {
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure: process.env.NODE_ENV === "production"
+    secure: process.env.NODE_ENV === "production",
   });
 
   // // Log the configuration

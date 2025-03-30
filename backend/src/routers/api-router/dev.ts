@@ -12,7 +12,6 @@ async function clearDatabase() {
   await db.deleteFrom("orgtags").execute();
   await db.deleteFrom("eventorgs").execute();
   await db.deleteFrom("savedevents").execute();
-  await db.deleteFrom("userlikes").execute();
   await db.deleteFrom("userattendance").execute();
   await db.deleteFrom("usersubs").execute();
   await db.deleteFrom("userorgs").execute();

@@ -1,24 +1,23 @@
-import React from "react";
+'use client'
+import React, { useState } from "react";
 import Image from "next/image";
 import {
-  FaHeart,
   FaTag,
-  FaRegHeart,
   FaBookmark,
   FaRegBookmark,
-  FaCircle,
-  FaBook,
   FaEllipsisH,
+  FaSpinner,
 } from "react-icons/fa";
 import Link from "next/link";
-import { SearchEventsReturn } from "@/api/event";
+import { SearchEventsReturn, useToggleEventSave } from "@/api/event";
 import IconLabel from "@/components/common/IconLabel";
-import { HiEye } from "react-icons/hi";
 import { useMenuHandle } from "@/components/MenuHandle";
 
 export default function EventCard({ event }: { event: SearchEventsReturn }) {
-  const [isSaved, setIsSaved] = React.useState(false);
   const { isMenuOpen, menuRef, setIsMenuOpen } = useMenuHandle();
+  const [saves, setSaves] = useState(event.event_saves);
+  const [isSaved, setIsSaved] = useState(event.event_saved ?? false);
+  const { mutateAsync: toggleEventSave,  } = useToggleEventSave(event.event_id.toString(), isSaved);
 
   const handleBlockEvent = (eventId: number) => {
     // Implement block functionality
@@ -30,6 +29,14 @@ export default function EventCard({ event }: { event: SearchEventsReturn }) {
     // Implement report functionality
     console.log(`Reported event: ${eventId}`);
     setIsMenuOpen(false);
+  };
+
+  const handleSaveEvent = () => {
+    toggleEventSave().then(() => {
+      // Goofy ahh logic
+      setSaves(event.event_saves + (event.event_saved != isSaved ? 0 : isSaved ? -1 : 1));
+      setIsSaved(!isSaved);
+    });
   };
 
   return (
@@ -86,7 +93,7 @@ export default function EventCard({ event }: { event: SearchEventsReturn }) {
         <div className="h-max">
           <div className="flex items-center h-fit gap-2">
             <button
-              onClick={() => setIsSaved(!isSaved)}
+              onClick={handleSaveEvent}
               className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg h-fit ${isSaved ? "bg-maroon text-white" : "bg-white text-maroon border-[1px] border-maroon"}`}
               aria-label={isSaved ? "Unsave event" : "Save event"}
             >
@@ -140,10 +147,7 @@ export default function EventCard({ event }: { event: SearchEventsReturn }) {
         </p>
         <span className="text-maroon text-sm flex items-center">•</span>
         <div className="flex gap-2">
-          <IconLabel text={"1000"}>
-            <HiEye color="maroon" />
-          </IconLabel>
-          <IconLabel text={"1000"}>
+          <IconLabel text={saves.toString()}>
             <FaBookmark color="maroon" />
           </IconLabel>
         </div>

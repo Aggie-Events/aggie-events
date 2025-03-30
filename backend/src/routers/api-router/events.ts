@@ -61,6 +61,7 @@ eventRouter.get("/:event_id", async (req, res) => {
         "e.date_created as date_created",
         "e.date_modified as date_modified",
         "e.event_status as event_status",
+        "e.event_saves as event_saves",
         // Kinda hacky, just pray that there is never a user who added an event with a null user_name
         eb.fn
           .coalesce("u.user_name", sql<string>`'null_user'`)
@@ -97,9 +98,6 @@ eventRouter.get("/:event_id", async (req, res) => {
     const event_info = {
       ...page_data,
       tags: tags as string[],
-      event_status: "published",
-      event_views: 0,
-      event_going: 0,
     };
 
     res.json(event_info);
@@ -225,7 +223,9 @@ eventRouter.get("/user/:user_name", async (req, res) => {
       .leftJoin("orgs as o", "e_o.org_id", "o.org_id")
       .select((eb) => [
         "e.event_id",
-        eb.fn.coalesce("e.event_name", sql<string>`'Untitled Event'`).as("event_name"),
+        eb.fn
+          .coalesce("e.event_name", sql<string>`'Untitled Event'`)
+          .as("event_name"),
         "e.event_description",
         "e.event_location",
         "e.start_time",
@@ -300,7 +300,9 @@ eventRouter.put("/:event_id", authMiddleware, async (req, res) => {
     }
 
     if (event.contributor_id !== user_id) {
-      return res.status(401).json({ message: "Unauthorized to edit this event" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized to edit this event" });
     }
 
     const {
@@ -350,7 +352,7 @@ eventRouter.put("/:event_id", authMiddleware, async (req, res) => {
         await db
           .insertInto("eventtags")
           .values(
-            tagIds.map((tag) => ({ event_id: event_id, tag_id: tag.tag_id }))
+            tagIds.map((tag) => ({ event_id: event_id, tag_id: tag.tag_id })),
           )
           .execute();
       }
@@ -360,5 +362,113 @@ eventRouter.put("/:event_id", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error updating event:", error);
     res.status(500).json({ message: "Error updating event" });
+  }
+});
+
+/**
+ * @route POST /api/events/:event_id/save
+ * @description Save an event for the current user
+ * @access Private - Requires authentication
+ * @param {number} event_id - The ID of the event to save
+ * @returns {Object} Success message
+ * @returns {Error} 404 - Event not found
+ * @returns {Error} 500 - Server error if event cannot be saved
+ */
+eventRouter.post("/:event_id/save", authMiddleware, async (req, res) => {
+  const event_id: number = parseInt(req.params.event_id, 10);
+  const user_id = (req.user! as SerializedUser).user_id;
+
+  console.log("Saving event " + event_id + " for user " + user_id);
+
+  try {
+    // Check if event exists
+    const event = await db
+      .selectFrom("events")
+      .where("event_id", "=", event_id)
+      .select(["event_id"])
+      .executeTakeFirst();
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Check if already saved
+    const existingSave = await db
+      .selectFrom("savedevents")
+      .where("event_id", "=", event_id)
+      .where("user_id", "=", user_id)
+      .select(["event_id"])
+      .executeTakeFirst();
+
+    if (existingSave) {
+      return res.status(400).json({ message: "Event already saved" });
+    }
+
+    // Save the event
+    await db
+      .insertInto("savedevents")
+      .values({
+        event_id: event_id,
+        user_id: user_id,
+      })
+      .execute();
+
+    res.json({ message: "Event saved successfully" });
+  } catch (error) {
+    console.error("Error saving event:", error);
+    res.status(500).json({ message: "Error saving event" });
+  }
+});
+
+/**
+ * @route DELETE /api/events/:event_id/save
+ * @description Unsave an event for the current user
+ * @access Private - Requires authentication
+ * @param {number} event_id - The ID of the event to unsave
+ * @returns {Object} Success message
+ * @returns {Error} 404 - Event not found
+ * @returns {Error} 500 - Server error if event cannot be unsaved
+ */
+eventRouter.delete("/:event_id/save", authMiddleware, async (req, res) => {
+  const event_id: number = parseInt(req.params.event_id, 10);
+  const user_id = (req.user! as SerializedUser).user_id;
+
+  console.log("Unsaving event " + event_id + " for user " + user_id);
+
+  try {
+    // Check if event exists
+    const event = await db
+      .selectFrom("events")
+      .where("event_id", "=", event_id)
+      .select(["event_id"])
+      .executeTakeFirst();
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Check if saved
+    const existingSave = await db
+      .selectFrom("savedevents")
+      .where("event_id", "=", event_id)
+      .where("user_id", "=", user_id)
+      .select(["event_id"])
+      .executeTakeFirst();
+
+    if (!existingSave) {
+      return res.status(400).json({ message: "Event not saved" });
+    }
+
+    // Unsave the event
+    await db
+      .deleteFrom("savedevents")
+      .where("event_id", "=", event_id)
+      .where("user_id", "=", user_id)
+      .execute();
+
+    res.json({ message: "Event unsaved successfully" });
+  } catch (error) {
+    console.error("Error unsaving event:", error);
+    res.status(500).json({ message: "Error unsaving event" });
   }
 });
