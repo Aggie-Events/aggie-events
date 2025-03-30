@@ -122,6 +122,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         org_email: "esc@tamu.edu",
         org_description: "The voice of engineering students at TAMU",
         org_building: "ZACH",
+        org_slug: "esc",
         org_room: "401",
         org_verified: true,
       },
@@ -131,6 +132,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         org_description: "Bringing entertainment to campus",
         org_building: "MSC",
         org_room: "2406",
+        org_slug: "msc-town-hall",
         org_verified: true,
       },
       {
@@ -139,6 +141,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         org_description: "Computing enthusiasts unite",
         org_building: "PETR",
         org_room: "207",
+        org_slug: "tucs",
         org_verified: false,
       },
     ];
@@ -158,16 +161,11 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
 
       // Add orgslug for verified organizations
       if (org.org_verified) {
-        const slug = org.org_name
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '');
-        
         await db
           .insertInto("orgslugs")
           .values({
             org_id: insertedOrg.org_id,
-            org_slug: slug,
+            org_slug: org.org_slug,
           })
           .execute();
       }
