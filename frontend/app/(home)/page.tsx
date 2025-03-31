@@ -7,7 +7,7 @@ import Header from "@/app/(other)/_components/CommonHeader";
 import HomeHeader from "@/app/(home)/_components/HomeHeader";
 import TypeAnim from "@/app/(home)/_components/typing-anim/TypeAnim";
 import { TypingTextBase, TypingText } from "@/config/config";
-
+import QuickFilters from './_components/QuickFilters';
 
 export default function HomePage() {
   return (
@@ -58,6 +58,14 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8">Popular Events</h2>
           <PopularEvents />
+        </div>
+      </section>
+
+      {/* Quick Filters Section */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold mb-8">Quick Filters</h2>
+          <QuickFilters />
         </div>
       </section>
 
