@@ -52,6 +52,7 @@ export interface OrgPageInformation {
   org_room: string | null;
   org_email: string | null;
   org_slug: string | null;
+  org_role?: string;
 }
 
 // Set a filter in the filters object
