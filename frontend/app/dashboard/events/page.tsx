@@ -295,7 +295,7 @@ export default function EventsPage() {
                       </select>
                     </td>
                     <td className="px-6 py-4">
-                      {event.event_likes}
+                      {event.event_saves}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-3">

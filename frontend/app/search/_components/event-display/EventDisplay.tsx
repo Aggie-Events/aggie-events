@@ -5,12 +5,28 @@ import { FaClock } from "react-icons/fa";
 import IconLabel from "@/components/common/IconLabel";
 import EventCard from "@/app/search/_components/event-display/EventCard";
 import EventImage from "@/app/search/_components/event-display/EventImage";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { SearchEventsReturn } from "@/api/event";
 import { formatTimeInterval } from "@/utils/date";
 import EventDateDisplay from "@/app/search/_components/event-display/EventDateDisplay";
 
-export default function EventDisplay({ event }: { event: SearchEventsReturn }) {
+interface EventDisplayProps {
+  event: SearchEventsReturn;
+  onSaveEvent: (eventId: number) => void;
+  onBlockEvent: (eventId: number) => void;
+  onReportEvent: (eventId: number) => void;
+  isSaved: boolean;
+  saves: number;
+}
+
+export default function EventDisplay({ 
+  event,
+  onSaveEvent,
+  onBlockEvent,
+  onReportEvent,
+  isSaved,
+  saves
+}: EventDisplayProps) {
   return (
     <motion.div
       className="flex gap-4 w-full"
@@ -28,7 +44,14 @@ export default function EventDisplay({ event }: { event: SearchEventsReturn }) {
       }}
     >
       <EventDateDisplay event={event} />
-      <EventCard event={event} />
+      <EventCard 
+        event={event} 
+        onSaveEvent={onSaveEvent}
+        onBlockEvent={onBlockEvent}
+        onReportEvent={onReportEvent}
+        isSaved={isSaved}
+        saves={saves}
+      />
       {/* <EventImage event={event} /> */}
     </motion.div>
   );

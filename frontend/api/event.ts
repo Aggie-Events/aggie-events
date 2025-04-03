@@ -268,9 +268,9 @@ export function useEventSearchUser(options: {
  * @param {boolean} isCurrentlySaved - Whether the event is currently saved
  * @returns {UseMutationResult} The mutation result
  */
-export function useToggleEventSave(eventId: string, isCurrentlySaved: boolean) {
+export function useToggleEventSave() {
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ eventId, isCurrentlySaved }: { eventId: string, isCurrentlySaved: boolean }) => {
       console.log("Toggling event save status for event " + eventId + " to " + isCurrentlySaved);
       const response = await fetchUtil(
         `${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}/save`,
@@ -279,9 +279,6 @@ export function useToggleEventSave(eventId: string, isCurrentlySaved: boolean) {
         },
       );
       return response.json();
-    },
-    onSuccess: () => {
-      // TODO: Invalidate relevant queries to update UI
     },
   });
 }

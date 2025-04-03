@@ -1,43 +1,35 @@
-'use client'
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import {
   FaTag,
   FaBookmark,
   FaRegBookmark,
   FaEllipsisH,
-  FaSpinner,
 } from "react-icons/fa";
 import Link from "next/link";
-import { SearchEventsReturn, useToggleEventSave } from "@/api/event";
+import { SearchEventsReturn } from "@/api/event";
 import IconLabel from "@/components/common/IconLabel";
 import { useMenuHandle } from "@/components/MenuHandle";
+import { motion } from "framer-motion";
 
-export default function EventCard({ event }: { event: SearchEventsReturn }) {
+interface EventCardProps {
+  event: SearchEventsReturn;
+  onSaveEvent: (eventId: number) => void;
+  onBlockEvent: (eventId: number) => void;
+  onReportEvent: (eventId: number) => void;
+  isSaved: boolean;
+  saves: number;
+}
+
+export default function EventCard({ 
+  event, 
+  onSaveEvent, 
+  onBlockEvent, 
+  onReportEvent,
+  isSaved,
+  saves
+}: EventCardProps) {
   const { isMenuOpen, menuRef, setIsMenuOpen } = useMenuHandle();
-  const [saves, setSaves] = useState(event.event_saves);
-  const [isSaved, setIsSaved] = useState(event.event_saved ?? false);
-  const { mutateAsync: toggleEventSave,  } = useToggleEventSave(event.event_id.toString(), isSaved);
-
-  const handleBlockEvent = (eventId: number) => {
-    // Implement block functionality
-    console.log(`Blocked event: ${eventId}`);
-    setIsMenuOpen(false);
-  };
-
-  const handleReportEvent = (eventId: number) => {
-    // Implement report functionality
-    console.log(`Reported event: ${eventId}`);
-    setIsMenuOpen(false);
-  };
-
-  const handleSaveEvent = () => {
-    toggleEventSave().then(() => {
-      // Goofy ahh logic
-      setSaves(event.event_saves + (event.event_saved != isSaved ? 0 : isSaved ? -1 : 1));
-      setIsSaved(!isSaved);
-    });
-  };
 
   return (
     <div className="flex flex-col gap-1 bg-gray-150 rounded-lg py-2 px-4 grow shadow-md w-full border-[1px] border-gray-200">
@@ -92,14 +84,35 @@ export default function EventCard({ event }: { event: SearchEventsReturn }) {
 
         <div className="h-max">
           <div className="flex items-center h-fit gap-2">
-            <button
-              onClick={handleSaveEvent}
+            <motion.button
+              onClick={() => onSaveEvent(event.event_id)}
               className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg h-fit ${isSaved ? "bg-maroon text-white" : "bg-white text-maroon border-[1px] border-maroon"}`}
               aria-label={isSaved ? "Unsave event" : "Save event"}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{
+                width: "auto"
+              }}
+              transition={{ 
+                type: "tween",
+                duration: 0.1
+              }}
             >
-              {isSaved ? <FaBookmark size={16} /> : <FaRegBookmark size={16} />}
+              <motion.div
+                key={isSaved ? "saved" : "unsaved"}
+                initial={{ scale: 1.2}}
+                animate={{ scale: 1}}
+                exit={{ scale: 1.2}}
+                transition={{ 
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 10
+                }}
+              >
+                {isSaved ? <FaBookmark size={16} /> : <FaRegBookmark size={16} />}
+              </motion.div>
               <span>{isSaved ? "Saved" : "Save"}</span>
-            </button>
+            </motion.button>
 
             {/* Menu Button */}
             <div className="relative" ref={menuRef}>
@@ -114,13 +127,19 @@ export default function EventCard({ event }: { event: SearchEventsReturn }) {
                 <div className="absolute right-0 top-full mt-1 z-10 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <div className="py-1">
                     <button
-                      onClick={() => handleBlockEvent(event.event_id)}
+                      onClick={() => {
+                        onBlockEvent(event.event_id);
+                        setIsMenuOpen(false);
+                      }}
                       className="text-gray-700 hover:bg-gray-100 hover:text-gray-900 group flex w-full items-center px-4 py-2 text-sm"
                     >
                       Block
                     </button>
                     <button
-                      onClick={() => handleReportEvent(event.event_id)}
+                      onClick={() => {
+                        onReportEvent(event.event_id);
+                        setIsMenuOpen(false);
+                      }}
                       className="text-gray-700 hover:bg-gray-100 hover:text-gray-900 group flex w-full items-center px-4 py-2 text-sm"
                     >
                       Report

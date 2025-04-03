@@ -28,18 +28,23 @@ export const db = new Kysely<DB>({
  * Test the database connection by selecting all users.
  * Logs a success message if the connection is successful, otherwise throws an error.
  */
-export const testDB = async () => {
-  db.selectFrom("users")
-    .selectAll("users")
-    .execute()
-    .then(() => {
-      console.log("Database connection successful!");
-    })
-    .catch((error) => {
-      console.log(
-        "PostgreSQL database is invalid with db string: " +
-          process.env.DATABASE_URL,
-      );
-      throw new Error("Error testing db: " + error);
-    });
+export const waitForDB = () => {
+  const attemptConnection = () => {
+    db.selectFrom("users")
+      .selectAll("users")
+      .executeTakeFirst()
+      .then(() => {
+        console.log("Database connection successful!");
+      })
+      .catch((error) => {
+        console.log(
+          "PostgreSQL database is invalid with db string: " +
+            process.env.DATABASE_URL,
+        );
+        console.log("Retrying in 5 seconds...");
+        setTimeout(attemptConnection, 5000);
+      });
+  };
+
+  attemptConnection();
 };

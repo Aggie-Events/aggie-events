@@ -2,15 +2,17 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SearchFilters, setFilterParam, castFilterParam } from "@/config/query-types";
-import { useEventSearch } from "@/api/event";
-import EventList from "./_components/EventList";
+import { useEventSearch, useToggleEventSave } from "@/api/event";
+import EventDisplay from "./_components/event-display/EventDisplay";
 import PageSelect from "./_components/PageSelect";
 import Sidebar from "./_components/Sidebar";
 import SortOption from "./_components/SortOption";
 import QuickFilters, { Category, categories } from "./_components/QuickFilters";
 import LoadingBar from "@/components/LoadingBar";
 import { AnimatePresence } from "framer-motion";
-import { motion } from "framer-motion";
+import { useAuth } from "@/components/auth/AuthContext";
+import ToastManager from "@/components/toast/ToastManager";
+import LoginScreen from "@/components/auth/LoginScreen";
 
 // Filters
 // - Date Range
@@ -41,6 +43,10 @@ export default function Search() {
   const searchParams = useSearchParams();
   const filters = useRef<SearchFilters>(getFilters());
   const { push } = useRouter();
+  const { user } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
+  const [eventStates, setEventStates] = useState<Record<number, { isSaved: boolean; saves: number }>>({});
+  const { mutateAsync: toggleEventSave } = useToggleEventSave();
   
   const { data: searchResults, isLoading, isFetching } = useEventSearch(searchParams.toString());
   const results = searchResults?.events;
@@ -133,6 +139,44 @@ export default function Search() {
     };
   }, [handleMouseMove, handleMouseUp]);
 
+  const handleSaveEvent = (eventId: number) => {
+    if (!user) {
+      ToastManager.addToast("Please login to save events", "error", 3000);
+      setShowLogin(true);
+      return;
+    }
+
+    const event = results?.find(e => e.event_id === eventId);
+    if (!event) return;
+
+    // Update the event card state
+    // Functions like an optimistic update to show the event as saved immediately without having to refetch
+    const currentState = eventStates[eventId] || { 
+      isSaved: event.event_saved ?? false, 
+      saves: event.event_saves 
+    };
+    
+    toggleEventSave({ eventId: eventId.toString(), isCurrentlySaved: currentState.isSaved }).then(() => {
+      setEventStates(prev => ({
+        ...prev,
+        [eventId]: {
+          isSaved: !currentState.isSaved,
+          saves: currentState.saves + (currentState.isSaved ? -1 : 1)
+        }
+      }));
+    });
+  };
+
+  const handleBlockEvent = (eventId: number) => {
+    // Implement block functionality
+    console.log(`Blocked event: ${eventId}`);
+  };
+
+  const handleReportEvent = (eventId: number) => {
+    // Implement report functionality
+    console.log(`Reported event: ${eventId}`);
+  };
+
   return (
     <div className="flex flex-col w-full h-[calc(100vh-4rem)] relative">
       <AnimatePresence>
@@ -220,7 +264,26 @@ export default function Search() {
                   />
                 </div>
 
-                <EventList events={results} />
+                <div className="flex flex-col gap-4">
+                  {results.map((event) => {
+                    const state = eventStates[event.event_id] || {
+                      isSaved: event.event_saved ?? false,
+                      saves: event.event_saves
+                    };
+                    
+                    return (
+                      <EventDisplay
+                        key={event.event_id}
+                        event={event}
+                        onSaveEvent={handleSaveEvent}
+                        onBlockEvent={handleBlockEvent}
+                        onReportEvent={handleReportEvent}
+                        isSaved={state.isSaved}
+                        saves={state.saves}
+                      />
+                    );
+                  })}
+                </div>
 
                 {results.length < searchResults.resultSize && (
                   <div className="flex justify-center mt-6">
@@ -240,6 +303,7 @@ export default function Search() {
           </div>
         </div>
       </div>
+      {showLogin && <LoginScreen onClose={() => setShowLogin(false)} />}
     </div>
   );
 }
