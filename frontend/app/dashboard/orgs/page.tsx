@@ -3,11 +3,11 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { MdAdd } from "react-icons/md";
-import { useOrganizationList } from "@/api/orgs";
+import { useCurrentUserOrgs } from "@/api/orgs";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 export default function OrganizationsPage() {
-  const { data: organizations, isLoading, error } = useOrganizationList();
+  const { data: organizations, isLoading, error } = useCurrentUserOrgs();
 
   if (isLoading) {
     return (
@@ -66,7 +66,7 @@ export default function OrganizationsPage() {
                     {org.org_name}
                   </Link>
                   <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600 border border-gray-200">
-                    {org.org_role || "Owner"}
+                    {org.org_role}
                   </span>
                 </div>
               </div>

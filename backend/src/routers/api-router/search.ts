@@ -258,8 +258,8 @@ searchRouter.get("/events/user", authMiddleware, async (req, res) => {
       case "status":
         query = query.orderBy("e.event_status", orderDir);
         break;
-      case "likes":
-        // We'll handle likes sorting in memory since it's a computed field
+      case "saves":
+        query = query.orderBy("e.event_saves", orderDir);
         break;
       default:
         query = query.orderBy("e.start_time", "desc");
@@ -298,51 +298,55 @@ searchRouter.get("/events/user", authMiddleware, async (req, res) => {
       .offset((Number(page) - 1) * Number(pageSize))
       .execute();
 
-    // Get likes count in a separate query
-    const likesQuery = await db
-      .selectFrom("savedevents")
-      .select([
-        "event_id",
-        (eb) => eb.fn.count<number>("user_id").as("likes_count"),
-      ])
-      .where(
-        "event_id",
-        "in",
-        results.map((r: any) => r.event_id),
-      )
-      .groupBy("event_id")
-      .execute();
+    console.log("results", results);
 
-    // Map likes to events
-    const likesMap = new Map(
-      likesQuery.map((l) => [l.event_id, l.likes_count]),
-    );
+    // // Get likes count in a separate query
+    // const likesQuery = await db
+    //   .selectFrom("savedevents")
+    //   .select([
+    //     "event_id",
+    //     (eb) => eb.fn.count<number>("user_id").as("likes_count"),
+    //   ])
+    //   .where(
+    //     "event_id",
+    //     "in",
+    //     results.map((r: any) => r.event_id),
+    //   )
+    //   .groupBy("event_id")
+    //   .execute();
+
+    // // Map likes to events
+    // const likesMap = new Map(
+    //   likesQuery.map((l) => [l.event_id, l.likes_count]),
+    // );
     results = results.map((event) => ({
       ...event,
-      event_likes: 0,
+      event_saves: 0,
       event_saved: false, // Default value
     }));
 
     // If user is authenticated, check if they have saved each event
-    if (req.user) {
-      const savedEvents = await db
-        .selectFrom("savedevents")
-        .where("user_id", "=", req.user.user_id)
-        .where(
-          "event_id",
-          "in",
-          results.map((r: any) => r.event_id),
-        )
-        .select(["event_id"])
-        .execute();
+    // if (req.user) {
+    //   const savedEvents = await db
+    //     .selectFrom("savedevents")
+    //     .where("user_id", "=", req.user.user_id)
+    //     .where(
+    //       "event_id",
+    //       "in",
+    //       results.map((r: any) => r.event_id),
+    //     )
+    //     .select(["event_id"])
+    //     .execute();
+    // }
 
-      const savedEventIds = new Set(savedEvents.map((se) => se.event_id));
+    //   const savedEventIds = new Set(savedEvents.map((se) => se.event_id));
 
-      results = results.map((event: any) => ({
-        ...event,
-        event_saved: savedEventIds.has(event.event_id),
-      }));
-    }
+    //   results = results.map((event: any) => ({
+    //     ...event,
+    // //     event_saved: savedEventIds.has(event.event_id),
+    // //    }));
+    //   // }
+    //   })
 
     res.status(200).json({
       results,

@@ -282,3 +282,24 @@ export function useToggleEventSave() {
     },
   });
 }
+
+/**
+ * React Query hook to fetch events by organization ID
+ * @param {number} orgId - The ID of the organization
+ * @returns {UseQueryResult<Event[], Error>} The events
+ */
+export function useEventsByOrg(orgId: number) {
+  return useQuery<Event[], Error>({
+    queryKey: ["events", "org", orgId],
+    queryFn: async () => {
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/events/org/${orgId}`,
+        {
+          method: "GET",
+        },
+      );
+      return response.json();
+    },
+  });
+}
+

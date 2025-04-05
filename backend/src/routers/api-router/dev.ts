@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "../../database";
 import { authMiddleware } from "../../middlewares/authMiddleware";
-import { EventStatus } from "../../types/schema";
+import { EventStatus, MembershipType } from "../../types/schema";
 
 export const devRouter = Router();
 
@@ -124,6 +124,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         org_slug: "esc",
         org_room: "401",
         org_verified: true,
+        org_role: "owner",
       },
       {
         org_name: "MSC Town Hall",
@@ -133,6 +134,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         org_room: "2406",
         org_slug: "msc-town-hall",
         org_verified: true,
+        org_role: "editor",
       },
       {
         org_name: "TAMU Unofficial Computing Society",
@@ -142,6 +144,7 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
         org_room: "207",
         org_slug: "tucs",
         org_verified: false,
+        org_role: "owner",
       },
     ];
 
@@ -150,7 +153,14 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
     for (const org of sampleOrgs) {
       const insertedOrg = await db
         .insertInto("orgs")
-        .values(org)
+        .values({
+          org_name: org.org_name,
+          org_email: org.org_email,
+          org_description: org.org_description,
+          org_building: org.org_building,
+          org_room: org.org_room,
+          org_verified: org.org_verified,
+        })
         .returningAll()
         .executeTakeFirst();
 
@@ -168,6 +178,16 @@ devRouter.post("/populate", authMiddleware, async (req, res) => {
           })
           .execute();
       }
+
+      // Add role to org
+      await db
+        .insertInto("userorgs")
+        .values({
+          user_id: user_id,
+          org_id: insertedOrg.org_id,
+          user_role: org.org_role as MembershipType,
+        })
+        .execute();
     }
 
     // Create sample events

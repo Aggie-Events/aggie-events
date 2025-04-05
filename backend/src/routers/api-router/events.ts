@@ -472,3 +472,80 @@ eventRouter.delete("/:event_id/save", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Error unsaving event" });
   }
 });
+
+/**
+ * @route GET /api/events/org/:org_id
+ * @description Fetch all events associated with a specific organization
+ * @access Public
+ * @param {number} org_id - The ID of the organization whose events to fetch
+ * @returns {Object[]} Array of events associated with the organization
+ * @returns {Error} 404 - Organization not found
+ * @returns {Error} 500 - Server error if events cannot be fetched
+ */
+eventRouter.get("/org/:org_id", async (req, res) => {
+  try {
+    const org_id: number = parseInt(req.params.org_id, 10);
+
+    // Check if organization exists
+    const org = await db
+      .selectFrom("orgs")
+      .where("org_id", "=", org_id)
+      .select(["org_id"])
+      .executeTakeFirst();
+
+    if (!org) {
+      return res.status(404).json({ message: "Organization not found" });
+    }
+
+    const events: EventInfo[] = await db
+      .selectFrom("eventorgs as e_o")
+      .where("e_o.org_id", "=", org_id)
+      .innerJoin("events as e", "e_o.event_id", "e.event_id")
+      .innerJoin("users as u", "e.contributor_id", "u.user_id")
+      .innerJoin("orgs as o", "e_o.org_id", "o.org_id")
+      .select((eb) => [
+        "e.event_id",
+        eb.fn
+          .coalesce("e.event_name", sql<string>`'Untitled Event'`)
+          .as("event_name"),
+        "e.event_description",
+        "e.event_location",
+        "e.event_img",
+        "e.start_time",
+        "e.end_time",
+        "e.date_created",
+        "e.date_modified",
+        "e.event_status",
+        "e.event_saves",
+        eb.fn
+          .coalesce("u.user_name", sql<string>`'null_user'`)
+          .as("contributor_name"),
+        "o.org_name",
+        "o.org_id",
+        jsonArrayFrom(
+          eb
+            .selectFrom("eventtags as e_t")
+            .whereRef("e_t.event_id", "=", "e.event_id")
+            .innerJoin("tags as t", "e_t.tag_id", "t.tag_id")
+            .select("t.tag_name"),
+        ).as("tags"),
+      ])
+      .execute()
+      .then((events) =>
+        events.map((event) => ({
+          ...event,
+          tags: (event.tags as { tag_name: string }[]).map((t) => t.tag_name),
+          event_views: 0,
+          event_likes: 0,
+          event_going: 0,
+          event_status: "published" as const,
+        })),
+      );
+
+    res.json(events);
+    console.log(`Events for organization ${org_id} requested!`);
+  } catch (error) {
+    console.error("Error fetching events for organization:", error);
+    res.status(500).send("Error fetching events for organization!");
+  }
+});

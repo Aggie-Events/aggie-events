@@ -1,31 +1,22 @@
 "use client";
 import React from "react";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { FaArrowLeft } from "react-icons/fa6";
 import { FaHome, FaCalendarAlt, FaUsers, FaCog, FaExclamationCircle } from "react-icons/fa";
-import { useRouter } from "next/navigation";
 import { useOrgPageInformation } from "@/api/orgs";
 import { MdVerified } from "react-icons/md";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import BackButton from "@/components/common/BackButton";
 
 export default function OrgLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const { orgParam } = useParams<{ orgParam: string }>();
   const pathname = usePathname();
-  const router = useRouter();
   const { data: org, isLoading, isError } = useOrgPageInformation(orgParam as string);
-
-  const handleBack = () => {
-    if (document.referrer && new URL(document.referrer).origin === window.location.origin) {
-      router.back();
-    } else {
-      router.push('/');
-    }
-  };
 
   // Navigation tabs for the organization
   const navTabs = [
@@ -38,15 +29,8 @@ export default function OrgLayout({
   if (isError) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-5xl mx-auto px-4 py-8">
-          {/* Back Button */}
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-maroon mb-6 group transition-colors"
-          >
-            <FaArrowLeft className="text-lg transition-transform group-hover:-translate-x-1" />
-            <span>Back</span>
-          </button>
+        <div className="w-full px-4 py-8">
+          <BackButton />
           
           <div className="bg-white rounded-xl shadow-md p-8 text-center">
             <FaExclamationCircle className="text-5xl text-maroon mx-auto mb-4" />
@@ -68,19 +52,10 @@ export default function OrgLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Back Button */}
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-2 text-gray-600 hover:text-maroon mb-6 group transition-colors"
-        >
-          <FaArrowLeft className="text-lg transition-transform group-hover:-translate-x-1" />
-          <span>Back</span>
-        </button>
+      <div className="w-full">
 
         {/* Organization Header */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-          <div className="bg-maroon h-3" />
+        <div className="bg-white shadow-md overflow-hidden mb-8">
           <div className="p-6">
             {isLoading ? (
               <div className="flex justify-center items-center py-8">
@@ -150,7 +125,7 @@ export default function OrgLayout({
         </div>
 
         {/* Main Content */}
-        <div>{!isLoading && org ? children : (
+        <div className="px-8 mb-8">{!isLoading && org ? children : (
           <div className="bg-white rounded-xl shadow-md p-8 text-center">
             <LoadingSpinner />
             <p className="mt-4 text-gray-500">Loading organization content...</p>
