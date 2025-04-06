@@ -81,14 +81,6 @@ eventRouter.get("/:event_id", async (req, res) => {
       return;
     }
 
-      const { event_likes } = await db
-          .selectFrom("events as e")
-          .leftJoin("userlikes", "e.event_id", "userlikes.event_id")
-          .select(db.fn.count("userlikes.user_id").as("event_likes"))
-          .where("e.event_id", "=", event_id)
-          .groupBy("e.event_id")
-          .executeTakeFirstOrThrow();
-
     const tags = await db
       .selectFrom("eventtags as e_t")
       .where("e_t.event_id", "=", page_data.event_id)
@@ -119,61 +111,6 @@ eventRouter.get("/:event_id", async (req, res) => {
 });
 
 /**
- * @route POST /api/events/:event_id/like
- * @description Like an event
- * @access Private - Requires authentication
- * @param {Object} req.body - No request body
- * @returns 204 No content
- * @returns 409 Conflict - Already liked
- * @returns {Error} 500 - Server error if event cannot be liked
- */
-eventRouter.post("/:event_id/like", authMiddleware, async (req, res) => {
-  const event_id = parseInt(req.params.event_id, 10);
-  const user_id = req.user!.user_id;
-
-  const { numInsertedOrUpdatedRows } = await db
-    .insertInto("userlikes")
-    .values({ user_id, event_id })
-    .executeTakeFirst();
-
-    if(numInsertedOrUpdatedRows ?? 0 > 0) {
-        res.status(204).send();
-        console.log(`User ${user_id} liked event ${event_id}`);
-    } else {
-        res.status(409).send();
-        console.log(`User ${user_id} tried to add preexisting like for event ${event_id}`);
-    }
-});
-
-/**
- * @route DELETE /api/:event_id/like
- * @description Unlike an event
- * @access Private - Requires authentication
- * @param {Object} req.body - No request body
- * @returns 204 No content
- * @returns 409 Conflict - Already unliked
- * @returns {Error} 500 - Server error if event cannot be unliked
- */
-eventRouter.delete("/:event_id/like", authMiddleware, async (req, res) => {
-    const event_id = parseInt(req.params.event_id, 10);
-    const user_id = req.user!.user_id;
-    
-    const { numDeletedRows } = await db
-        .deleteFrom("userlikes")
-        .where("user_id", "=", user_id)
-        .where("event_id", "=", event_id)
-        .executeTakeFirst();
-
-    if(numDeletedRows > 0) {
-        res.status(204).send();
-        console.log(`User ${user_id} unliked event ${event_id}`);
-    } else {
-        res.status(409).send();
-        console.log(`User ${user_id} tried to remove nonexistent like for event ${event_id}`);
-    }
-});
-
-/**
  * @route POST /api/events
  * @description Create a new event
  * @access Private - Requires authentication
@@ -188,8 +125,6 @@ eventRouter.delete("/:event_id/like", authMiddleware, async (req, res) => {
  * @returns {Error} 500 - Server error if event cannot be created
  */
 eventRouter.post("/", authMiddleware, async (req, res) => {
-  console.log("hello alex");
-
   const {
     event_name,
     event_description,
@@ -209,7 +144,6 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
     event_img: string | null;
     event_status: EventStatus;
   } = req.body;
-
 
   try {
     // Insert the event into the database and return the event_id
@@ -614,82 +548,4 @@ eventRouter.get("/org/:org_id", async (req, res) => {
     console.error("Error fetching events for organization:", error);
     res.status(500).send("Error fetching events for organization!");
   }
-});
-
-/**
- * @route GET /api/events/saved
- * @description Fetch all events saved by the current user
- * @access Private - Requires authentication
- * @returns {Object[]} Array of events saved by the user
- * @returns {Error} 500 - Server error if events cannot be fetched
- */
-eventRouter.get("/saved", authMiddleware, async (req, res) => {
-  try {
-    const user_id = (req.user! as SerializedUser).user_id;
-
-    const events: EventInfo[] = await db
-      .selectFrom("savedevents as s")
-      .where("s.user_id", "=", user_id)
-      .innerJoin("events as e", "s.event_id", "e.event_id")
-      .innerJoin("users as u", "e.contributor_id", "u.user_id")
-      .leftJoin("eventorgs as e_o", "e.event_id", "e_o.event_id")
-      .leftJoin("orgs as o", "e_o.org_id", "o.org_id")
-      .leftJoin("orgslugs as o_s", "o.org_id", "o_s.org_id")
-      .select((eb) => [
-        "e.event_id",
-        eb.fn
-          .coalesce("e.event_name", sql<string>`'Untitled Event'`)
-          .as("event_name"),
-        "e.event_description",
-        "e.event_location",
-        "e.event_img",
-        "e.start_time",
-        "e.end_time",
-        "e.date_created",
-        "e.date_modified",
-        "e.event_status",
-        "e.event_saves",
-        "s.date_created as saved_at",
-        eb.fn
-          .coalesce("u.user_name", sql<string>`'null_user'`)
-          .as("contributor_name"),
-        "o.org_name",
-        "o.org_id",
-        "o_s.org_slug",
-        jsonArrayFrom(
-          eb
-            .selectFrom("eventtags as e_t")
-            .whereRef("e_t.event_id", "=", "e.event_id")
-            .innerJoin("tags as t", "e_t.tag_id", "t.tag_id")
-            .select("t.tag_name"),
-        ).as("tags"),
-      ])
-      .execute()
-      .then((events) =>
-        events.map((event) => ({
-          ...event,
-          tags: (event.tags as { tag_name: string }[]).map((t) => t.tag_name),
-          event_views: 0,
-          event_likes: 0,
-          event_going: 0,
-          event_saved: true,
-        })),
-      );
-
-    res.json(events);
-    console.log(`Saved events for user ${user_id} requested!`);
-  } catch (error) {
-    console.error("Error fetching saved events:", error);
-    res.status(500).send("Error fetching saved events!");
-  }
-});
-
-eventRouter.get("/saved/count", authMiddleware, async (req, res) => {
-  const user_id = (req.user! as SerializedUser).user_id;
-  const count = await db
-    .selectFrom("users")
-    .where("user_id", "=", user_id)
-    .select(["user_saved_events"])
-    .executeTakeFirstOrThrow();
-  res.json(count.user_saved_events);
 });
