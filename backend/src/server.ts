@@ -7,6 +7,7 @@ import express from "express";
 import passport from "passport";
 import session from "express-session";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy } from "passport-custom";
 import { apiRouter } from "./routers/api-router";
 import { authRouter } from "./routers/auth-router";
 import { db } from "./database";
@@ -20,6 +21,19 @@ import {
   UploadApiResponse,
   UploadApiErrorResponse,
 } from "cloudinary";
+import { OAuth2Client } from "google-auth-library";
+
+export const mobileClient = new OAuth2Client(process.env.MOBILE_CLIENT_ID);
+
+// ONLY FOR MOBILE
+export async function verifyGoogleToken(token: string) {
+  const ticket = await mobileClient.verifyIdToken({
+    idToken: token,
+    audience: process.env.MOBILE_CLIENT_ID,
+  });
+
+  return ticket.getPayload();
+}
 
 /**
  * Initializes the Express server, sets up middleware, and configures authentication.
@@ -70,7 +84,14 @@ const init = async (): Promise<express.Application> => {
     }),
   );
 
-  // Configure Google OAuth strategy
+
+  // idToken: req.body.idToken,
+  //     user_displayname: req.body.user_displayname,
+  //     user_img: req.body.user_img,
+  //     user_name: req.body.user_name,
+  //     user_email: req.body.user_email,
+
+  // Configure Google OAuth strategy for WEB
   passport.use(
     new GoogleStrategy(
       {
@@ -133,6 +154,62 @@ const init = async (): Promise<express.Application> => {
           });
       },
     ),
+  );
+
+  // Configure Local Strategy for MOBILE Google sign-in
+  passport.use("google-token",
+    new Strategy(async (req: any, done: any) => {
+      try {
+        const { idToken, user_displayname, user_img, user_name, user_email } = req.body;
+        if (!idToken) {
+          return done(null, false, { message: "ID token is required" });
+        }
+
+        const payload = await verifyGoogleToken(idToken);
+        if (!payload || !payload.email) {
+          return done(null, false, { message: "Invalid token" });
+        }
+
+        // Verify that the token email matches the provided email
+        if (payload.email !== user_email) {
+          return done(null, false, {
+            message: "Email mismatch between token and provided data",
+          });
+        }
+
+        // Attempts to retrieve user from db
+        let user = await db
+          .selectFrom("users")
+          .select(["user_id", "user_name", "user_displayname"])
+          .where("user_email", "=", user_email)
+          .executeTakeFirst();
+
+        // Creates new user if it doesn't exist
+        if (!user) {
+          const { user_id } = await db
+            .insertInto("users")
+            .values({
+              user_email,
+              user_displayname,
+              user_name,
+            })
+            .returning("user_id")
+            .executeTakeFirstOrThrow();
+          user = { user_id, user_name, user_displayname };
+        }
+
+        // Return function?
+        return done(null, {
+          user_email,
+          user_name: user.user_name,
+          user_displayname: user.user_displayname,
+          user_img: user_img,
+          user_id: user.user_id,
+        } as UserStorage);
+      } catch (error) {
+        return done(error);
+      }
+    }),
   );
 
   // Determines what user data should be persisted in the session

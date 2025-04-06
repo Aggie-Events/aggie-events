@@ -6,6 +6,8 @@
 import express from "express";
 import passport from "passport";
 import { UserStorage } from "../types/user-storage";
+import { verifyGoogleToken } from "../server";
+import { db } from "../database";
 
 export const authRouter = express.Router();
 
@@ -68,4 +70,37 @@ authRouter.post("/logout", (req, res) => {
       return res.status(200).json({ message: "Logged out successfully" });
     });
   });
+});
+
+authRouter.post("/google-mobile", (req, res, next) => {
+  console.log("Google mobile sign-in");
+  passport.authenticate(
+    "google-token",
+    (
+      err: Error | null,
+      user: UserStorage | false,
+      info: { message: string } | undefined,
+    ) => {
+      if (err) {
+        console.error("Google sign-in error:", err);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+
+      if (!user) {
+        return res
+          .status(401)
+          .json({ message: info?.message || "Authentication failed" });
+      }
+
+      req.login(user, (loginErr) => {
+        if (loginErr) {
+          console.error("Login error:", loginErr);
+          return res.status(500).json({ message: "Login failed" });
+        }
+
+        console.log("Login successful");
+        return res.json({ message: "Login successful", user });
+      });
+    },
+  )(req, res, next);
 });
