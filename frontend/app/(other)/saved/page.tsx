@@ -217,14 +217,14 @@ export default function SavedEventsPage() {
   }
 
   return (
-    <div className="flex flex-col w-full h-[calc(100vh-4rem)] relative">
+    <div className="flex flex-col w-full mb-8">
       <AnimatePresence>
         {isLoading && <LoadingBar />}
       </AnimatePresence>
       
       {/* Page header */}
       <div className="w-full bg-white border-b">
-        <div className="max-w-7xl mx-auto p-4">
+        <div className="mx-auto py-4 px-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">

@@ -9,7 +9,11 @@ CREATE TABLE orgs
     org_reputation  INT     DEFAULT 0     NOT NULL,
 
     org_building    VARCHAR(255)          NULL,
-    org_room        VARCHAR(255)          NULL
+    org_room        VARCHAR(255)          NULL,
+
+    -- GENERATED COLUMNS 
+    org_events_count INT DEFAULT 0 NOT NULL,
+    org_members_count INT DEFAULT 0 NOT NULL
 );
 CREATE UNIQUE INDEX org_name_unique_upper ON orgs (UPPER(org_name));
 
@@ -348,5 +352,47 @@ CREATE TRIGGER maintain_user_saved_events_count
     ON savedevents
     FOR EACH ROW
 EXECUTE FUNCTION update_user_saved_events_count();
+
+-- Create function to update org_events_count
+CREATE OR REPLACE FUNCTION update_org_events_count()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE orgs SET org_events_count = org_events_count + 1 WHERE org_id = NEW.org_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE orgs SET org_events_count = org_events_count - 1 WHERE org_id = OLD.org_id;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger to maintain org_events_count
+CREATE TRIGGER maintain_org_events_count
+    AFTER INSERT OR DELETE
+    ON eventorgs
+    FOR EACH ROW
+EXECUTE FUNCTION update_org_events_count();
+
+-- Create function to update org_members_count
+CREATE OR REPLACE FUNCTION update_org_members_count()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE orgs SET org_members_count = org_members_count + 1 WHERE org_id = NEW.org_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE orgs SET org_members_count = org_members_count - 1 WHERE org_id = OLD.org_id;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger to maintain org_members_count
+CREATE TRIGGER maintain_org_members_count
+    AFTER INSERT OR DELETE
+    ON userorgs
+    FOR EACH ROW
+EXECUTE FUNCTION update_org_members_count();
 
 

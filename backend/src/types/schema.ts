@@ -66,6 +66,8 @@ export interface Orgs {
   org_reputation: Generated<number>;
   org_building: string | null;
   org_room: string | null;
+  org_events_count: Generated<number>;
+  org_members_count: Generated<number>;
 }
 
 export interface Orgtags {

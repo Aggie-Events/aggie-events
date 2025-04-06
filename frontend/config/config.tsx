@@ -2,8 +2,7 @@ import React, { ReactElement } from "react";
 import { FaUserCircle, FaUserFriends, FaBookmark, FaRegBookmark } from "react-icons/fa";
 import { IconType } from "react-icons";
 import { IoMdNotificationsOutline, IoMdSettings } from "react-icons/io";
-import { MdDashboard, MdNotifications, MdOutlineExplore } from "react-icons/md";
-import { IoAdd } from "react-icons/io5";
+import { MdDashboard, MdOutlineExplore, MdFeedback } from "react-icons/md";
 
 
 export const DefaultHeaderLinks: { href: string; label: string }[] = [
@@ -25,7 +24,8 @@ export const UserMenuLinks: {
 }[] = [
   // { href: "/users/", label: "Profile", icon: <FaUserCircle /> },
   { href: "/dashboard", label: "Dashboard", icon: <MdDashboard /> },
-  { href: "/friends", label: "Friends", icon: <FaUserFriends /> },
+  // { href: "/friends", label: "Friends", icon: <FaUserFriends /> },
+  { href: "/feedback", label: "Feedback", icon: <MdFeedback /> },
   { href: "/settings", label: "Settings", icon: <IoMdSettings /> },
 ];
 

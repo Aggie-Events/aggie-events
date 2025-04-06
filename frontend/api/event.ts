@@ -316,19 +316,13 @@ export function useSavedEvents() {
   return useQuery<SearchEventsReturn[], Error>({
     queryKey: ["events", "saved"],
     queryFn: async () => {
+      console.log("Fetching saved events");
       const response = await fetchUtil(
-        `${process.env.NEXT_PUBLIC_API_URL}/events/saved`,
+        `${process.env.NEXT_PUBLIC_API_URL}/users/saved`,
         {
           method: "GET",
         },
       );
-      
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error("You must be logged in to view saved events");
-        }
-        throw new Error("Failed to fetch saved events");
-      }
       
       const events = await response.json();
       return events.map((e: any) => ({
@@ -354,7 +348,7 @@ export function useSavedEventsCount() {
     queryFn: async () => {
       try {
         const response = await fetchUtil(
-          `${process.env.NEXT_PUBLIC_API_URL}/events/saved/count`,
+          `${process.env.NEXT_PUBLIC_API_URL}/users/saved/count`,
           {
             method: "GET",
           },
