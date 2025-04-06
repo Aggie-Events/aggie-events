@@ -72,7 +72,8 @@ authRouter.post("/logout", (req, res) => {
   });
 });
 
-authRouter.post("/google-signin", (req, res, next) => {
+authRouter.post("/google-mobile", (req, res, next) => {
+  console.log("Google mobile sign-in");
   passport.authenticate(
     "google-token",
     (
@@ -97,6 +98,7 @@ authRouter.post("/google-signin", (req, res, next) => {
           return res.status(500).json({ message: "Login failed" });
         }
 
+        console.log("Login successful");
         return res.json({ message: "Login successful", user });
       });
     },
