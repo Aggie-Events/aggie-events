@@ -61,6 +61,7 @@ eventRouter.get("/:event_id", async (req, res) => {
         "e.date_created as date_created",
         "e.date_modified as date_modified",
         "e.event_status as event_status",
+        "e.event_saves as event_saves",
         // Kinda hacky, just pray that there is never a user who added an event with a null user_name
         eb.fn
           .coalesce("u.user_name", sql<string>`'null_user'`)
@@ -105,9 +106,6 @@ eventRouter.get("/:event_id", async (req, res) => {
     const event_info = {
       ...page_data,
       tags: tags as string[],
-      event_status: "published",
-      event_views: 0,
-      event_going: 0,
     };
 
     res.json(event_info);
@@ -291,7 +289,9 @@ eventRouter.get("/user/:user_name", async (req, res) => {
       .leftJoin("orgs as o", "e_o.org_id", "o.org_id")
       .select((eb) => [
         "e.event_id",
-        eb.fn.coalesce("e.event_name", sql<string>`'Untitled Event'`).as("event_name"),
+        eb.fn
+          .coalesce("e.event_name", sql<string>`'Untitled Event'`)
+          .as("event_name"),
         "e.event_description",
         "e.event_location",
         "e.start_time",
@@ -366,7 +366,9 @@ eventRouter.put("/:event_id", authMiddleware, async (req, res) => {
     }
 
     if (event.contributor_id !== user_id) {
-      return res.status(401).json({ message: "Unauthorized to edit this event" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized to edit this event" });
     }
 
     const {
@@ -416,7 +418,7 @@ eventRouter.put("/:event_id", authMiddleware, async (req, res) => {
         await db
           .insertInto("eventtags")
           .values(
-            tagIds.map((tag) => ({ event_id: event_id, tag_id: tag.tag_id }))
+            tagIds.map((tag) => ({ event_id: event_id, tag_id: tag.tag_id })),
           )
           .execute();
       }
@@ -427,4 +429,267 @@ eventRouter.put("/:event_id", authMiddleware, async (req, res) => {
     console.error("Error updating event:", error);
     res.status(500).json({ message: "Error updating event" });
   }
+});
+
+/**
+ * @route POST /api/events/:event_id/save
+ * @description Save an event for the current user
+ * @access Private - Requires authentication
+ * @param {number} event_id - The ID of the event to save
+ * @returns {Object} Success message
+ * @returns {Error} 404 - Event not found
+ * @returns {Error} 500 - Server error if event cannot be saved
+ */
+eventRouter.post("/:event_id/save", authMiddleware, async (req, res) => {
+  const event_id: number = parseInt(req.params.event_id, 10);
+  const user_id = (req.user! as SerializedUser).user_id;
+
+  console.log("Saving event " + event_id + " for user " + user_id);
+
+  try {
+    // Check if event exists
+    const event = await db
+      .selectFrom("events")
+      .where("event_id", "=", event_id)
+      .select(["event_id"])
+      .executeTakeFirst();
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Check if already saved
+    const existingSave = await db
+      .selectFrom("savedevents")
+      .where("event_id", "=", event_id)
+      .where("user_id", "=", user_id)
+      .select(["event_id"])
+      .executeTakeFirst();
+
+    if (existingSave) {
+      return res.status(400).json({ message: "Event already saved" });
+    }
+
+    // Save the event
+    await db
+      .insertInto("savedevents")
+      .values({
+        event_id: event_id,
+        user_id: user_id,
+      })
+      .execute();
+
+    res.json({ message: "Event saved successfully" });
+  } catch (error) {
+    console.error("Error saving event:", error);
+    res.status(500).json({ message: "Error saving event" });
+  }
+});
+
+/**
+ * @route DELETE /api/events/:event_id/save
+ * @description Unsave an event for the current user
+ * @access Private - Requires authentication
+ * @param {number} event_id - The ID of the event to unsave
+ * @returns {Object} Success message
+ * @returns {Error} 404 - Event not found
+ * @returns {Error} 500 - Server error if event cannot be unsaved
+ */
+eventRouter.delete("/:event_id/save", authMiddleware, async (req, res) => {
+  const event_id: number = parseInt(req.params.event_id, 10);
+  const user_id = (req.user! as SerializedUser).user_id;
+
+  console.log("Unsaving event " + event_id + " for user " + user_id);
+
+  try {
+    // Check if event exists
+    const event = await db
+      .selectFrom("events")
+      .where("event_id", "=", event_id)
+      .select(["event_id"])
+      .executeTakeFirst();
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Check if saved
+    const existingSave = await db
+      .selectFrom("savedevents")
+      .where("event_id", "=", event_id)
+      .where("user_id", "=", user_id)
+      .select(["event_id"])
+      .executeTakeFirst();
+
+    if (!existingSave) {
+      return res.status(400).json({ message: "Event not saved" });
+    }
+
+    // Unsave the event
+    await db
+      .deleteFrom("savedevents")
+      .where("event_id", "=", event_id)
+      .where("user_id", "=", user_id)
+      .execute();
+
+    res.json({ message: "Event unsaved successfully" });
+  } catch (error) {
+    console.error("Error unsaving event:", error);
+    res.status(500).json({ message: "Error unsaving event" });
+  }
+});
+
+/**
+ * @route GET /api/events/org/:org_id
+ * @description Fetch all events associated with a specific organization
+ * @access Public
+ * @param {number} org_id - The ID of the organization whose events to fetch
+ * @returns {Object[]} Array of events associated with the organization
+ * @returns {Error} 404 - Organization not found
+ * @returns {Error} 500 - Server error if events cannot be fetched
+ */
+eventRouter.get("/org/:org_id", async (req, res) => {
+  try {
+    const org_id: number = parseInt(req.params.org_id, 10);
+
+    // Check if organization exists
+    const org = await db
+      .selectFrom("orgs")
+      .where("org_id", "=", org_id)
+      .select(["org_id"])
+      .executeTakeFirst();
+
+    if (!org) {
+      return res.status(404).json({ message: "Organization not found" });
+    }
+
+    const events: EventInfo[] = await db
+      .selectFrom("eventorgs as e_o")
+      .where("e_o.org_id", "=", org_id)
+      .innerJoin("events as e", "e_o.event_id", "e.event_id")
+      .innerJoin("users as u", "e.contributor_id", "u.user_id")
+      .innerJoin("orgs as o", "e_o.org_id", "o.org_id")
+      .select((eb) => [
+        "e.event_id",
+        eb.fn
+          .coalesce("e.event_name", sql<string>`'Untitled Event'`)
+          .as("event_name"),
+        "e.event_description",
+        "e.event_location",
+        "e.event_img",
+        "e.start_time",
+        "e.end_time",
+        "e.date_created",
+        "e.date_modified",
+        "e.event_status",
+        "e.event_saves",
+        eb.fn
+          .coalesce("u.user_name", sql<string>`'null_user'`)
+          .as("contributor_name"),
+        "o.org_name",
+        "o.org_id",
+        jsonArrayFrom(
+          eb
+            .selectFrom("eventtags as e_t")
+            .whereRef("e_t.event_id", "=", "e.event_id")
+            .innerJoin("tags as t", "e_t.tag_id", "t.tag_id")
+            .select("t.tag_name"),
+        ).as("tags"),
+      ])
+      .execute()
+      .then((events) =>
+        events.map((event) => ({
+          ...event,
+          tags: (event.tags as { tag_name: string }[]).map((t) => t.tag_name),
+          event_views: 0,
+          event_likes: 0,
+          event_going: 0,
+          event_status: "published" as const,
+        })),
+      );
+
+    res.json(events);
+    console.log(`Events for organization ${org_id} requested!`);
+  } catch (error) {
+    console.error("Error fetching events for organization:", error);
+    res.status(500).send("Error fetching events for organization!");
+  }
+});
+
+/**
+ * @route GET /api/events/saved
+ * @description Fetch all events saved by the current user
+ * @access Private - Requires authentication
+ * @returns {Object[]} Array of events saved by the user
+ * @returns {Error} 500 - Server error if events cannot be fetched
+ */
+eventRouter.get("/saved", authMiddleware, async (req, res) => {
+  try {
+    const user_id = (req.user! as SerializedUser).user_id;
+
+    const events: EventInfo[] = await db
+      .selectFrom("savedevents as s")
+      .where("s.user_id", "=", user_id)
+      .innerJoin("events as e", "s.event_id", "e.event_id")
+      .innerJoin("users as u", "e.contributor_id", "u.user_id")
+      .leftJoin("eventorgs as e_o", "e.event_id", "e_o.event_id")
+      .leftJoin("orgs as o", "e_o.org_id", "o.org_id")
+      .leftJoin("orgslugs as o_s", "o.org_id", "o_s.org_id")
+      .select((eb) => [
+        "e.event_id",
+        eb.fn
+          .coalesce("e.event_name", sql<string>`'Untitled Event'`)
+          .as("event_name"),
+        "e.event_description",
+        "e.event_location",
+        "e.event_img",
+        "e.start_time",
+        "e.end_time",
+        "e.date_created",
+        "e.date_modified",
+        "e.event_status",
+        "e.event_saves",
+        "s.date_created as saved_at",
+        eb.fn
+          .coalesce("u.user_name", sql<string>`'null_user'`)
+          .as("contributor_name"),
+        "o.org_name",
+        "o.org_id",
+        "o_s.org_slug",
+        jsonArrayFrom(
+          eb
+            .selectFrom("eventtags as e_t")
+            .whereRef("e_t.event_id", "=", "e.event_id")
+            .innerJoin("tags as t", "e_t.tag_id", "t.tag_id")
+            .select("t.tag_name"),
+        ).as("tags"),
+      ])
+      .execute()
+      .then((events) =>
+        events.map((event) => ({
+          ...event,
+          tags: (event.tags as { tag_name: string }[]).map((t) => t.tag_name),
+          event_views: 0,
+          event_likes: 0,
+          event_going: 0,
+          event_saved: true,
+        })),
+      );
+
+    res.json(events);
+    console.log(`Saved events for user ${user_id} requested!`);
+  } catch (error) {
+    console.error("Error fetching saved events:", error);
+    res.status(500).send("Error fetching saved events!");
+  }
+});
+
+eventRouter.get("/saved/count", authMiddleware, async (req, res) => {
+  const user_id = (req.user! as SerializedUser).user_id;
+  const count = await db
+    .selectFrom("users")
+    .where("user_id", "=", user_id)
+    .select(["user_saved_events"])
+    .executeTakeFirstOrThrow();
+  res.json(count.user_saved_events);
 });

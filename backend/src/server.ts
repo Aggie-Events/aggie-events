@@ -49,7 +49,7 @@ const init = async (): Promise<express.Application> => {
 
   const app = express();
 
-  app.use(limiter);
+  // app.use(limiter);
 
   app.use(express.json()); // Use JSON body parser middleware
 

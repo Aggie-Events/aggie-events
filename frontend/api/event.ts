@@ -17,7 +17,8 @@ export interface SearchEventsReturn {
   event_name: string;
   event_description: string;
   event_img: string | null;
-  event_likes: number;
+  event_saves: number;
+  event_saved?: boolean;
   event_status: EventStatus;
   start_time: Date;
   end_time: Date;
@@ -205,3 +206,166 @@ export function useEventSearch(searchParams: string) {
     placeholderData: keepPreviousData, // Keep the previous data while the new data is being fetched (prevents flickering)
   });
 }
+
+/**
+ * React Query hook to search for user's events with sorting and pagination
+ * @param {{ page?: number, pageSize?: number, sort?: string, order?: 'asc' | 'desc' }} options - Search options
+ * @returns {UseQueryResult<{events: SearchEventsReturn[], pageSize: number, resultSize: number, currentPage: number}>} The search results
+ */
+export function useEventSearchUser(options: {
+  page?: number;
+  pageSize?: number;
+  sort?: "name" | "eventDate" | "lastModified" | "status" | "likes";
+  order?: "asc" | "desc";
+} = {}) {
+  const { page = 1, pageSize = 10, sort = "eventDate", order = "desc" } = options;
+
+  return useQuery<{
+    events: SearchEventsReturn[];
+    pageSize: number;
+    resultSize: number;
+    currentPage: number;
+  }>({
+    queryKey: ["eventSearch", "user", { page, pageSize, sort, order }],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+        sort: sort,
+        order: order
+      });
+
+      const { results, resultSize, pageSize: returnedPageSize, currentPage } = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/search/events/user?${params}`,
+        {
+          method: "GET",
+        },
+      ).then((res) => res.json());
+
+      return {
+        events: results.map((e: any) => ({
+          ...e,
+          start_time: new Date(e.start_time),
+          end_time: new Date(e.end_time),
+          date_created: new Date(e.date_created),
+          date_modified: new Date(e.date_modified),
+          tags: e.tags || [],
+          event_likes: e.event_likes || 0
+        })),
+        pageSize: returnedPageSize,
+        resultSize,
+        currentPage
+      };
+    },
+    staleTime: Infinity, // Never stale (don't want the event search results to change while the user is interacting with the page)
+    placeholderData: keepPreviousData, // Keep the previous data while the new data is being fetched (prevents flickering)
+  });
+}
+
+/**
+ * React Query hook to toggle event save status
+ * @param {string} eventId - The ID of the event to toggle
+ * @param {boolean} isCurrentlySaved - Whether the event is currently saved
+ * @returns {UseMutationResult} The mutation result
+ */
+export function useToggleEventSave() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ eventId, isCurrentlySaved }: { eventId: string, isCurrentlySaved: boolean }) => {
+      console.log("Toggling event save status for event " + eventId + " to " + isCurrentlySaved);
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}/save`,
+        {
+          method: isCurrentlySaved ? "DELETE" : "POST",
+        },
+      );
+      if (response.ok) {
+        // TODO: Only update when event is upcoming
+        queryClient.setQueryData(["events", "saved", "count"], (oldData: number) => oldData + (isCurrentlySaved ? -1 : 1));
+      }
+      return response.json();
+    },
+  });
+}
+
+/**
+ * React Query hook to fetch events by organization ID
+ * @param {number} orgId - The ID of the organization
+ * @returns {UseQueryResult<Event[], Error>} The events
+ */
+export function useEventsByOrg(orgId: number) {
+  return useQuery<Event[], Error>({
+    queryKey: ["events", "org", orgId],
+    queryFn: async () => {
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/events/org/${orgId}`,
+        {
+          method: "GET",
+        },
+      );
+      return response.json();
+    },
+  });
+}
+
+/**
+ * React Query hook to fetch events saved by the current user
+ * @returns {UseQueryResult<SearchEventsReturn[], Error>} The saved events
+ */
+export function useSavedEvents() {
+  return useQuery<SearchEventsReturn[], Error>({
+    queryKey: ["events", "saved"],
+    queryFn: async () => {
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/events/saved`,
+        {
+          method: "GET",
+        },
+      );
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("You must be logged in to view saved events");
+        }
+        throw new Error("Failed to fetch saved events");
+      }
+      
+      const events = await response.json();
+      return events.map((e: any) => ({
+        ...e,
+        start_time: new Date(e.start_time),
+        end_time: new Date(e.end_time),
+        date_created: new Date(e.date_created),
+        date_modified: new Date(e.date_modified),
+        saved_at: new Date(e.saved_at),
+        tags: e.tags || [],
+      }));
+    },
+  });
+}
+
+/**
+ * React Query hook to get the count of saved events
+ * @returns {UseQueryResult<number, Error>} The count of saved events
+ */
+export function useSavedEventsCount() {
+  return useQuery<number, Error>({
+    queryKey: ["events", "saved", "count"],
+    queryFn: async () => {
+      try {
+        const response = await fetchUtil(
+          `${process.env.NEXT_PUBLIC_API_URL}/events/saved/count`,
+          {
+            method: "GET",
+          },
+        );
+
+        return await response.json();
+      } catch (error) {
+        console.error("Error fetching saved events count:", error);
+        return 0; // Return 0 on error
+      }
+    },
+  });
+}
+

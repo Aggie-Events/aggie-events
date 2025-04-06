@@ -29,13 +29,13 @@ export interface Events {
   event_name: string | null;
   event_description: string | null;
   event_location: string | null;
-  event_views: Generated<number>;
   event_img: string | null;
   event_status: EventStatus;
   start_time: Timestamp | null;
   end_time: Timestamp | null;
   date_created: Generated<Timestamp>;
   date_modified: Generated<Timestamp>;
+  event_saves: Generated<number>;
 }
 
 export interface Eventorgs {
@@ -110,9 +110,9 @@ export interface Userattendance {
   date_created: Generated<Timestamp>;
 }
 
-export interface Userlikes {
+export interface Userfollows {
   user_id: number;
-  event_id: number;
+  org_id: number;
   date_created: Generated<Timestamp>;
 }
 
@@ -136,6 +136,7 @@ export interface Users {
   user_description: string | null;
   user_profile_img: string | null;
   user_banned: Generated<boolean>;
+  user_saved_events: Generated<number>;
 }
 
 export interface Usersubs {
@@ -163,7 +164,7 @@ export interface DB {
   savedevents: Savedevents;
   tags: Tags;
   userattendance: Userattendance;
-  userlikes: Userlikes;
+  userfollows: Userfollows;
   userorgs: Userorgs;
   users: Users;
   usersubs: Usersubs;

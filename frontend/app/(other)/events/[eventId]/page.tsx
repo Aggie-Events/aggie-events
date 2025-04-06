@@ -16,6 +16,7 @@ import { formatDateInterval } from "@/utils/date";
 import { EventPageInformation } from "@/config/query-types";
 import EventTagList from "@/components/tag/EventTagList";
 import Link from "next/link";
+import BackButton from "@/components/common/BackButton";
 
 export default function EventDetails() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -38,31 +39,11 @@ const EventOptions = [
 
 function EventData({ event }: { event: EventPageInformation }) {
   const [isLiked, setIsLiked] = useState(false);
-  const router = useRouter();
-
-  const handleBack = () => {
-    // Check if there's a previous page and it's from the same origin
-    if (
-      document.referrer &&
-      new URL(document.referrer).origin === window.location.origin
-    ) {
-      router.back();
-    } else {
-      // If no previous page or different origin, go to home
-      router.push("/");
-    }
-  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 animate-fade-in">
       {/* Back Button */}
-      <button
-        onClick={handleBack}
-        className="flex items-center gap-2 text-gray-600 hover:text-maroon mb-6 group transition-colors"
-      >
-        <FaArrowLeft className="text-lg transition-transform group-hover:-translate-x-1" />
-        <span>Back</span>
-      </button>
+      <BackButton />
 
       {/* Header Section */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">

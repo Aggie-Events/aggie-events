@@ -75,7 +75,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "compose.prod.yml,compose.deps.yml,.env,.env.frontend,.env.backend,run_prod.sh"
+          source: "compose.prod.yml,compose.deps.yml,.env,.env.frontend,.env.backend,run_prod.sh,table_create.sql"
           target: ~/deploy/
         
       - name: Run Docker Compose

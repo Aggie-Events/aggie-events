@@ -1,162 +1,322 @@
 "use client";
-import { useParams } from "next/navigation";
-import { UserProfile } from "@/api/user";
-import EventCard from "@/app/search/_components/event-display/EventCard";
-import Image from "next/image";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useUserProfile } from "@/api/user";
-import { FaArrowLeft } from "react-icons/fa6";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { MdAdd, MdEdit, MdDelete, MdSearch, MdArrowUpward, MdArrowDownward } from "react-icons/md";
+import ToastManager from "@/components/toast/ToastManager";
+import { useEventSearchUser } from "@/api/event";
+import { useAuth } from "@/components/auth/AuthContext";
+import { EventStatus } from "@/config/query-types";
+import LoadingBar from "@/components/LoadingBar";
+import { AnimatePresence } from "framer-motion";
 
-export default function UserPage() {
-  const { username } = useParams<{ username: string }>();
-  const { data: userData, isPending, isError } = useUserProfile(username);
+type SortableColumn = "name" | "eventDate" | "lastModified" | "status" | "likes";
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {isPending && <Loading />}
-      {isError && <UserNotFound />}
-      {userData && <UserData userData={userData} />}
-    </div>
-  );
-}
+// Helper function to format dates
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(date);
+};
 
-function UserData({ userData }: { userData: UserProfile }) {
+const formatTime = (date: Date) => {
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true
+  }).format(date);
+};
+
+export default function EventsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Initialize state from URL params
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const [statusFilter, setStatusFilter] = useState<EventStatus | "all">(
+    (searchParams.get("status") as EventStatus | "all") || "all"
+  );
+  const [upcomingOnly, setUpcomingOnly] = useState(searchParams.get("upcoming") === "true");
+  const [sortBy, setSortBy] = useState<SortableColumn>(
+    (searchParams.get("sort") as SortableColumn) || "eventDate"
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(
+    (searchParams.get("order") as "asc" | "desc") || "desc"
+  );
+  const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
+  const [pageSize] = useState(Number(searchParams.get("pageSize")) || 10);
 
-  const handleBack = () => {
-    if (document.referrer && new URL(document.referrer).origin === window.location.origin) {
-      router.back();
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    if (searchQuery) params.set("q", searchQuery);
+    if (statusFilter !== "all") params.set("status", statusFilter);
+    if (upcomingOnly) params.set("upcoming", "true");
+    if (sortBy !== "eventDate") params.set("sort", sortBy);
+    if (sortOrder !== "desc") params.set("order", sortOrder);
+    if (page !== 1) params.set("page", page.toString());
+    if (pageSize !== 10) params.set("pageSize", pageSize.toString());
+
+    const queryString = params.toString();
+    router.push(queryString ? `?${queryString}` : "");
+  }, [searchQuery, statusFilter, upcomingOnly, sortBy, sortOrder, page, pageSize, router]);
+
+  const { data, isLoading } = useEventSearchUser({
+    page,
+    pageSize,
+    sort: sortBy,
+    order: sortOrder
+  });
+
+  const handleSort = (column: SortableColumn) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
-      router.push('/');
+      setSortBy(column);
+      setSortOrder("asc");
+    }
+    // Reset to first page when sorting changes
+    setPage(1);
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    setPage(1); // Reset to first page on new search
+  };
+
+  const handleStatusFilter = (value: EventStatus | "all") => {
+    setStatusFilter(value);
+    setPage(1); // Reset to first page on filter change
+  };
+
+  const handleUpcomingToggle = (value: boolean) => {
+    setUpcomingOnly(value);
+    setPage(1); // Reset to first page on filter change
+  };
+
+  const SortIndicator = ({ column }: { column: SortableColumn }) => {
+    if (sortBy !== column) return null;
+    return sortOrder === "asc" ? 
+      <MdArrowUpward className="inline-block ml-1" /> : 
+      <MdArrowDownward className="inline-block ml-1" />;
+  };
+
+  // Filter events based on search and status
+  const filteredEvents = data?.events.filter(event => {
+    if (searchQuery && !event.event_name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    if (statusFilter !== "all" && event.event_status !== statusFilter) {
+      return false;
+    }
+    if (upcomingOnly && new Date(event.start_time) <= new Date()) {
+      return false;
+    }
+    return true;
+  }) ?? [];
+
+  const getStatusColor = (status: EventStatus) => {
+    switch (status) {
+      case 'published':
+        return 'bg-green-100 text-green-800';
+      case 'draft':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8 animate-fade-in">
-      {/* Back Button */}
-      <button
-        onClick={handleBack}
-        className="flex items-center gap-2 text-gray-600 hover:text-maroon mb-6 group transition-colors"
-      >
-        <FaArrowLeft className="text-lg transition-transform group-hover:-translate-x-1" />
-        <span>Back</span>
-      </button>
+  const handleStatusUpdate = async (eventId: number, status: EventStatus) => {
+    // TODO: Implement status update
+    ToastManager.addToast(`Status updated to ${status}`, "success");
+  };
 
-      {/* User Profile Section */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div className="flex items-center gap-6">
-          <div className="w-32 h-32 rounded-full bg-gray-200 overflow-hidden">
-            {userData.user_profile_img ? (
-              <Image
-                src={userData.user_profile_img}
-                alt={userData.user_displayname}
-                width={128}
-                height={128}
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-4xl text-gray-400">
-                {userData.user_displayname[0].toUpperCase()}
-              </div>
-            )}
-          </div>
-          
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {userData.user_displayname}
-              {userData.user_verified && (
-                <span className="ml-2 text-blue-500">✓</span>
-              )}
-            </h1>
-            {userData.user_name && (
-              <p className="text-gray-600 mb-2">@{userData.user_name}</p>
-            )}
-            {userData.user_major && (
-              <p className="text-gray-600">
-                {userData.user_major}
-                {userData.user_year && ` • Year ${userData.user_year}`}
-              </p>
-            )}
+  return (
+    <div className="space-y-6">
+      <AnimatePresence>
+        {isLoading && <LoadingBar />}
+      </AnimatePresence>
+
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-800">My Events</h1>
+        <Link
+          href="/dashboard/events/create"
+          className="flex items-center gap-2 px-4 py-2 bg-maroon text-white rounded-md hover:bg-darkmaroon transition-colors"
+        >
+          <MdAdd className="text-xl" />
+          Create Event
+        </Link>
+      </div>
+
+      {/* Filter Section */}
+      <div className="flex flex-col space-y-4">
+        <div className="flex items-center space-x-4">
+          {/* Search */}
+          <div className="relative flex-1">
+            <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+            <input
+              type="text"
+              placeholder="Search events..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-maroon focus:bg-white"
+            />
           </div>
         </div>
 
-        {userData.user_description && (
-          <p className="mt-4 text-gray-700">{userData.user_description}</p>
-        )}
+        <div className="flex items-center space-x-4">
+          <select
+            value={statusFilter}
+            onChange={(e) => handleStatusFilter(e.target.value as EventStatus | "all")}
+            className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-maroon hover:bg-gray-100"
+          >
+            <option value="all">All Statuses</option>
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
 
-        {/* Organizations Section */}
-        {userData.organizations.length > 0 && (
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-3">Organizations</h2>
-            <div className="flex flex-wrap gap-3">
-              {userData.organizations.map((org) => (
-                <Link
-                  key={org.org_id}
-                  href={`/org/${org.org_id}`}
-                  className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2 hover:bg-gray-200 transition-colors"
-                >
-                  {org.org_icon && (
-                    <Image
-                      src={org.org_icon}
-                      alt={org.org_name}
-                      width={24}
-                      height={24}
-                      className="rounded-full"
-                    />
-                  )}
-                  <span>{org.org_name}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* User's Events Section */}
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        Events Added by {userData.user_displayname}
-      </h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {userData.events.length > 0 ? (
-          userData.events.map((event) => (
-            <EventCard 
-              key={event.event_id} 
-              event={event}
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              id="upcomingOnly"
+              checked={upcomingOnly}
+              onChange={(e) => handleUpcomingToggle(e.target.checked)}
+              className="w-4 h-4 text-maroon border-gray-300 rounded focus:ring-maroon"
             />
-          ))
-        ) : (
-          <div className="col-span-full text-center text-gray-500 py-8">
-            No events added yet.
-          </div>
-        )}
+            <span className="text-sm text-gray-700">Upcoming Events Only</span>
+          </label>
+        </div>
       </div>
+
+      {!filteredEvents || filteredEvents.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+          <p className="text-gray-500">
+            {isLoading ? "Loading events..." : "You haven't created any events yet."}
+          </p>
+          {!isLoading && (
+            <Link
+              href="/dashboard/events/create"
+              className="inline-block mt-4 text-maroon hover:text-darkmaroon"
+            >
+              Create your first event
+            </Link>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th 
+                    onClick={() => handleSort("name")}
+                    className="px-6 py-4 text-left text-sm font-medium text-gray-600 tracking-wider cursor-pointer hover:bg-gray-100"
+                  >
+                    Event <SortIndicator column="name" />
+                  </th>
+                  <th 
+                    onClick={() => handleSort("eventDate")}
+                    className="px-6 py-4 text-left text-sm font-medium text-gray-600 tracking-wider cursor-pointer hover:bg-gray-100"
+                  >
+                    Event Date <SortIndicator column="eventDate" />
+                  </th>
+                  <th 
+                    onClick={() => handleSort("lastModified")}
+                    className="px-6 py-4 text-left text-sm font-medium text-gray-600 tracking-wider cursor-pointer hover:bg-gray-100"
+                  >
+                    Last Modified <SortIndicator column="lastModified" />
+                  </th>
+                  <th 
+                    onClick={() => handleSort("status")}
+                    className="px-6 py-4 text-left text-sm font-medium text-gray-600 tracking-wider cursor-pointer hover:bg-gray-100"
+                  >
+                    Status <SortIndicator column="status" />
+                  </th>
+                  <th 
+                    onClick={() => handleSort("likes")}
+                    className="px-6 py-4 text-left text-sm font-medium text-gray-600 tracking-wider cursor-pointer hover:bg-gray-100"
+                  >
+                    Likes <SortIndicator column="likes" />
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600 tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-100">
+                {filteredEvents.map((event) => (
+                  <tr key={event.event_id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center">
+                        <div>
+                          <Link
+                            href={`/events/${event.event_id}`}
+                            className="text-base font-medium text-gray-900 hover:text-maroon"
+                          >
+                            {event.event_name}
+                          </Link>
+                          <div className="text-sm text-gray-500 mt-1">
+                            {event.event_location || 'No location'}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">
+                        {formatDate(new Date(event.start_time))}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {formatTime(new Date(event.start_time))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">
+                        {formatDate(new Date(event.date_modified))}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {formatTime(new Date(event.date_modified))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <select
+                        value={event.event_status ?? 'published'}
+                        onChange={(e) => handleStatusUpdate(event.event_id, e.target.value as EventStatus)}
+                        className={`px-2 py-1 text-xs font-semibold rounded-full border-0 ${getStatusColor(event.event_status ?? 'published')}`}
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4">
+                      {event.event_saves}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-3">
+                        <Link 
+                          href={`/dashboard/events/edit/${event.event_id}`}
+                          className="text-maroon hover:text-darkmaroon"
+                        >
+                          <MdEdit className="text-xl" />
+                        </Link>
+                        <button className="text-red-600 hover:text-red-900">
+                          <MdDelete className="text-xl" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-function Loading() {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
-      <div className="w-12 h-12 border-4 border-maroon border-t-transparent rounded-full animate-spin" />
-      <p className="mt-4 text-gray-600">Loading user profile...</p>
-    </div>
-  );
-}
-
-function UserNotFound() {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
-      <h1 className="text-5xl font-bold text-maroon mb-4">User Not Found</h1>
-      <p className="text-gray-600 mb-8">The user you're looking for doesn't exist or has been removed.</p>
-      <button 
-        onClick={() => window.history.back()}
-        className="px-6 py-3 bg-maroon text-white rounded-full hover:bg-darkmaroon transition-colors"
-      >
-        Go Back
-      </button>
-    </div>
-  );
-}
-
+} 

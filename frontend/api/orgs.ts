@@ -1,4 +1,5 @@
 import { fetchUtil } from "@/api/fetch";
+import { useAuth } from "@/components/auth/AuthContext";
 import { OrgPageInformation } from "@/config/query-types";
 import { useQuery } from "@tanstack/react-query";
 
@@ -27,23 +28,34 @@ export interface UserOrgInfo {
   org_role: string;
 }
 
+export interface OrgMember {
+  user_id: number;
+  user_name: string;
+  user_displayname: string;
+  user_profile_img: string | null;
+  user_major: string | null;
+  user_year: number | null;
+  user_role: "owner" | "editor";
+  join_date: string;
+}
+
 /**
-* Create an organization
-* @param {CreateOrgData} org - The organization to create
-* @returns {Promise<number>} The created organization ID
-*/
+ * Create an organization
+ * @param {CreateOrgData} org - The organization to create
+ * @returns {Promise<number>} The created organization ID
+ */
 export const createOrg = async (org: CreateOrgData) => {
   try {
-      const response = await fetchUtil(
-          `${process.env.NEXT_PUBLIC_API_URL}/orgs`,
-          {
-              method: "POST",
-              body: org,
-          },
-      );
-      return response.json() ?? null;
+    const response = await fetchUtil(
+      `${process.env.NEXT_PUBLIC_API_URL}/orgs`,
+      {
+        method: "POST",
+        body: org,
+      },
+    );
+    return response.json() ?? null;
   } catch (error) {
-      throw new Error("Error creating organization");
+    throw new Error("Error creating organization");
   }
 };
 
@@ -80,7 +92,7 @@ export function useOrgPageInformation(org_name: string) {
     },
     retry: false,
   });
-};
+}
 
 /**
  * Deletes all organizations
@@ -106,16 +118,16 @@ export const deleteOrganization = async () => {
  */
 export function useOrganizationList() {
   return useQuery<OrgPageInformation[], Error>({
-      queryKey: ["organizations"],
-      queryFn: async () => {
-          const response = await fetchUtil(
-              `${process.env.NEXT_PUBLIC_API_URL}/orgs`,
-              {
-                  method: "GET",
-              },
-          );
-          return response.json() ?? [];
-      },
+    queryKey: ["organizations"],
+    queryFn: async () => {
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/orgs`,
+        {
+          method: "GET",
+        },
+      );
+      return response.json() ?? [];
+    },
   });
 }
 
@@ -126,7 +138,7 @@ export function useOrganizationList() {
  */
 export function useUserOrgs(username: string) {
   return useQuery<UserOrgInfo[], Error>({
-    queryKey: ['organizations', { 'user': username }],
+    queryKey: ["organizations", { user: username }],
     queryFn: async () => {
       const response = await fetchUtil(
         `${process.env.NEXT_PUBLIC_API_URL}/orgs/user/${username}`,
@@ -137,5 +149,51 @@ export function useUserOrgs(username: string) {
       return response.json() ?? [];
     },
     enabled: !!username, // Only run the query if username is provided
+  });
+}
+
+/**
+ * React Query hook to fetch the current user's organizations
+ * @returns {UseQueryResult<UserOrgInfo[], Error>} The current user's organizations
+ */
+export function useCurrentUserOrgs() {
+  return useQuery<UserOrgInfo[], Error>({
+    queryKey: ["organizations", { user: "current" }],
+    queryFn: async () => {
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/orgs/current/user/`,
+        {
+          method: "GET",
+        },
+      );
+      return response.json() ?? [];
+    },
+  });
+}
+
+/**
+ * React Query hook to fetch members of an organization
+ * @param {number} orgId - The ID of the organization
+ * @returns {UseQueryResult<OrgMember[], Error>} The organization members
+ */
+export function useOrgMembers(orgId: number) {
+  return useQuery<OrgMember[], Error>({
+    queryKey: ["organizations", orgId, "members"],
+    queryFn: async () => {
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/orgs/${orgId}/members`,
+        {
+          method: "GET",
+        }
+      );
+      
+      // Parse dates
+      const members = await response.json();
+      return members.map((member: any) => ({
+        ...member,
+        join_date: new Date(member.join_date)
+      }));
+    },
+    enabled: !!orgId,
   });
 }

@@ -63,6 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (response.ok) {
           setUser(null);
           ToastManager.addToast("Successfully logged out", "success", 3000);
+          window.location.reload();
         } else {
           console.error("Failed to log out:", response.statusText);
           ToastManager.addToast("Failed to log out", "error", 3000);

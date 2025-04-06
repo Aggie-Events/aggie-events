@@ -27,8 +27,12 @@ CREATE TABLE users
     user_year        INT                   NULL,
     user_description TEXT                  NULL,
     user_profile_img VARCHAR(255)          NULL,
-    user_banned      BOOLEAN DEFAULT FALSE NOT NULL
+    user_banned      BOOLEAN DEFAULT FALSE NOT NULL,
+
+    -- GENERATED COLUMNS
+    user_saved_events INT DEFAULT 0 NOT NULL
 );
+
 ALTER TABLE users
   ADD CONSTRAINT username_length CHECK (length(user_name) >= 3 AND length(user_name) <= 20),
   ADD CONSTRAINT username_no_special_chars CHECK (user_name ~ '^[a-zA-Z0-9]+$'),
@@ -55,16 +59,18 @@ CREATE TABLE events
     event_name        VARCHAR(255)                          NULL,
     event_description TEXT                                  NULL,
     event_location    VARCHAR(255)                          NULL,
-    event_views       INT         DEFAULT 0                 NOT NULL,
 
     event_img         VARCHAR(255)                          NULL,
 
     start_time        TIMESTAMPTZ                           NULL,
     end_time          TIMESTAMPTZ                           NULL,
-    date_created      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    date_modified     TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
     event_status      event_status                          NOT NULL,
+
+    -- GENERATED COLUMNS
+    date_created      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    date_modified     TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    event_saves       INT                  DEFAULT 0         NOT NULL,
 
     -- If both start_time and end_time are not null, then start_time must be less than end_time
     CHECK (start_time < end_time),
@@ -107,6 +113,7 @@ CREATE TABLE userorgs
     user_id       INT                                   NOT NULL,
     org_id        INT                                   NOT NULL,
     user_role      membership_type,
+    -- GENERATED COLUMNS
     date_created  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_modified TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     PRIMARY KEY (user_id, org_id),
@@ -136,7 +143,9 @@ CREATE TABLE savedevents
 (
     user_id      INT                                   NOT NULL,
     event_id     INT                                   NOT NULL,
+    -- GENERATED COLUMNS
     date_created TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
     PRIMARY KEY (user_id, event_id),
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
     FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE
@@ -151,6 +160,7 @@ CREATE TABLE eventorgs
     -- Users can still associate events with organizations even if they aren't authorized, but it is considered unofficial
     -- Authorized organization members will still have control over event along with the original poster
     official BOOLEAN NOT NULL DEFAULT FALSE,
+
     PRIMARY KEY (event_id, org_id),
     FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE,
     FOREIGN KEY (org_id) REFERENCES orgs (org_id) ON DELETE CASCADE
@@ -162,6 +172,7 @@ CREATE TABLE eventtags
 (
     event_id INT NOT NULL,
     tag_id   INT NOT NULL,
+
     PRIMARY KEY (event_id, tag_id),
     FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE,
     FOREIGN KEY (tag_id) REFERENCES tags (tag_id) ON DELETE CASCADE
@@ -172,6 +183,7 @@ CREATE TABLE orgtags
 (
     org_id INT NOT NULL,
     tag_id INT NOT NULL,
+
     PRIMARY KEY (org_id, tag_id),
     FOREIGN KEY (org_id) REFERENCES orgs (org_id) ON DELETE CASCADE,
     FOREIGN KEY (tag_id) REFERENCES tags (tag_id) ON DELETE CASCADE
@@ -186,22 +198,12 @@ CREATE TABLE alternateorgnames
     FOREIGN KEY (org_id) REFERENCES orgs (org_id) ON DELETE CASCADE
 );
 
--- Stores what users have liked
-CREATE TABLE userlikes
-(
-    user_id      INT                                   NOT NULL,
-    event_id     INT                                   NOT NULL,
-    date_created TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    PRIMARY KEY (user_id, event_id),
-    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
-    FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE
-);
-
 -- Stores where a user has marked that they are attending an event
 CREATE TABLE userattendance
 (
     user_id      INT                                   NOT NULL,
     event_id     INT                                   NOT NULL,
+    -- GENERATED COLUMNS
     date_created TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     PRIMARY KEY (user_id, event_id),
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
@@ -213,6 +215,18 @@ CREATE TABLE usersubs
 (
     user_id      INT                                   NOT NULL,
     org_id       INT                                   NOT NULL,
+    date_created TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY (user_id, org_id),
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
+    FOREIGN KEY (org_id) REFERENCES orgs (org_id) ON DELETE CASCADE
+);
+
+-- Stores user follows for organizations
+CREATE TABLE userfollows
+(
+    user_id      INT                                   NOT NULL,
+    org_id       INT                                   NOT NULL,
+    -- GENERATED COLUMNS
     date_created TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     PRIMARY KEY (user_id, org_id),
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
@@ -233,6 +247,7 @@ CREATE TABLE friendships
     user1_id     INT                                         NOT NULL,
     user2_id     INT                                         NOT NULL,
     status       friendship_status DEFAULT 'pending', -- Use the enum type here, and set a default
+    -- GENERATED COLUMNS
     date_created TIMESTAMPTZ       DEFAULT CURRENT_TIMESTAMP NOT NULL,
     PRIMARY KEY (user1_id, user2_id),
     FOREIGN KEY (user1_id) REFERENCES users (user_id) ON DELETE CASCADE,
@@ -244,6 +259,7 @@ CREATE TABLE blocks
 (
     user_id      INT                                   NOT NULL,
     blocked_id   INT                                   NOT NULL,
+    -- GENERATED COLUMNS
     date_created TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     PRIMARY KEY (user_id, blocked_id),
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
@@ -269,9 +285,13 @@ CREATE TABLE reports
     report_status     report_status DEFAULT 'pending'         NOT NULL,
     admin_notes       TEXT                                    NULL,
 
+    
+
+    -- GENERATED COLUMNS
     date_created      TIMESTAMPTZ   DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_modified     TIMESTAMPTZ   DEFAULT CURRENT_TIMESTAMP NOT NULL,
     resolution_date   TIMESTAMP                               NULL,
+    
 
     FOREIGN KEY (reporter_user_id) REFERENCES users (user_id) ON DELETE SET NULL,
     FOREIGN KEY (reported_event_id) REFERENCES events (event_id) ON DELETE CASCADE,
@@ -287,5 +307,46 @@ CREATE TRIGGER set_timestamp
     ON reports
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
+
+-- Create trigger to maintain save count
+CREATE OR REPLACE FUNCTION update_event_save_count()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE events SET event_saves = event_saves + 1 WHERE event_id = NEW.event_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE events SET event_saves = event_saves - 1 WHERE event_id = OLD.event_id;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER maintain_save_count
+    AFTER INSERT OR DELETE
+    ON savedevents
+    FOR EACH ROW
+EXECUTE FUNCTION update_event_save_count();
+
+-- Create function to update user_saved_events count
+CREATE OR REPLACE FUNCTION update_user_saved_events_count()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE users SET user_saved_events = user_saved_events + 1 WHERE user_id = NEW.user_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE users SET user_saved_events = user_saved_events - 1 WHERE user_id = OLD.user_id;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger to maintain user_saved_events count
+CREATE TRIGGER maintain_user_saved_events_count
+    AFTER INSERT OR DELETE
+    ON savedevents
+    FOR EACH ROW
+EXECUTE FUNCTION update_user_saved_events_count();
 
 

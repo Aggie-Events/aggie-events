@@ -1,36 +1,35 @@
 import React from "react";
 import Image from "next/image";
 import {
-  FaHeart,
   FaTag,
-  FaRegHeart,
   FaBookmark,
   FaRegBookmark,
-  FaCircle,
-  FaBook,
   FaEllipsisH,
 } from "react-icons/fa";
 import Link from "next/link";
 import { SearchEventsReturn } from "@/api/event";
 import IconLabel from "@/components/common/IconLabel";
-import { HiEye } from "react-icons/hi";
 import { useMenuHandle } from "@/components/MenuHandle";
+import { motion } from "framer-motion";
 
-export default function EventCard({ event }: { event: SearchEventsReturn }) {
-  const [isSaved, setIsSaved] = React.useState(false);
+interface EventCardProps {
+  event: SearchEventsReturn;
+  onSaveEvent: (eventId: number) => void;
+  onBlockEvent: (eventId: number) => void;
+  onReportEvent: (eventId: number) => void;
+  isSaved: boolean;
+  saves: number;
+}
+
+export default function EventCard({ 
+  event, 
+  onSaveEvent, 
+  onBlockEvent, 
+  onReportEvent,
+  isSaved,
+  saves
+}: EventCardProps) {
   const { isMenuOpen, menuRef, setIsMenuOpen } = useMenuHandle();
-
-  const handleBlockEvent = (eventId: number) => {
-    // Implement block functionality
-    console.log(`Blocked event: ${eventId}`);
-    setIsMenuOpen(false);
-  };
-
-  const handleReportEvent = (eventId: number) => {
-    // Implement report functionality
-    console.log(`Reported event: ${eventId}`);
-    setIsMenuOpen(false);
-  };
 
   return (
     <div className="flex flex-col gap-1 bg-gray-150 rounded-lg py-2 px-4 grow shadow-md w-full border-[1px] border-gray-200">
@@ -50,7 +49,7 @@ export default function EventCard({ event }: { event: SearchEventsReturn }) {
               <h3 className="flex flex-col justify-center grow">
                 <Link
                   className="text-md font-medium text-maroon hover:underline"
-                  href={event.org_slug ? `/org/${event.org_slug}` : `/org/${event.org_id}`}
+                  href={event.org_slug ? `/orgs/${event.org_slug}` : `/orgs/${event.org_id}`}
                 >
                   {event.org_name}
                 </Link>
@@ -85,14 +84,35 @@ export default function EventCard({ event }: { event: SearchEventsReturn }) {
 
         <div className="h-max">
           <div className="flex items-center h-fit gap-2">
-            <button
-              onClick={() => setIsSaved(!isSaved)}
+            <motion.button
+              onClick={() => onSaveEvent(event.event_id)}
               className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg h-fit ${isSaved ? "bg-maroon text-white" : "bg-white text-maroon border-[1px] border-maroon"}`}
               aria-label={isSaved ? "Unsave event" : "Save event"}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{
+                width: "auto"
+              }}
+              transition={{ 
+                type: "tween",
+                duration: 0.1
+              }}
             >
-              {isSaved ? <FaBookmark size={16} /> : <FaRegBookmark size={16} />}
+              <motion.div
+                key={isSaved ? "saved" : "unsaved"}
+                initial={{ scale: 1.2}}
+                animate={{ scale: 1}}
+                exit={{ scale: 1.2}}
+                transition={{ 
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 10
+                }}
+              >
+                {isSaved ? <FaBookmark size={16} /> : <FaRegBookmark size={16} />}
+              </motion.div>
               <span>{isSaved ? "Saved" : "Save"}</span>
-            </button>
+            </motion.button>
 
             {/* Menu Button */}
             <div className="relative" ref={menuRef}>
@@ -107,13 +127,19 @@ export default function EventCard({ event }: { event: SearchEventsReturn }) {
                 <div className="absolute right-0 top-full mt-1 z-10 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <div className="py-1">
                     <button
-                      onClick={() => handleBlockEvent(event.event_id)}
+                      onClick={() => {
+                        onBlockEvent(event.event_id);
+                        setIsMenuOpen(false);
+                      }}
                       className="text-gray-700 hover:bg-gray-100 hover:text-gray-900 group flex w-full items-center px-4 py-2 text-sm"
                     >
                       Block
                     </button>
                     <button
-                      onClick={() => handleReportEvent(event.event_id)}
+                      onClick={() => {
+                        onReportEvent(event.event_id);
+                        setIsMenuOpen(false);
+                      }}
                       className="text-gray-700 hover:bg-gray-100 hover:text-gray-900 group flex w-full items-center px-4 py-2 text-sm"
                     >
                       Report
@@ -140,10 +166,7 @@ export default function EventCard({ event }: { event: SearchEventsReturn }) {
         </p>
         <span className="text-maroon text-sm flex items-center">•</span>
         <div className="flex gap-2">
-          <IconLabel text={"1000"}>
-            <HiEye color="maroon" />
-          </IconLabel>
-          <IconLabel text={"1000"}>
+          <IconLabel text={saves.toString()}>
             <FaBookmark color="maroon" />
           </IconLabel>
         </div>
