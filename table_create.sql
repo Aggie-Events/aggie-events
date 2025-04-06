@@ -395,4 +395,16 @@ CREATE TRIGGER maintain_org_members_count
     FOR EACH ROW
 EXECUTE FUNCTION update_org_members_count();
 
+-- Feedback table for storing user feedback
+CREATE TABLE feedback
+(
+    feedback_id    SERIAL PRIMARY KEY,
+    name           VARCHAR(255)                          NULL,
+    email          VARCHAR(255)                          NULL,
+    feedback_type  VARCHAR(50)                           NOT NULL,
+    message        TEXT                                  NOT NULL,
+    -- GENERATED COLUMNS
+    date_created   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
 

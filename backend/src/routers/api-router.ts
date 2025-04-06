@@ -10,7 +10,8 @@ import { searchRouter } from "./api-router/search";
 import { eventRouter } from "./api-router/events";
 import { tagRouter } from "./api-router/tag";
 import { devRouter } from "./api-router/dev";
-import {uploadRouter} from "./api-router/upload"
+import { uploadRouter } from "./api-router/upload";
+import { feedbackRouter } from "./api-router/feedback";
 export const apiRouter = express.Router();
 
 /**
@@ -43,7 +44,8 @@ apiRouter.use("/orgs", orgRouter);
 apiRouter.use("/search", searchRouter);
 apiRouter.use("/events", eventRouter);
 apiRouter.use("/tags", tagRouter);
-apiRouter.use("/upload", uploadRouter)
+apiRouter.use("/upload", uploadRouter);
+apiRouter.use("/feedback", feedbackRouter);
 
 if (process.env.NODE_ENV === "development") {
   apiRouter.use("/dev", devRouter);

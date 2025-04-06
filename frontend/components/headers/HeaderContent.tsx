@@ -35,7 +35,7 @@ function UnauthenticatedHeader() {
 }
 
 // Component for authenticated users
-function AuthenticatedHeader({ user }: AuthenticatedHeaderProps) {
+function AuthenticatedHeader() {
   const { data: savedEventsCount = 0 } = useSavedEventsCount();
   
   return (
@@ -85,7 +85,7 @@ export default function HeaderContent() {
 
       {/* User section */}
       <div className="flex mr-5 gap-2 items-center">
-        {user ? <AuthenticatedHeader user={user} /> : <UnauthenticatedHeader />}
+        {user ? <AuthenticatedHeader /> : <UnauthenticatedHeader />}
         <UserLogoToggle />
       </div>
     </nav>

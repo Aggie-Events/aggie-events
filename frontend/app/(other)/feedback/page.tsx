@@ -3,15 +3,18 @@
 import { useState } from "react";
 import { IoSend } from "react-icons/io5";
 import ToastManager from "@/components/toast/ToastManager";
+import { useFeedbackSubmit } from "@/api/feedback";
+import AuthRedirect from "@/components/auth/AuthRedirect";
+import { useRouter } from "next/navigation";
 
 export default function FeedbackPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
     feedbackType: "general",
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitFeedback = useFeedbackSubmit();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -35,17 +38,18 @@ export default function FeedbackPage() {
     setIsSubmitting(true);
     
     try {
-      // TODO: Replace with actual API call to submit feedback
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await submitFeedback.mutateAsync({
+        feedbackType: formData.feedbackType,
+        message: formData.message,
+      });
       
       // Success handling
       ToastManager.addToast("Thank you for your feedback!", "success", 3000);
       setFormData({
-        name: "",
-        email: "",
         feedbackType: "general",
         message: "",
       });
+      router.push("/");
     } catch (error) {
       console.error("Failed to submit feedback:", error);
       ToastManager.addToast("Failed to submit feedback", "error", 3000);
@@ -56,42 +60,15 @@ export default function FeedbackPage() {
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-4">
+      <AuthRedirect url="/feedback" />
       <h1 className="text-2xl font-bold mb-6">Feedback</h1>
       <p className="mb-6 text-gray-700">
-        We value your feedback! Please use this form to submit any comments, suggestions, or issues
+        We value your feedback! Please use this form to submit any comments,
+        suggestions, or issues you've encountered while using Aggie Events.
         you've encountered while using Aggie Events.
       </p>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
-            Name (Optional)
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-maroon"
-            placeholder="Your name"
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
-            Email (Optional)
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-maroon"
-            placeholder="Your email address"
-          />
-        </div>
         
         <div>
           <label htmlFor="feedbackType" className="block text-sm font-medium mb-1">

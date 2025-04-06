@@ -7,7 +7,7 @@ import { MdDashboard, MdOutlineExplore, MdFeedback } from "react-icons/md";
 
 export const DefaultHeaderLinks: { href: string; label: string }[] = [
   { href: "/search", label: "Browse" },
-  { href: "/feedback", label: "Feedback" },
+  // { href: "/feedback", label: "Feedback" },
 ];
 
 export const AuthHeaderLinks: { href: string; label: string; icon: ReactElement<IconType> }[] = [

@@ -153,6 +153,15 @@ export interface Blocks {
   date_created: Generated<Timestamp>;
 }
 
+export interface Feedback {
+  feedback_id: Generated<number>;
+  name: string | null;
+  email: string | null;
+  feedback_type: string;
+  message: string;
+  date_created: Generated<Timestamp>;
+}
+
 export interface DB {
   alternateorgnames: Alternateorgnames;
   events: Events;
@@ -171,4 +180,5 @@ export interface DB {
   users: Users;
   usersubs: Usersubs;
   blocks: Blocks;
+  feedback: Feedback;
 }
