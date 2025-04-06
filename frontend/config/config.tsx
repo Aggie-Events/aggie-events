@@ -5,11 +5,18 @@ import { IoMdNotificationsOutline, IoMdSettings } from "react-icons/io";
 import { MdDashboard, MdNotifications, MdOutlineExplore } from "react-icons/md";
 import { IoAdd } from "react-icons/io5";
 
-export const HeaderLinks: { href: string; label: string; icon: ReactElement<IconType> }[] = [
+
+export const DefaultHeaderLinks: { href: string; label: string }[] = [
+  { href: "/search", label: "Browse" },
+  { href: "/feedback", label: "Feedback" },
+];
+
+export const AuthHeaderLinks: { href: string; label: string; icon: ReactElement<IconType> }[] = [
   { href: "/search", label: "Browse", icon: <MdOutlineExplore className="w-6 h-6" /> },
   { href: "/saved", label: "Saved", icon: <FaRegBookmark className="w-5 h-5" /> },
   { href: "/notifications", label: "Notifications", icon: <IoMdNotificationsOutline className="w-7 h-7" /> },
 ];
+
 
 export const UserMenuLinks: {
   href: string;
@@ -20,7 +27,6 @@ export const UserMenuLinks: {
   { href: "/dashboard", label: "Dashboard", icon: <MdDashboard /> },
   { href: "/friends", label: "Friends", icon: <FaUserFriends /> },
   { href: "/settings", label: "Settings", icon: <IoMdSettings /> },
-  
 ];
 
 export const TypingTextBase = "Find ";

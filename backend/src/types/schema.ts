@@ -136,6 +136,7 @@ export interface Users {
   user_description: string | null;
   user_profile_img: string | null;
   user_banned: Generated<boolean>;
+  user_saved_events: Generated<number>;
 }
 
 export interface Usersubs {

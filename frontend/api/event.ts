@@ -269,6 +269,7 @@ export function useEventSearchUser(options: {
  * @returns {UseMutationResult} The mutation result
  */
 export function useToggleEventSave() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ eventId, isCurrentlySaved }: { eventId: string, isCurrentlySaved: boolean }) => {
       console.log("Toggling event save status for event " + eventId + " to " + isCurrentlySaved);
@@ -278,6 +279,10 @@ export function useToggleEventSave() {
           method: isCurrentlySaved ? "DELETE" : "POST",
         },
       );
+      if (response.ok) {
+        // TODO: Only update when event is upcoming
+        queryClient.setQueryData(["events", "saved", "count"], (oldData: number) => oldData + (isCurrentlySaved ? -1 : 1));
+      }
       return response.json();
     },
   });
@@ -299,6 +304,67 @@ export function useEventsByOrg(orgId: number) {
         },
       );
       return response.json();
+    },
+  });
+}
+
+/**
+ * React Query hook to fetch events saved by the current user
+ * @returns {UseQueryResult<SearchEventsReturn[], Error>} The saved events
+ */
+export function useSavedEvents() {
+  return useQuery<SearchEventsReturn[], Error>({
+    queryKey: ["events", "saved"],
+    queryFn: async () => {
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/events/saved`,
+        {
+          method: "GET",
+        },
+      );
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("You must be logged in to view saved events");
+        }
+        throw new Error("Failed to fetch saved events");
+      }
+      
+      const events = await response.json();
+      return events.map((e: any) => ({
+        ...e,
+        start_time: new Date(e.start_time),
+        end_time: new Date(e.end_time),
+        date_created: new Date(e.date_created),
+        date_modified: new Date(e.date_modified),
+        saved_at: new Date(e.saved_at),
+        tags: e.tags || [],
+      }));
+    },
+  });
+}
+
+/**
+ * React Query hook to get the count of saved events
+ * @returns {UseQueryResult<number, Error>} The count of saved events
+ */
+export function useSavedEventsCount() {
+  return useQuery<number, Error>({
+    queryKey: ["events", "saved", "count"],
+    queryFn: async () => {
+      try {
+        const response = await fetchUtil(
+          `${process.env.NEXT_PUBLIC_API_URL}/events/saved/count`,
+          {
+            method: "GET",
+          },
+        );
+
+        return await response.json();
+      } catch (error) {
+        console.error("Error fetching saved events count:", error);
+        return 0; // Return 0 on error
+      }
     },
   });
 }
