@@ -3,11 +3,10 @@ import React, { useRef, useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SearchFilters, setFilterParam, castFilterParam } from "@/config/query-types";
 import { useEventSearch, useToggleEventSave } from "@/api/event";
-import EventDisplay from "./_components/event-display/EventDisplay";
+import EventDisplay from "./_components/_event-display/EventDisplay";
 import PageSelect from "./_components/PageSelect";
-import Sidebar from "./_components/Sidebar";
+import Sidebar from "./_components/_filter-sidebar/FilterSidebar";
 import SortOption from "./_components/SortOption";
-import QuickFilters, { Category, categories } from "./_components/QuickFilters";
 import LoadingBar from "@/components/LoadingBar";
 import { AnimatePresence } from "framer-motion";
 import { useAuth } from "@/components/auth/AuthContext";
@@ -54,7 +53,6 @@ export default function Search() {
   const [tags, setTags] = useState<string[]>(
     filters.current.tags ? Array.from(filters.current.tags) : []
   );
-  const [selectedCategory, setSelectedCategory] = useState<Category>("All Events");
   const [sidebarWidth, setSidebarWidth] = useState(320);
   const isDragging = useRef(false);
   const startX = useRef(0);
@@ -88,13 +86,6 @@ export default function Search() {
     });
     setTags(Array.from(filters.current.tags ?? []));
     push(`/search?${params.toString()}`);
-  }
-
-  function handleCategorySelect(category: Category) {
-    filters.current.tags = category === "All Events" ? new Set() : new Set([category]);
-    setSelectedCategory(category);
-    filters.current.page = 1;
-    updateUrl();
   }
 
   const handleFilterChange = (newFilters: { 
@@ -182,46 +173,6 @@ export default function Search() {
       <AnimatePresence>
         {isFetching && <LoadingBar />}
       </AnimatePresence>
-      
-      {/* Top bar with category tags */}
-      <div className="w-full bg-white border-b">
-        <div className="max-w-7xl mx-auto p-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm font-medium text-gray-500">Quick Filters</h2>
-            <QuickFilters
-              filters={filters}
-              selectedCategory={selectedCategory}
-              tags={tags}
-              onCategorySelect={handleCategorySelect}
-              onUpdateFilters={updateUrl}
-            />
-          </div>
-          
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3">
-              {tags.map((tag) => (
-                <span 
-                  key={tag}
-                  className="px-3 py-1 bg-gray-100 text-sm rounded-full flex items-center gap-2"
-                >
-                  {tag}
-                  <button
-                    onClick={() => {
-                      filters.current.tags = new Set(
-                        Array.from(filters.current.tags || []).filter(t => t !== tag)
-                      );
-                      updateUrl();
-                    }}
-                    className="hover:text-maroon"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Main content area with filters and results */}
       <div className="flex flex-1 overflow-hidden">

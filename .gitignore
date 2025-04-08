@@ -51,3 +51,5 @@ letsencrypt/
 *.pem
 
 .idea/
+
+.cursor/

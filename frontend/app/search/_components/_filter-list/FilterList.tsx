@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import CollapsableConfig from "@/app/search/_components/filter-list/CollapsableConfig";
-import FilterInput from "@/app/search/_components/filter-list/FilterInput";
+import CollapsableConfig from "@/app/search/_components/_filter-list/CollapsableConfig";
+import FilterInput from "@/app/search/_components/_filter-list/FilterInput";
 
 export type FilterListOutput = {
   name?: string;
@@ -16,16 +16,11 @@ export default function FilterList({
     name: "",
     tag: "",
   });
-  // const filter-list = useRef<FilterListOutput>({
-  //   name: "",
-  //   tag: "",
-  // });
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         onSubmit(filters);
-        // filter-list.current = {};
       }}
     >
       <CollapsableConfig title="Name">

@@ -110,6 +110,7 @@ searchRouter.get("/events", async (req, res) => {
         "e.date_created as date_created",
         "e.date_modified as date_modified",
         "e.event_saves as event_saves",
+        "e.event_img as event_img",
         "u.user_name as contributor_name",
         "o.org_name as org_name",
         "o.org_id as org_id",

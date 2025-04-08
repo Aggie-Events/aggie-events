@@ -19,10 +19,6 @@ export default function FilterInput({
     <input
       type="text"
       className="w-full p-1 border border-gray-300 outline-none focus:shadow-md ring-1 ring-black"
-      // onKeyDown={(e) => {
-      //   if (e.key === "Enter") {
-      //   }
-      // }}
       onChange={(e) => onChange(e.target)}
       value={value}
       {...props}

@@ -3,12 +3,11 @@ import React from "react";
 import { FaLocationDot } from "react-icons/fa6";
 import { FaClock } from "react-icons/fa";
 import IconLabel from "@/components/common/IconLabel";
-import EventCard from "@/app/search/_components/event-display/EventCard";
-import EventImage from "@/app/search/_components/event-display/EventImage";
+import EventCard from "@/app/search/_components/_event-display/EventCard";
 import { motion } from "framer-motion";
 import { SearchEventsReturn } from "@/api/event";
 import { formatTimeInterval } from "@/utils/date";
-import EventDateDisplay from "@/app/search/_components/event-display/EventDateDisplay";
+import EventDateDisplay from "@/app/search/_components/_event-display/EventDateDisplay";
 
 interface EventDisplayProps {
   event: SearchEventsReturn;
@@ -52,7 +51,6 @@ export default function EventDisplay({
         isSaved={isSaved}
         saves={saves}
       />
-      {/* <EventImage event={event} /> */}
     </motion.div>
   );
 }

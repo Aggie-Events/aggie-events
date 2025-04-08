@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from "react";
 
 interface MenuHandleOptions {
     closeOnScroll?: boolean;
+    isOpen?: boolean;
 }
 
 export function useMenuHandle(options: MenuHandleOptions = {}) {
-    const { closeOnScroll = false } = options;
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { closeOnScroll = false, isOpen = false } = options;
+    const [isMenuOpen, setIsMenuOpen] = useState(isOpen);
     const menuRef = useRef<HTMLDivElement>(null);
 
     const handleClickOutside = (event: MouseEvent) => {
