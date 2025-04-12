@@ -34,8 +34,11 @@ export type SearchFilters = {
   query?: string;
   name?: string;
   tags?: Set<string>;
-  dateRange?: Date[];
-  location?: string;
+  startDate?: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
+  locations?: string;
   page?: number;
   organizations?: string[];
   sort?: string;
@@ -76,6 +79,14 @@ export function castFilterParam(
       return new Set(value.split(","));
     case "page":
       return parseInt(value);
+    case "startDate":
+    case "endDate":
+      return value; // Date strings in 'YYYY-MM-DD' format
+    case "startTime":
+    case "endTime":
+      return value; // Time strings in 'HH:MM' format
+    case "locations":
+      return value; // Comma-separated string of locations
     default:
       return value;
   }

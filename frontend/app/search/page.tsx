@@ -12,6 +12,7 @@ import { AnimatePresence } from "framer-motion";
 import { useAuth } from "@/components/auth/AuthContext";
 import ToastManager from "@/components/toast/ToastManager";
 import LoginScreen from "@/components/auth/LoginScreen";
+import { formatDateForInput } from "@/utils/date";
 
 // Filters
 // - Date Range
@@ -71,6 +72,13 @@ export default function Search() {
 
   function updateUrl() {
     const params = new URLSearchParams(searchParams);
+    
+    // Clear existing params we might update
+    ['tags', 'startDate', 'endDate', 'startTime', 'endTime', 'locations', 'page'].forEach(key => {
+      params.delete(key);
+    });
+    
+    // Add current filter params
     Object.entries(filters.current).forEach(([key, val]) => {
       if (val) {
         if (val instanceof Set) {
@@ -80,20 +88,53 @@ export default function Search() {
         } else {
           params.set(key, val.toString());
         }
-      } else {
-        params.delete(key);
       }
     });
+    
     setTags(Array.from(filters.current.tags ?? []));
     push(`/search?${params.toString()}`);
   }
 
   const handleFilterChange = (newFilters: { 
     tags?: string[]; 
-    dateRange?: [Date, Date]; 
-    timeRange?: [string, string] 
+    dateRange?: [Date | null, Date | null]; 
+    timeRange?: [string | null, string | null];
+    locations?: string[];
   }) => {
-    if (newFilters.tags) filters.current.tags = new Set(newFilters.tags);
+    // Clear existing filters that might be updated
+    ['tags', 'startDate', 'endDate', 'startTime', 'endTime', 'locations'].forEach(key => {
+      delete (filters.current as any)[key];
+    });
+    
+    // Handle tags
+    if (newFilters.tags && newFilters.tags.length > 0) {
+      filters.current.tags = new Set(newFilters.tags);
+    }
+
+    // Handle date range
+    if (newFilters.dateRange) {
+      const [startDate, endDate] = newFilters.dateRange;
+      if (startDate && endDate) {
+        filters.current.startDate = formatDateForInput(startDate);
+        filters.current.endDate = formatDateForInput(endDate);
+      }
+    }
+
+    // Handle time range
+    if (newFilters.timeRange) {
+      const [startTime, endTime] = newFilters.timeRange;
+      if (startTime) filters.current.startTime = startTime;
+      if (endTime) filters.current.endTime = endTime;
+    }
+
+    // Handle locations
+    if (newFilters.locations && newFilters.locations.length > 0) {
+      filters.current.locations = newFilters.locations.join(',');
+    }
+
+    // Reset to page 1 when filters change
+    filters.current.page = 1;
+    
     updateUrl();
   };
 

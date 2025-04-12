@@ -97,10 +97,105 @@ export function dateToUTCMidnight(date: string): Date {
     .toJSDate();
 }
 
+/**
+ * Formats a date for input
+ * @param date - The date to format
+ * @returns The formatted date (YYYY-MM-DD)
+ */
 export const formatDateForInput = (date: Date): string => {
   return date.toISOString().split('T')[0];
 };
 
+/**
+ * Formats a time for input
+ * @param date - The date to format
+ * @returns The formatted time
+ */
 export const formatTimeForInput = (date: Date): string => {
   return date.toTimeString().slice(0, 5);
 };
+
+/**
+ * Gets the date of today
+ * @returns The date of today
+ */
+export const getToday = (): Date => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+};
+
+/**
+ * Gets the date of tomorrow
+ * @returns The date of tomorrow
+ */
+export const getTomorrow = (): Date => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  return tomorrow;
+};
+
+/**
+ * Gets the last day of the week
+ * @returns The last day of the week
+ */
+export const getEndOfWeek = (): Date => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const endOfWeek = new Date();
+  endOfWeek.setDate(today.getDate() + (7 - today.getDay()));
+  return endOfWeek;
+};
+
+/**
+ * Gets the last day of the month
+ * @returns The last day of the month
+ */
+export const getEndOfMonth = (): Date => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const endOfMonth = new Date();
+  endOfMonth.setMonth(today.getMonth() + 1);
+  endOfMonth.setDate(0);
+  return endOfMonth;
+};
+
+/**
+ * Checks if the date is today
+ * @param date - The date to check
+ * @returns True if the date is today, false otherwise
+ */
+export const isToday = (date: Date): boolean => {
+  return date.getDate() === getToday().getDate();
+};
+
+/**
+ * Checks if the date is tomorrow
+ * @param date - The date to check
+ * @returns True if the date is tomorrow, false otherwise
+ */
+export const isTomorrow = (date: Date): boolean => {
+  return date.getDate() === getTomorrow().getDate();
+};
+
+/**
+ * Checks if the date is the last day of the week
+ * @param date - The date to check
+ * @returns True if the date is the last day of the week, false otherwise
+ */
+export const isThisWeekEndDay = (date: Date): boolean => {
+  return date.getDate() === getEndOfWeek().getDate();
+};
+
+/**
+ * Checks if the date is the last day of the month
+ * @param date - The date to check
+ * @returns True if the date is the last day of the month, false otherwise
+ */
+export const isThisMonthEndDay = (date: Date): boolean => {
+  return date.getDate() === getEndOfMonth().getDate();
+};
+
+
+

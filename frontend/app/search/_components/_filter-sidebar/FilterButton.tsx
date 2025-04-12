@@ -10,7 +10,7 @@ export function FilterButton({
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1 text-sm rounded-full ${active ? "bg-maroon text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+      className={`px-3 py-1 text-sm w-fit rounded-full ${active ? "bg-maroon text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
     >
       {text}
     </button>

@@ -1,14 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { useMenuHandle } from "@/components/MenuHandle";
+import { useSearchParams } from "next/navigation";
 
 interface LocationFilterProps {
   onLocationChange: (locations: string[]) => void;
 }
 
+// Available location types
+const LOCATION_TYPES = ["On Campus", "Off Campus", "Virtual"];
+
 export default function LocationFilter({ onLocationChange }: LocationFilterProps) {
-  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const searchParams = useSearchParams();
+  
+  // Initialize from URL parameters if available
+  const initialLocations = searchParams.get('locations')
+    ? searchParams.get('locations')!.split(',')
+    : [];
+    
+  const [selectedLocations, setSelectedLocations] = useState<string[]>(initialLocations);
   const locationMenu = useMenuHandle({isOpen: true});
+  
+  // Update parent component when locations change on initial load
+  useEffect(() => {
+    if (initialLocations.length > 0) {
+      onLocationChange(initialLocations);
+    }
+  }, []); // Runs only on mount to sync initial state
 
   const handleLocationSelect = (location: string) => {
     const newLocations = selectedLocations.includes(location)
@@ -33,33 +51,17 @@ export default function LocationFilter({ onLocationChange }: LocationFilterProps
       
       {locationMenu.isMenuOpen && (
         <div className="space-y-1"> 
-          <label className="flex items-center">
-            <input 
-              type="checkbox" 
-              className="rounded text-maroon focus:ring-maroon h-4 w-4"
-              checked={selectedLocations.includes("On Campus")}
-              onChange={() => handleLocationSelect("On Campus")}
-            />
-            <span className="ml-2 text-sm text-gray-700">On Campus</span>
-          </label>
-          <label className="flex items-center">
-            <input 
-              type="checkbox" 
-              className="rounded text-maroon focus:ring-maroon h-4 w-4"
-              checked={selectedLocations.includes("Off Campus")}
-              onChange={() => handleLocationSelect("Off Campus")}
-            />
-            <span className="ml-2 text-sm text-gray-700">Off Campus</span>
-          </label>
-          <label className="flex items-center">
-            <input 
-              type="checkbox" 
-              className="rounded text-maroon focus:ring-maroon h-4 w-4"
-              checked={selectedLocations.includes("Virtual")}
-              onChange={() => handleLocationSelect("Virtual")}
-            />
-            <span className="ml-2 text-sm text-gray-700">Virtual</span>
-          </label>
+          {LOCATION_TYPES.map(locationType => (
+            <label key={locationType} className="flex items-center">
+              <input 
+                type="checkbox" 
+                className="rounded text-maroon focus:ring-maroon h-4 w-4"
+                checked={selectedLocations.includes(locationType)}
+                onChange={() => handleLocationSelect(locationType)}
+              />
+              <span className="ml-2 text-sm text-gray-700">{locationType}</span>
+            </label>
+          ))}
         </div>
       )}
     </div>
