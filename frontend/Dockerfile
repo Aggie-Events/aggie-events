@@ -21,6 +21,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY ./ ./
 
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_AUTH_URL
+
 RUN if [ -z "$NEXT_PUBLIC_API_URL" ]; then echo 'Environment variable NEXT_PUBLIC_API_URL must be specified. Exiting.'; exit 1; fi
 
 # Build the Next.js application
