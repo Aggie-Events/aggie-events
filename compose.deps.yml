@@ -1,32 +1,4 @@
 services:
-  traefik:
-    image: traefik:v3.2.1
-    container_name: traefik
-    restart: always
-    ports:
-      - "80:80"        # HTTP
-      - "443:443"      # HTTPS
-      - "8080:8080"    # Traefik dashboard (optional)
-    command:
-      - "--api.dashboard=true"
-      - "--api.insecure=true"
-      - "--log.level=INFO"
-
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-
-      - "--entryPoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.email=zanbowie138@gmail.com"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./letsencrypt:/letsencrypt"  # Store SSL certificates
-    networks:
-      - traefik-network
   db:
     container_name: postgres_container
     image: postgres:17
@@ -48,7 +20,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - traefik-network
+      - dokploy-network
   pgbackups:
     container_name: pgbackups
     image: prodrigestivill/postgres-backup-local
@@ -73,8 +45,7 @@ services:
         - BACKUP_KEEP_MONTHS=6
         - HEALTHCHECK_PORT=8080
     networks:
-      - traefik-network
+      - dokploy-network
 networks:
-  traefik-network:
-    name: traefik-network
-    driver: bridge  # Optional: define the network driver (default is `bridge`)
+  dokploy-network:
+    external: true

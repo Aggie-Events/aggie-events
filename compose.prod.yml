@@ -15,10 +15,10 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`aggieevents.tech`)"  # Replace with your domain
       - "traefik.http.routers.app.entrypoints=websecure"     # HTTPS
-#      - "traefik.http.routers.app.tls=true"  # Enable SSL
       - "traefik.http.routers.app.tls.certresolver=letsencrypt"  # Use Let's Encrypt for SSL
+      - "traefik.http.services.next-app.loadbalancer.server.port=3000"
     networks:
-      - traefik-network
+      - dokploy-network
   backend:
     image: agev/backend:latest
     container_name: backend_container
@@ -33,10 +33,10 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`api.aggieevents.tech`)"
       - "traefik.http.routers.api.entrypoints=websecure"
-#      - "traefik.http.routers.api.tls=true"  # Enable SSL
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.api.loadbalancer.server.port=5000"
     networks:
-      - traefik-network
+      - dokploy-network
 networks:
-  traefik-network:
+  dokploy-network:
     external: true
