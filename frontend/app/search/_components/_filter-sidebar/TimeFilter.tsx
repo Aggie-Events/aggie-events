@@ -1,70 +1,81 @@
-import React, { useState } from "react";
-import { FaChevronDown } from "react-icons/fa";
-import { useMenuHandle } from "@/components/MenuHandle";
+import React from "react";
 import { FilterButton } from "./FilterButton";
+import { FilterSection } from "./FilterSection";
+
 interface TimeFilterProps {
-  onTimeChange: (startTime: string, endTime: string) => void;
+  onTimeChange: (startTime: string | undefined, endTime: string | undefined) => void;
+  startTime: string | undefined;
+  endTime: string | undefined;
 }
 
-export default function TimeFilter({ onTimeChange }: TimeFilterProps) {
-  const [startTime, setStartTime] = useState<string>("");
-  const [endTime, setEndTime] = useState<string>("");
-  const timeFilterMenu = useMenuHandle({ isOpen: true });
+type TimeFilterButton = "any" | "morning" | "afternoon" | "evening";
 
-  const handleTimeSelect = (start: string, end: string) => {
-    setStartTime(start);
-    setEndTime(end);
+export default function TimeFilter({ onTimeChange, startTime, endTime }: TimeFilterProps) {
+  const [activeTimeButton, setActiveTimeButton] = React.useState<TimeFilterButton | null>(null);
 
-    if (start && end) {
-      onTimeChange(start, end);
-    }
+  const handleTimeSelect = (start: string | undefined, end: string | undefined, buttonName?: TimeFilterButton) => {
+    setActiveTimeButton(buttonName || null);
+    onTimeChange(start, end);
+  };
+
+  const resetTimeFilter = () => {
+    setActiveTimeButton("any");
+    onTimeChange(undefined, undefined);
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="font-medium">Time</h3>
-        <button
-          onClick={() =>
-            timeFilterMenu.setIsMenuOpen(!timeFilterMenu.isMenuOpen)
-          }
-          className="text-sm text-gray-500 flex items-center"
-        >
-          <FaChevronDown
-            className={`ml-1 h-3 w-3 transition-transform ${timeFilterMenu.isMenuOpen ? "rotate-180" : ""}`}
+    <FilterSection title="Time">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <FilterButton
+            onClick={resetTimeFilter}
+            active={activeTimeButton === "any"}
+            text="Any"
           />
-        </button>
-      </div>
+          <FilterButton
+            onClick={() => handleTimeSelect("06:00", "12:00", "morning")}
+            active={activeTimeButton === "morning"}
+            text="Morning"
+          />
+          <FilterButton
+            onClick={() => handleTimeSelect("12:00", "17:00", "afternoon")}
+            active={activeTimeButton === "afternoon"}
+            text="Afternoon"
+          />
+          <FilterButton
+            onClick={() => handleTimeSelect("17:00", "23:59", "evening")}
+            active={activeTimeButton === "evening"}
+            text="Evening"
+          />
+        </div>
 
-      {timeFilterMenu.isMenuOpen && (
-        <div className="space-y-2">
-          <div className="flex flex-col gap-2">
-            <FilterButton
-              onClick={() => handleTimeSelect("", "")}
-              active={startTime === "" && endTime === ""}
-              text="Any"
+        <div className="flex flex-col gap-2">
+          <div>
+            <label className="block text-sm text-gray-700">Start Time</label>
+            <input
+              type="time"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-maroon focus:ring-maroon sm:text-sm"
+              value={startTime || ""}
+              onChange={(e) => {
+                setActiveTimeButton(null);
+                handleTimeSelect(e.target.value || undefined, endTime);
+              }}
             />
-            <div>
-              <label className="block text-sm text-gray-700">Start Time</label>
-              <input
-                type="time"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-maroon focus:ring-maroon sm:text-sm"
-                value={startTime}
-                onChange={(e) => handleTimeSelect(e.target.value, endTime)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-700">End Time</label>
-              <input
-                type="time"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-maroon focus:ring-maroon sm:text-sm"
-                value={endTime}
-                onChange={(e) => handleTimeSelect(startTime, e.target.value)}
-              />
-            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-700">End Time</label>
+            <input
+              type="time"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-maroon focus:ring-maroon sm:text-sm"
+              value={endTime || ""}
+              onChange={(e) => {
+                setActiveTimeButton(null);
+                handleTimeSelect(startTime, e.target.value || undefined);
+              }}
+            />
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    </FilterSection>
   );
 }

@@ -1,7 +1,9 @@
 "use client";
-import React, { useRef, useState, useCallback, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SearchFilters, setFilterParam, castFilterParam } from "@/config/query-types";
+import {
+  SearchFilters,
+} from "@/config/query-types";
 import { useEventSearch, useToggleEventSave } from "@/api/event";
 import EventDisplay from "./_components/_event-display/EventDisplay";
 import PageSelect from "./_components/PageSelect";
@@ -12,6 +14,8 @@ import { AnimatePresence } from "framer-motion";
 import { useAuth } from "@/components/auth/AuthContext";
 import ToastManager from "@/components/toast/ToastManager";
 import LoginScreen from "@/components/auth/LoginScreen";
+import { DraggableSidebar } from "@/components/common/DraggableSidebar";
+import { useFilterHook } from "./_components/FilterHook";
 
 // Filters
 // - Date Range
@@ -40,95 +44,43 @@ const sortOptions = [
 
 export default function Search() {
   const searchParams = useSearchParams();
-  const filters = useRef<SearchFilters>(getFilters());
   const { push } = useRouter();
   const { user } = useAuth();
-  const [showLogin, setShowLogin] = useState(false);
-  const [eventStates, setEventStates] = useState<Record<number, { isSaved: boolean; saves: number }>>({});
+
   const { mutateAsync: toggleEventSave } = useToggleEventSave();
-  
-  const { data: searchResults, isLoading, isFetching } = useEventSearch(searchParams.toString());
-  const results = searchResults?.events;
-  
-  const [tags, setTags] = useState<string[]>(
-    filters.current.tags ? Array.from(filters.current.tags) : []
-  );
-  const [sidebarWidth, setSidebarWidth] = useState(320);
-  const isDragging = useRef(false);
-  const startX = useRef(0);
-  const startWidth = useRef(0);
+  const {
+    data: results,
+    isLoading,
+    isFetching,
+  } = useEventSearch(searchParams.toString());
 
-  function getFilters(): SearchFilters {
-    const params = new URLSearchParams(searchParams);
-    let newFilters: SearchFilters = {};
-    for (const [key, value] of params.entries()) {
-      const castKey = key as keyof SearchFilters;
-      const val = castFilterParam(key, value);
-      setFilterParam(newFilters, castKey, val);
-    }
-    return newFilters;
-  }
+  const [showLogin, setShowLogin] = useState(false);
+  const [eventStates, setEventStates] = useState<
+    Record<number, { isSaved: boolean; saves: number }>
+  >({});
+  const { filters } = useFilterHook();
 
-  function updateUrl() {
-    const params = new URLSearchParams(searchParams);
-    Object.entries(filters.current).forEach(([key, val]) => {
+  function updateSearchParams(filters: SearchFilters) {
+    // Update the URL with the current filters
+    const params = new URLSearchParams();
+
+    // Add current filter params
+    Object.entries(filters).forEach(([key, val]) => {
       if (val) {
         if (val instanceof Set) {
-          val.size > 0 ? params.set(key, Array.from(val).join(",")) : params.delete(key);
+          val.size > 0
+            ? params.set(key, Array.from(val).join(","))
+            : params.delete(key);
         } else if (Array.isArray(val)) {
           params.set(key, val.join(","));
         } else {
           params.set(key, val.toString());
         }
-      } else {
-        params.delete(key);
       }
     });
-    setTags(Array.from(filters.current.tags ?? []));
+
     push(`/search?${params.toString()}`);
   }
-
-  const handleFilterChange = (newFilters: { 
-    tags?: string[]; 
-    dateRange?: [Date, Date]; 
-    timeRange?: [string, string] 
-  }) => {
-    if (newFilters.tags) filters.current.tags = new Set(newFilters.tags);
-    updateUrl();
-  };
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    isDragging.current = true;
-    startX.current = e.clientX;
-    startWidth.current = sidebarWidth;
-    document.body.classList.add('select-none');
-  }, [sidebarWidth]);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging.current) return;
-    
-    const delta = e.clientX - startX.current;
-    const newWidth = startWidth.current + delta;
-    
-    if (newWidth >= 200 && newWidth <= 600) {
-      setSidebarWidth(newWidth);
-    }
-  }, []);
-
-  const handleMouseUp = useCallback(() => {
-    isDragging.current = false;
-    document.body.classList.remove('select-none');
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [handleMouseMove, handleMouseUp]);
 
   const handleSaveEvent = (eventId: number) => {
     if (!user) {
@@ -137,23 +89,26 @@ export default function Search() {
       return;
     }
 
-    const event = results?.find(e => e.event_id === eventId);
+    const event = results?.events?.find((e) => e.event_id === eventId);
     if (!event) return;
 
     // Update the event card state
     // Functions like an optimistic update to show the event as saved immediately without having to refetch
-    const currentState = eventStates[eventId] || { 
-      isSaved: event.event_saved ?? false, 
-      saves: event.event_saves 
+    const currentState = eventStates[eventId] || {
+      isSaved: event.event_saved ?? false,
+      saves: event.event_saves,
     };
-    
-    toggleEventSave({ eventId: eventId.toString(), isCurrentlySaved: currentState.isSaved }).then(() => {
-      setEventStates(prev => ({
+
+    toggleEventSave({
+      eventId: eventId.toString(),
+      isCurrentlySaved: currentState.isSaved,
+    }).then(() => {
+      setEventStates((prev) => ({
         ...prev,
         [eventId]: {
           isSaved: !currentState.isSaved,
-          saves: currentState.saves + (currentState.isSaved ? -1 : 1)
-        }
+          saves: currentState.saves + (currentState.isSaved ? -1 : 1),
+        },
       }));
     });
   };
@@ -170,58 +125,54 @@ export default function Search() {
 
   return (
     <div className="flex flex-col w-full h-[calc(100vh-4rem)] relative">
-      <AnimatePresence>
-        {isFetching && <LoadingBar />}
-      </AnimatePresence>
+      <AnimatePresence>{isFetching && <LoadingBar />}</AnimatePresence>
 
       {/* Main content area with filters and results */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left sidebar */}
-        <div 
-          className="bg-white border-r overflow-y-auto h-full"
-          style={{ width: sidebarWidth }}
-        >
+        <DraggableSidebar>
           <div className="h-full p-4">
-            <Sidebar onFilterChange={handleFilterChange} />
+            <Sidebar
+              filters={filters}
+              onFilterChange={(newFilters: SearchFilters) =>
+                updateSearchParams({ ...newFilters, page: undefined })
+              }
+            />
           </div>
-        </div>
-
-        {/* Drag handle */}
-        <div
-          className="w-1 h-full bg-transparent hover:bg-gray-200 active:bg-gray-300 transition-colors cursor-col-resize"
-          onMouseDown={handleMouseDown}
-        />
+        </DraggableSidebar>
 
         {/* Results area */}
         <div className="flex-1 overflow-y-auto">
-          <div className="p-4 max-w-7xl">
+          <div className="max-w-7xl">
             {isLoading ? (
               <div className="w-full flex justify-center items-center min-h-[200px]">
                 <div className="w-12 h-12 border-4 border-maroon border-t-transparent rounded-full animate-spin" />
               </div>
-            ) : results && searchResults ?  (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center z-10">
-                  <h1 className="text-xl font-semibold">
-                    {searchResults.resultSize} results{" "}
+            ) : results ? (
+              <div className="space-y-2">
+                <div className="flex justify-between items-center z-10 bg-white px-4 py-2 sticky top-0 border-b border-gray-200">
+                  <h1 className="text-lg font-semibold">
+                    {results.resultSize} results{" "}
+                    {filters.query ? `for "${filters.query}" ` : " "}
                     <span className="text-gray-500 text-sm">
-                      ({searchResults.duration.toFixed(2)} ms)
+                      ({results.duration.toFixed(2)} ms)
                     </span>
                   </h1>
-                  <SortOption 
-                    filters={filters}
-                    onSearch={updateUrl}
+                  <SortOption
+                    currentSort={filters.sort ?? "start"}
+                    onUpdate={(value) => {
+                      updateSearchParams({ ...filters, sort: value, page: 1 });
+                    }}
                     sortOptions={sortOptions}
                   />
                 </div>
 
-                <div className="flex flex-col gap-4">
-                  {results.map((event) => {
+                <div className="flex flex-col gap-4 p-4">
+                  {results.events.map((event) => {
                     const state = eventStates[event.event_id] || {
                       isSaved: event.event_saved ?? false,
-                      saves: event.event_saves
+                      saves: event.event_saves,
                     };
-                    
+
                     return (
                       <EventDisplay
                         key={event.event_id}
@@ -236,16 +187,15 @@ export default function Search() {
                   })}
                 </div>
 
-                {results.length < searchResults.resultSize && (
+                {results.events.length < results.resultSize && (
                   <div className="flex justify-center mt-6">
                     <PageSelect
-                      page={filters.current.page ?? 1}
-                      pageSize={searchResults.pageSize}
+                      page={filters.page ?? 1}
+                      pageSize={results.pageSize}
                       setPage={(page) => {
-                        filters.current.page = page;
-                        updateUrl();
+                        updateSearchParams({ ...filters, page });
                       }}
-                      maxResults={searchResults.resultSize}
+                      maxResults={results.resultSize}
                     />
                   </div>
                 )}

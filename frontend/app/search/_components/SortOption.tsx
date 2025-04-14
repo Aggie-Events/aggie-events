@@ -4,21 +4,18 @@ import { useMenuHandle } from "@/components/MenuHandle";
 import { FaChevronDown } from "react-icons/fa";
 
 interface SortOptionProps {
-  filters: React.MutableRefObject<SearchFilters>;
-  onSearch: () => void;
+  currentSort: string;
+  onUpdate: (value: string) => void;
   sortOptions: { display: string; value: string }[];
 }
 
-export default function SortOption({ filters, onSearch, sortOptions }: SortOptionProps) {
+export default function SortOption({ currentSort, onUpdate, sortOptions }: SortOptionProps) {
   const { isMenuOpen, menuRef, setIsMenuOpen } = useMenuHandle();
   
-  const currentSort = filters.current.sort || "start";
   const currentSortDisplay = sortOptions.find(option => option.value === currentSort)?.display || "Sort by";
 
   const handleSortChange = (value: string) => {
-    filters.current.sort = value;
-    filters.current.page = 1;
-    onSearch();
+    onUpdate(value);
     setIsMenuOpen(false);
   };
 

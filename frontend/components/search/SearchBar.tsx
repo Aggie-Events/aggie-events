@@ -3,15 +3,20 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaSearch } from "react-icons/fa";
 import SearchPrompt from "@/components/search/SearchPrompt";
+import { useMenuHandle } from "../MenuHandle";
 
 export default function SearchBar() {
   const [searchInput, setSearchInput] = useState<string>("");
-  const [focused, setFocused] = useState<boolean>(false);
   const searchParams = useSearchParams();
-
-  const searchRef = useRef<HTMLFormElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const { isMenuOpen: focused, menuRef, setIsMenuOpen: setFocused } = useMenuHandle();
   const { push } = useRouter();
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (params.has("query")) {
+      setSearchInput(params.get("query")!);
+    }
+  }, [searchParams]);
 
   function handleSearch() {
     // Manipulate url query parameters
@@ -23,7 +28,6 @@ export default function SearchBar() {
       params.delete("query");
     }
     setFocused(false);
-    setSearchInput("");
     push(`/search?${params.toString()}`);
   }
 
@@ -43,32 +47,11 @@ export default function SearchBar() {
     push(`/search?${params.toString()}`);
   }
 
-  useEffect(() => {
-    const handleClickOutside = (event: any) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setFocused(false);
-      }
-    };
-
-    // Add event listener when the menu is open
-    if (focused) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-      inputRef.current?.blur();
-    }
-
-    // Cleanup event listener on component unmount
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [focused]);
-
   return (
     <>
       <form
         className={`flex grow justify-center hover:drop-shadow-lg ${focused && "z-[999]"}`}
-        ref={searchRef}
+        
       >
         <div
           className={`relative flex w-full items-center
@@ -79,6 +62,7 @@ export default function SearchBar() {
               : "rounded-md bg-gray-100"
           }
             `}
+            ref={menuRef}
         >
           <button
             onClick={handleSearch}
@@ -91,7 +75,6 @@ export default function SearchBar() {
             alt="Test"
             className={`text-black py-1 w-full h-10 outline-none bg-transparent`}
             placeholder="Search..."
-            ref={inputRef}
             onChange={(e) => setSearchInput(e.target.value)}
             value={searchInput}
             onKeyDown={(e) => {

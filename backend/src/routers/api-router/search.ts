@@ -1,7 +1,7 @@
 import { db } from "../../database";
 import express from "express";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
-import { Expression, SqlBool } from "kysely";
+import { Expression, SqlBool, sql } from "kysely";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 
 export const searchRouter = express.Router();
@@ -20,13 +20,17 @@ searchRouter.get("/events", async (req, res) => {
     page: page = 1,
     pageSize: pageSize = 3,
     sort: sortBy,
+    startDate,
+    endDate,
+    startTime,
+    endTime,
   } = req.query;
 
   try {
-    // TODO: check for typos
     let query = db.selectFrom("events as e").where((eb) => {
       const filters: Expression<SqlBool>[] = [];
 
+      // Text search filters
       if (queryString) {
         filters.push(eb("e.event_name", "ilike", `%${queryString}%`));
       }
@@ -34,6 +38,66 @@ searchRouter.get("/events", async (req, res) => {
       if (name) {
         filters.push(eb("e.event_name", "ilike", `%${name}%`));
       }
+
+      // Date range filters
+      if (startDate) {
+        const startDateObj = new Date(startDate as string);
+        const utcDate = new Date(startDateObj.getTime() + 5 * 60 * 60 * 1000);
+        console.log(`${utcDate.toISOString().split("T")[0]}`);
+        filters.push(
+          eb(
+            sql`e.start_time::date`,
+            ">=",
+            sql`${utcDate.toISOString().split("T")[0]}`,
+          ),
+        );
+      }
+
+      if (endDate) {
+        const endDateObj = new Date(endDate as string);
+        const utcDate = new Date(endDateObj.getTime() + 5 * 60 * 60 * 1000);
+        filters.push(
+          eb(
+            sql`e.end_time::date`,
+            "<=",
+            sql`${utcDate.toISOString().split("T")[0]}`,
+          ),
+        );
+      }
+
+      // TODO: This is a horrible way to do this, but it works for now
+      if (startTime) {
+        const [hours, minutes] = (startTime as string).split(":");
+        const cstDate = new Date();
+        cstDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        // Convert CST to UTC
+        const utcDate = new Date(cstDate.getTime() + 5 * 60 * 60 * 1000);
+        console.log(`${utcDate.toTimeString().slice(0, 5)}`);
+        filters.push(
+          eb(
+            sql`e.start_time::time`,
+            ">=",
+            sql`${utcDate.toTimeString().slice(0, 5)}`,
+          ),
+        );
+      }
+
+      if (endTime) {
+        const [hours, minutes] = (endTime as string).split(":");
+        const cstDate = new Date();
+        cstDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        // Convert CST to UTC
+        const utcDate = new Date(cstDate.getTime() + 5 * 60 * 60 * 1000);
+        console.log(`${utcDate.toTimeString().slice(0, 5)}`);
+        filters.push(
+          eb(
+            sql`e.end_time::time`,
+            "<=",
+            sql`${utcDate.toTimeString().slice(0, 5)}`,
+          ),
+        );
+      }
+
       return eb.and(filters);
     });
 
@@ -56,7 +120,7 @@ searchRouter.get("/events", async (req, res) => {
             .having((eb) => {
               return eb(
                 eb.fn.count<number>("e.event_id"),
-                ">=", // Technically it doesn't matter if we use >= or = (I think)
+                ">=",
                 tagArray.length,
               );
             })
@@ -71,6 +135,7 @@ searchRouter.get("/events", async (req, res) => {
       .select((eb) => eb.fn.count<number>("e.event_id").as("event_count"))
       .executeTakeFirstOrThrow();
 
+    // Apply sorting
     switch (sortBy) {
       case "start":
         query = query.orderBy("e.start_time", "asc");
@@ -299,55 +364,11 @@ searchRouter.get("/events/user", authMiddleware, async (req, res) => {
       .offset((Number(page) - 1) * Number(pageSize))
       .execute();
 
-    console.log("results", results);
-
-    // // Get likes count in a separate query
-    // const likesQuery = await db
-    //   .selectFrom("savedevents")
-    //   .select([
-    //     "event_id",
-    //     (eb) => eb.fn.count<number>("user_id").as("likes_count"),
-    //   ])
-    //   .where(
-    //     "event_id",
-    //     "in",
-    //     results.map((r: any) => r.event_id),
-    //   )
-    //   .groupBy("event_id")
-    //   .execute();
-
-    // // Map likes to events
-    // const likesMap = new Map(
-    //   likesQuery.map((l) => [l.event_id, l.likes_count]),
-    // );
     results = results.map((event) => ({
       ...event,
       event_saves: 0,
       event_saved: false, // Default value
     }));
-
-    // If user is authenticated, check if they have saved each event
-    // if (req.user) {
-    //   const savedEvents = await db
-    //     .selectFrom("savedevents")
-    //     .where("user_id", "=", req.user.user_id)
-    //     .where(
-    //       "event_id",
-    //       "in",
-    //       results.map((r: any) => r.event_id),
-    //     )
-    //     .select(["event_id"])
-    //     .execute();
-    // }
-
-    //   const savedEventIds = new Set(savedEvents.map((se) => se.event_id));
-
-    //   results = results.map((event: any) => ({
-    //     ...event,
-    // //     event_saved: savedEventIds.has(event.event_id),
-    // //    }));
-    //   // }
-    //   })
 
     res.status(200).json({
       results,
