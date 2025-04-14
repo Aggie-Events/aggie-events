@@ -17,7 +17,9 @@ export default function FeedbackPage() {
   const submitFeedback = useFeedbackSubmit();
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -28,21 +30,25 @@ export default function FeedbackPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formData.message.trim()) {
-      ToastManager.addToast("Please enter your feedback message", "error", 3000);
+      ToastManager.addToast(
+        "Please enter your feedback message",
+        "error",
+        3000,
+      );
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       await submitFeedback.mutateAsync({
         feedbackType: formData.feedbackType,
         message: formData.message,
       });
-      
+
       // Success handling
       ToastManager.addToast("Thank you for your feedback!", "success", 3000);
       setFormData({
@@ -67,11 +73,13 @@ export default function FeedbackPage() {
         suggestions, or issues you've encountered while using Aggie Events.
         you've encountered while using Aggie Events.
       </p>
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        
         <div>
-          <label htmlFor="feedbackType" className="block text-sm font-medium mb-1">
+          <label
+            htmlFor="feedbackType"
+            className="block text-sm font-medium mb-1"
+          >
             Feedback Type
           </label>
           <select
@@ -88,7 +96,7 @@ export default function FeedbackPage() {
             <option value="other">Other</option>
           </select>
         </div>
-        
+
         <div>
           <label htmlFor="message" className="block text-sm font-medium mb-1">
             Your Feedback *
@@ -103,19 +111,20 @@ export default function FeedbackPage() {
             required
           />
         </div>
-        
+
         <button
           type="submit"
           disabled={isSubmitting}
           className={`flex items-center justify-center gap-2 w-full md:w-auto px-6 py-2.5 rounded-lg text-white font-medium transition-all
-            ${isSubmitting
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-maroon hover:bg-maroon/90"
+            ${
+              isSubmitting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-maroon hover:bg-maroon/90"
             }`}
         >
           {isSubmitting ? (
             <>
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white/80 rounded-full animate-spin"/>
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
               Submitting...
             </>
           ) : (

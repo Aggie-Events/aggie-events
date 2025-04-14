@@ -1,19 +1,31 @@
 import React from "react";
-import { FilterButton } from "./FilterButton";
-import { FilterSection } from "./FilterSection";
+import { FilterButton } from "@/app/search/_components/filter-sidebar/components/FilterButton";
+import { FilterSection } from "@/app/search/_components/filter-sidebar/components/FilterSection";
 
 interface TimeFilterProps {
-  onTimeChange: (startTime: string | undefined, endTime: string | undefined) => void;
+  onTimeChange: (
+    startTime: string | undefined,
+    endTime: string | undefined,
+  ) => void;
   startTime: string | undefined;
   endTime: string | undefined;
 }
 
 type TimeFilterButton = "any" | "morning" | "afternoon" | "evening";
 
-export default function TimeFilter({ onTimeChange, startTime, endTime }: TimeFilterProps) {
-  const [activeTimeButton, setActiveTimeButton] = React.useState<TimeFilterButton | null>(null);
+export default function TimeFilter({
+  onTimeChange,
+  startTime,
+  endTime,
+}: TimeFilterProps) {
+  const [activeTimeButton, setActiveTimeButton] =
+    React.useState<TimeFilterButton | null>(null);
 
-  const handleTimeSelect = (start: string | undefined, end: string | undefined, buttonName?: TimeFilterButton) => {
+  const handleTimeSelect = (
+    start: string | undefined,
+    end: string | undefined,
+    buttonName?: TimeFilterButton,
+  ) => {
     setActiveTimeButton(buttonName || null);
     onTimeChange(start, end);
   };

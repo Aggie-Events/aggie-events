@@ -1,6 +1,6 @@
 import React from "react";
 import { FaEllipsisH } from "react-icons/fa";
-import { useMenuHandle } from "@/components/MenuHandle";
+import { useMenuSelect } from "@/components/common/MenuSelectionHook";
 
 interface EventMenuProps {
   onBlockEvent: (eventId: number) => void;
@@ -8,8 +8,12 @@ interface EventMenuProps {
   eventId: number;
 }
 
-export default function EventMenu({ onBlockEvent, onReportEvent, eventId }: EventMenuProps) {
-  const { isMenuOpen, menuRef, setIsMenuOpen } = useMenuHandle();
+export default function EventMenu({
+  onBlockEvent,
+  onReportEvent,
+  eventId,
+}: EventMenuProps) {
+  const { isMenuOpen, menuRef, setIsMenuOpen } = useMenuSelect();
 
   return (
     <div className="relative" ref={menuRef}>
@@ -46,4 +50,4 @@ export default function EventMenu({ onBlockEvent, onReportEvent, eventId }: Even
       )}
     </div>
   );
-} 
+}

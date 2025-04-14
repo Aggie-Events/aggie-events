@@ -4,9 +4,9 @@ import { FaTag, FaBookmark } from "react-icons/fa";
 import Link from "next/link";
 import { SearchEventsReturn } from "@/api/event";
 import IconLabel from "@/components/common/IconLabel";
-import EventImage from "@/app/search/_components/_event-display/EventImage";
-import SaveButton from "@/app/search/_components/_event-display/SaveButton";
-import EventMenu from "@/app/search/_components/_event-display/EventMenu";
+import EventImage from "@/components/event-display/EventImage";
+import SaveButton from "@/components/event-display/SaveButton";
+import EventMenu from "@/components/event-display/EventMenu";
 
 interface EventCardProps {
   event: SearchEventsReturn;
@@ -28,7 +28,8 @@ export default function EventCard({
   isActive = false,
 }: EventCardProps) {
   return (
-    <div className={`
+    <div
+      className={`
       relative grow w-full
       bg-gray-150
       rounded-lg
@@ -37,15 +38,16 @@ export default function EventCard({
       shadow-md
       
       transition-all duration-200
-      ${isActive ? 'border-maroon/30 shadow-lg translate-x-1' : ''}
+      ${isActive ? "border-maroon/30 shadow-lg translate-x-1" : ""}
 
       before:absolute before:left-0 before:top-0
       before:h-full before:w-1
       before:bg-maroon-400
       before:rounded-l-lg
-      ${isActive ? 'before:opacity-100' : 'before:opacity-0'}
+      ${isActive ? "before:opacity-100" : "before:opacity-0"}
       before:transition-opacity before:duration-200
-    `}>
+    `}
+    >
       <div className="flex gap-4">
         <EventImage event={event} />
         <div className="grow my-auto">

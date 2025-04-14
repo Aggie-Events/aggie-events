@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FaChevronDown } from "react-icons/fa";
-import { useMenuHandle } from "@/components/MenuHandle";
+import { useMenuSelect } from "@/components/common/MenuSelectionHook";
 import { useSearchParams } from "next/navigation";
-import { FilterSection } from "./FilterSection";
-import { FilterButton } from "./FilterButton";
+import { FilterSection } from "@/app/search/_components/filter-sidebar/components/FilterSection";
+import { FilterButton } from "@/app/search/_components/filter-sidebar/components/FilterButton";
 
 interface LocationFilterProps {
   onLocationChange: (locations: string[]) => void;
@@ -12,17 +12,20 @@ interface LocationFilterProps {
 // Available location types
 const LOCATION_TYPES = ["On Campus", "Off Campus", "Virtual"];
 
-export default function LocationFilter({ onLocationChange }: LocationFilterProps) {
+export default function LocationFilter({
+  onLocationChange,
+}: LocationFilterProps) {
   const searchParams = useSearchParams();
-  
+
   // Initialize from URL parameters if available
-  const initialLocations = searchParams.get('locations')
-    ? searchParams.get('locations')!.split(',')
+  const initialLocations = searchParams.get("locations")
+    ? searchParams.get("locations")!.split(",")
     : [];
-    
-  const [selectedLocations, setSelectedLocations] = useState<string[]>(initialLocations);
-  const locationMenu = useMenuHandle({isOpen: true});
-  
+
+  const [selectedLocations, setSelectedLocations] =
+    useState<string[]>(initialLocations);
+  const locationMenu = useMenuSelect({ isOpen: true });
+
   // Update parent component when locations change on initial load
   useEffect(() => {
     if (initialLocations.length > 0) {
@@ -32,9 +35,9 @@ export default function LocationFilter({ onLocationChange }: LocationFilterProps
 
   const handleLocationSelect = (location: string) => {
     const newLocations = selectedLocations.includes(location)
-      ? selectedLocations.filter(l => l !== location)
+      ? selectedLocations.filter((l) => l !== location)
       : [...selectedLocations, location];
-    
+
     setSelectedLocations(newLocations);
     onLocationChange(newLocations);
   };
@@ -65,4 +68,4 @@ export default function LocationFilter({ onLocationChange }: LocationFilterProps
       </div>
     </FilterSection>
   );
-} 
+}

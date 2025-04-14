@@ -3,18 +3,18 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { SearchFilters } from "@/config/query-types";
 import { useEventSearch, useToggleEventSave } from "@/api/event";
-import EventDisplay from "./_components/_event-display/EventDisplay";
+import EventDisplay from "@/components/event-display/EventDisplay";
 import PageSelect from "./_components/PageSelect";
-import Sidebar from "./_components/_filter-sidebar/FilterSidebar";
+import Sidebar from "@/app/search/_components/filter-sidebar/FilterSidebar";
 import SortOption from "./_components/SortOption";
-import LoadingBar from "@/components/LoadingBar";
+import LoadingBar from "@/components/common/LoadingBar";
 import { AnimatePresence } from "framer-motion";
 import { useAuth } from "@/components/auth/AuthContext";
 import ToastManager from "@/components/toast/ToastManager";
 import LoginScreen from "@/components/auth/LoginScreen";
 import { DraggableSidebar } from "@/components/common/DraggableSidebar";
 import { useSearchState } from "./_components/SearchStateHook";
-import EventSidebar from "./_components/_event-display/EventSidebar";
+import EventSidebar from "@/components/event-display/EventSidebar";
 
 // Filters
 // - Date Range
@@ -53,10 +53,7 @@ export default function Search() {
   }, [selectedEvent]);
 
   const { mutateAsync: toggleEventSave } = useToggleEventSave();
-  const {
-    data: results,
-    isLoading
-  } = useEventSearch(searchParams.toString());
+  const { data: results, isLoading } = useEventSearch(searchParams.toString());
 
   const [showLogin, setShowLogin] = useState(false);
 
@@ -82,7 +79,7 @@ export default function Search() {
       updateEventState(
         eventId,
         !currentState.isSaved,
-        currentState.saves + (currentState.isSaved ? -1 : 1)
+        currentState.saves + (currentState.isSaved ? -1 : 1),
       );
     });
   };
@@ -95,22 +92,25 @@ export default function Search() {
     console.log(`Reported event: ${eventId}`);
   };
 
-  const handleEventNavigation = (currentEventId: number, direction: 'up' | 'down') => {
+  const handleEventNavigation = (
+    currentEventId: number,
+    direction: "up" | "down",
+  ) => {
     if (!results?.events) return;
-    
 
-    if (direction === 'up' && currentEventId > 0) {
+    if (direction === "up" && currentEventId > 0) {
       setSelectedEvent(currentEventId - 1);
-    } else if (direction === 'down' && currentEventId < results.events.length - 1) {
+    } else if (
+      direction === "down" &&
+      currentEventId < results.events.length - 1
+    ) {
       setSelectedEvent(currentEventId + 1);
     }
   };
 
   return (
     <div className="flex flex-col w-full h-[calc(100vh-4rem)] relative">
-      <AnimatePresence>
-        {(loading) && <LoadingBar />}
-      </AnimatePresence>
+      <AnimatePresence>{loading && <LoadingBar />}</AnimatePresence>
 
       <div className="flex flex-1 overflow-hidden">
         <DraggableSidebar>
@@ -192,7 +192,7 @@ export default function Search() {
         </div>
       </div>
 
-      <AnimatePresence> 
+      <AnimatePresence>
         {results && selectedEvent !== null && (
           <EventSidebar
             event={results.events[selectedEvent]}

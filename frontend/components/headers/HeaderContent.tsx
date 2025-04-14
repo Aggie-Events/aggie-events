@@ -4,7 +4,7 @@ import React from "react";
 import SearchBar from "@/components/search/SearchBar";
 import UserLogoToggle from "@/components/headers/user-menu/UserLogoToggle";
 import Logo from "@/components/common/Logo";
-import CreateButton from "@/components/headers/create-button/CreateButton";
+import CreateButton from "@/components/headers/CreateButton";
 import Link from "next/link";
 import { useSavedEventsCount } from "@/api/event";
 import { useAuth } from "@/components/auth/AuthContext";
@@ -22,10 +22,7 @@ function UnauthenticatedHeader() {
     <ul className="flex gap-x-3 mx-2">
       {DefaultHeaderLinks.map(({ href, label }, index) => (
         <li key={index} className="flex flex-row items-center">
-          <Link 
-            href={href} 
-            className="text-white rounded-md"
-          >
+          <Link href={href} className="text-white rounded-md">
             {label}
           </Link>
         </li>
@@ -37,7 +34,7 @@ function UnauthenticatedHeader() {
 // Component for authenticated users
 function AuthenticatedHeader() {
   const { data: savedEventsCount = 0 } = useSavedEventsCount();
-  
+
   return (
     <>
       <CreateButton />
@@ -45,8 +42,8 @@ function AuthenticatedHeader() {
         {AuthHeaderLinks.map(({ href, label, icon }, index) => (
           <li key={index} className="flex flex-row items-center">
             <Tooltip text={label}>
-              <Link 
-                href={href} 
+              <Link
+                href={href}
                 className="text-white hover:text-white/80 transition-colors p-2 rounded-full hover:bg-white/10 relative"
                 title={label}
               >
@@ -68,12 +65,12 @@ function AuthenticatedHeader() {
 // Main HeaderContent component that contains common layout and decides which header to show
 export default function HeaderContent() {
   const { user } = useAuth();
-  
+
   return (
     <nav className="flex items-center w-full gap-4">
       {/* Logo section */}
       <div className="mb-2 w-fit mx-3 p-1">
-        <Logo 
+        <Logo
           width={50}
           height={50}
           className=""

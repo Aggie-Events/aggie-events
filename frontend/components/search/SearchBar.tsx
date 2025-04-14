@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaSearch } from "react-icons/fa";
 import SearchPrompt from "@/components/search/SearchPrompt";
-import { useMenuHandle } from "../MenuHandle";
+import { useMenuSelect } from "../common/MenuSelectionHook";
 
 export default function SearchBar() {
   const [searchInput, setSearchInput] = useState<string>("");
@@ -13,7 +13,7 @@ export default function SearchBar() {
     isMenuOpen: focused,
     menuRef,
     setIsMenuOpen: setFocused,
-  } = useMenuHandle();
+  } = useMenuSelect();
   const { push } = useRouter();
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function SearchBar() {
       params.delete("query");
     }
     params.delete("page");
-    
+
     setFocused(false);
     push(`/search?${params.toString()}`);
   }

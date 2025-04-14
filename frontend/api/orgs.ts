@@ -184,14 +184,14 @@ export function useOrgMembers(orgId: number) {
         `${process.env.NEXT_PUBLIC_API_URL}/orgs/${orgId}/members`,
         {
           method: "GET",
-        }
+        },
       );
-      
+
       // Parse dates
       const members = await response.json();
       return members.map((member: any) => ({
         ...member,
-        join_date: new Date(member.join_date)
+        join_date: new Date(member.join_date),
       }));
     },
     enabled: !!orgId,

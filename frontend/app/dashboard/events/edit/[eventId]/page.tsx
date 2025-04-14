@@ -11,12 +11,13 @@ import { uploadImage } from "@/api/uploadImage";
 export default function EditEventPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const { data: event, isPending, isError } = useEvent(eventId);
-  const { mutate: mutateEvent, isPending: isUpdating } = useEventMutation(eventId);
+  const { mutate: mutateEvent, isPending: isUpdating } =
+    useEventMutation(eventId);
 
   return (
     <AuthSuspense>
       <div className="min-h-screen bg-gray-50">
-        {isPending || isUpdating && <Loading />}
+        {isPending || (isUpdating && <Loading />)}
         {isError && <EditError />}
         {event && <EditForm event={event} mutateEvent={mutateEvent} />}
       </div>
@@ -24,7 +25,13 @@ export default function EditEventPage() {
   );
 }
 
-function EditForm({ event, mutateEvent }: { event: any, mutateEvent: (eventData: EventFormData) => void }) {
+function EditForm({
+  event,
+  mutateEvent,
+}: {
+  event: any;
+  mutateEvent: (eventData: EventFormData) => void;
+}) {
   const router = useRouter();
 
   // Convert dates to local format for form inputs
@@ -32,7 +39,7 @@ function EditForm({ event, mutateEvent }: { event: any, mutateEvent: (eventData:
   const endDate = new Date(event.end_time);
 
   const initialData: EventFormData = {
-    event_name: event.event_name, 
+    event_name: event.event_name,
     event_description: event.event_description || "",
     event_location: event.event_location || "",
     start_date: formatDateForInput(startDate),
@@ -56,7 +63,7 @@ function EditForm({ event, mutateEvent }: { event: any, mutateEvent: (eventData:
           ToastManager.addToast(
             "Failed to upload image. Please try again.",
             "error",
-            3000
+            3000,
           );
           throw error;
         }
@@ -64,14 +71,10 @@ function EditForm({ event, mutateEvent }: { event: any, mutateEvent: (eventData:
 
       await mutateEvent({
         ...formData,
-        event_img: imageUrl
+        event_img: imageUrl,
       });
-      
-      ToastManager.addToast(
-        "Event updated successfully!",
-        "success",
-        3000
-      );
+
+      ToastManager.addToast("Event updated successfully!", "success", 3000);
 
       router.push("/dashboard/events");
     } catch (error) {
@@ -79,7 +82,7 @@ function EditForm({ event, mutateEvent }: { event: any, mutateEvent: (eventData:
       ToastManager.addToast(
         "Failed to update event. Please try again.",
         "error",
-        3000
+        3000,
       );
       throw error;
     }
@@ -115,12 +118,17 @@ function Loading() {
 
 function EditError() {
   const router = useRouter();
-  
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
-      <h1 className="text-5xl font-bold text-maroon mb-4">Unable to Edit Event</h1>
-      <p className="text-gray-600 mb-8">The event you're trying to edit doesn't exist or you don't have permission to edit it.</p>
-      <button 
+      <h1 className="text-5xl font-bold text-maroon mb-4">
+        Unable to Edit Event
+      </h1>
+      <p className="text-gray-600 mb-8">
+        The event you're trying to edit doesn't exist or you don't have
+        permission to edit it.
+      </p>
+      <button
         onClick={() => router.push("/dashboard/events")}
         className="px-6 py-3 bg-maroon text-white rounded-full hover:bg-darkmaroon transition-colors"
       >

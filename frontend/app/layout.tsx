@@ -3,7 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthContext";
 import { ToastRenderer } from "@/components/toast/ToastRenderer";
 import { Metadata } from "next";
-import QueryProvider from "@/app/providers";
+import QueryProvider from "@/components/context-providers/QueryProvider";
 
 export const metadata: Metadata = {
   title: "Aggie Events",

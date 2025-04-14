@@ -2,17 +2,24 @@ import React, { useState } from "react";
 import { FaTag } from "react-icons/fa";
 import { MdClose } from "react-icons/md";
 import { useTagAutocomplete } from "@/api/tags";
-import { useMenuHandle } from "@/components/MenuHandle";
+import { useMenuSelect } from "@/components/common/MenuSelectionHook";
 
 interface TagSelectorProps {
   selectedTags: string[];
   onTagsChange: (tags: string[]) => void;
 }
 
-export default function TagSelector({ selectedTags, onTagsChange }: TagSelectorProps) {
+export default function TagSelector({
+  selectedTags,
+  onTagsChange,
+}: TagSelectorProps) {
   const [tagInput, setTagInput] = useState("");
   const { data: tagSuggestions = [] } = useTagAutocomplete(tagInput);
-  const { isMenuOpen: isSuggestionsOpen, menuRef: tagMenuRef, setIsMenuOpen: setIsSuggestionsOpen } = useMenuHandle();
+  const {
+    isMenuOpen: isSuggestionsOpen,
+    menuRef: tagMenuRef,
+    setIsMenuOpen: setIsSuggestionsOpen,
+  } = useMenuSelect();
 
   const addTag = (tag: string) => {
     if (!selectedTags.includes(tag)) {
@@ -84,4 +91,4 @@ export default function TagSelector({ selectedTags, onTagsChange }: TagSelectorP
       </div>
     </div>
   );
-} 
+}

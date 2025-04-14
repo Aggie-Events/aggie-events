@@ -2,48 +2,62 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MdAdd, MdEdit, MdDelete, MdSearch, MdArrowUpward, MdArrowDownward } from "react-icons/md";
+import {
+  MdAdd,
+  MdEdit,
+  MdDelete,
+  MdSearch,
+  MdArrowUpward,
+  MdArrowDownward,
+} from "react-icons/md";
 import ToastManager from "@/components/toast/ToastManager";
 import { useEventSearchUser } from "@/api/event";
 import { useAuth } from "@/components/auth/AuthContext";
 import { EventStatus } from "@/config/query-types";
-import LoadingBar from "@/components/LoadingBar";
+import LoadingBar from "@/components/common/LoadingBar";
 import { AnimatePresence } from "framer-motion";
 
-type SortableColumn = "name" | "eventDate" | "lastModified" | "status" | "likes";
+type SortableColumn =
+  | "name"
+  | "eventDate"
+  | "lastModified"
+  | "status"
+  | "likes";
 
 // Helper function to format dates
 const formatDate = (date: Date) => {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   }).format(date);
 };
 
 const formatTime = (date: Date) => {
-  return new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: true
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
   }).format(date);
 };
 
 export default function EventsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Initialize state from URL params
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [statusFilter, setStatusFilter] = useState<EventStatus | "all">(
-    (searchParams.get("status") as EventStatus | "all") || "all"
+    (searchParams.get("status") as EventStatus | "all") || "all",
   );
-  const [upcomingOnly, setUpcomingOnly] = useState(searchParams.get("upcoming") === "true");
+  const [upcomingOnly, setUpcomingOnly] = useState(
+    searchParams.get("upcoming") === "true",
+  );
   const [sortBy, setSortBy] = useState<SortableColumn>(
-    (searchParams.get("sort") as SortableColumn) || "eventDate"
+    (searchParams.get("sort") as SortableColumn) || "eventDate",
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">(
-    (searchParams.get("order") as "asc" | "desc") || "desc"
+    (searchParams.get("order") as "asc" | "desc") || "desc",
   );
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [pageSize] = useState(Number(searchParams.get("pageSize")) || 10);
@@ -51,7 +65,7 @@ export default function EventsPage() {
   // Update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams();
-    
+
     if (searchQuery) params.set("q", searchQuery);
     if (statusFilter !== "all") params.set("status", statusFilter);
     if (upcomingOnly) params.set("upcoming", "true");
@@ -62,13 +76,22 @@ export default function EventsPage() {
 
     const queryString = params.toString();
     router.push(queryString ? `?${queryString}` : "");
-  }, [searchQuery, statusFilter, upcomingOnly, sortBy, sortOrder, page, pageSize, router]);
+  }, [
+    searchQuery,
+    statusFilter,
+    upcomingOnly,
+    sortBy,
+    sortOrder,
+    page,
+    pageSize,
+    router,
+  ]);
 
   const { data, isLoading } = useEventSearchUser({
     page,
     pageSize,
     sort: sortBy,
-    order: sortOrder
+    order: sortOrder,
   });
 
   const handleSort = (column: SortableColumn) => {
@@ -99,35 +122,41 @@ export default function EventsPage() {
 
   const SortIndicator = ({ column }: { column: SortableColumn }) => {
     if (sortBy !== column) return null;
-    return sortOrder === "asc" ? 
-      <MdArrowUpward className="inline-block ml-1" /> : 
-      <MdArrowDownward className="inline-block ml-1" />;
+    return sortOrder === "asc" ? (
+      <MdArrowUpward className="inline-block ml-1" />
+    ) : (
+      <MdArrowDownward className="inline-block ml-1" />
+    );
   };
 
   // Filter events based on search and status
-  const filteredEvents = data?.events.filter(event => {
-    if (searchQuery && !event.event_name.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
-    }
-    if (statusFilter !== "all" && event.event_status !== statusFilter) {
-      return false;
-    }
-    if (upcomingOnly && new Date(event.start_time) <= new Date()) {
-      return false;
-    }
-    return true;
-  }) ?? [];
+  const filteredEvents =
+    data?.events.filter((event) => {
+      if (
+        searchQuery &&
+        !event.event_name.toLowerCase().includes(searchQuery.toLowerCase())
+      ) {
+        return false;
+      }
+      if (statusFilter !== "all" && event.event_status !== statusFilter) {
+        return false;
+      }
+      if (upcomingOnly && new Date(event.start_time) <= new Date()) {
+        return false;
+      }
+      return true;
+    }) ?? [];
 
   const getStatusColor = (status: EventStatus) => {
     switch (status) {
-      case 'published':
-        return 'bg-green-100 text-green-800';
-      case 'draft':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
+      case "published":
+        return "bg-green-100 text-green-800";
+      case "draft":
+        return "bg-yellow-100 text-yellow-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -138,9 +167,7 @@ export default function EventsPage() {
 
   return (
     <div className="space-y-6">
-      <AnimatePresence>
-        {isLoading && <LoadingBar />}
-      </AnimatePresence>
+      <AnimatePresence>{isLoading && <LoadingBar />}</AnimatePresence>
 
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">My Events</h1>
@@ -172,7 +199,9 @@ export default function EventsPage() {
         <div className="flex items-center space-x-4">
           <select
             value={statusFilter}
-            onChange={(e) => handleStatusFilter(e.target.value as EventStatus | "all")}
+            onChange={(e) =>
+              handleStatusFilter(e.target.value as EventStatus | "all")
+            }
             className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-maroon hover:bg-gray-100"
           >
             <option value="all">All Statuses</option>
@@ -197,7 +226,9 @@ export default function EventsPage() {
       {!filteredEvents || filteredEvents.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-6 text-center">
           <p className="text-gray-500">
-            {isLoading ? "Loading events..." : "You haven't created any events yet."}
+            {isLoading
+              ? "Loading events..."
+              : "You haven't created any events yet."}
           </p>
           {!isLoading && (
             <Link
@@ -214,31 +245,31 @@ export default function EventsPage() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th 
+                  <th
                     onClick={() => handleSort("name")}
                     className="px-6 py-4 text-left text-sm font-medium text-gray-600 tracking-wider cursor-pointer hover:bg-gray-100"
                   >
                     Event <SortIndicator column="name" />
                   </th>
-                  <th 
+                  <th
                     onClick={() => handleSort("eventDate")}
                     className="px-6 py-4 text-left text-sm font-medium text-gray-600 tracking-wider cursor-pointer hover:bg-gray-100"
                   >
                     Event Date <SortIndicator column="eventDate" />
                   </th>
-                  <th 
+                  <th
                     onClick={() => handleSort("lastModified")}
                     className="px-6 py-4 text-left text-sm font-medium text-gray-600 tracking-wider cursor-pointer hover:bg-gray-100"
                   >
                     Last Modified <SortIndicator column="lastModified" />
                   </th>
-                  <th 
+                  <th
                     onClick={() => handleSort("status")}
                     className="px-6 py-4 text-left text-sm font-medium text-gray-600 tracking-wider cursor-pointer hover:bg-gray-100"
                   >
                     Status <SortIndicator column="status" />
                   </th>
-                  <th 
+                  <th
                     onClick={() => handleSort("likes")}
                     className="px-6 py-4 text-left text-sm font-medium text-gray-600 tracking-wider cursor-pointer hover:bg-gray-100"
                   >
@@ -251,7 +282,10 @@ export default function EventsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
                 {filteredEvents.map((event) => (
-                  <tr key={event.event_id} className="hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={event.event_id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div>
@@ -262,7 +296,7 @@ export default function EventsPage() {
                             {event.event_name}
                           </Link>
                           <div className="text-sm text-gray-500 mt-1">
-                            {event.event_location || 'No location'}
+                            {event.event_location || "No location"}
                           </div>
                         </div>
                       </div>
@@ -285,21 +319,24 @@ export default function EventsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <select
-                        value={event.event_status ?? 'published'}
-                        onChange={(e) => handleStatusUpdate(event.event_id, e.target.value as EventStatus)}
-                        className={`px-2 py-1 text-xs font-semibold rounded-full border-0 ${getStatusColor(event.event_status ?? 'published')}`}
+                        value={event.event_status ?? "published"}
+                        onChange={(e) =>
+                          handleStatusUpdate(
+                            event.event_id,
+                            e.target.value as EventStatus,
+                          )
+                        }
+                        className={`px-2 py-1 text-xs font-semibold rounded-full border-0 ${getStatusColor(event.event_status ?? "published")}`}
                       >
                         <option value="draft">Draft</option>
                         <option value="published">Published</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
                     </td>
-                    <td className="px-6 py-4">
-                      {event.event_saves}
-                    </td>
+                    <td className="px-6 py-4">{event.event_saves}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-3">
-                        <Link 
+                        <Link
                           href={`/dashboard/events/edit/${event.event_id}`}
                           className="text-blue-600 hover:text-blue-900"
                         >
@@ -319,4 +356,4 @@ export default function EventsPage() {
       )}
     </div>
   );
-} 
+}

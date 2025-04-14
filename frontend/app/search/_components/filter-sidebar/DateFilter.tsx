@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { FilterButton } from "./FilterButton";
-import { FilterSection } from "./FilterSection";
+import { FilterButton } from "@/app/search/_components/filter-sidebar/components/FilterButton";
+import { FilterSection } from "@/app/search/_components/filter-sidebar/components/FilterSection";
 import {
   getToday,
   getTomorrow,

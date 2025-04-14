@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MdDashboard, MdEvent, MdGroup, MdSettings, MdCode, MdNotifications } from "react-icons/md";
-import { useSidebar } from "@/components/layout/SidebarContext";
+import {
+  MdDashboard,
+  MdEvent,
+  MdGroup,
+  MdSettings,
+  MdCode,
+  MdNotifications,
+} from "react-icons/md";
+import { useSidebar } from "@/components/context-providers/SidebarContext";
 import NotificationService from "@/api/notifications";
 
 const sidebarLinks = [
@@ -23,7 +30,7 @@ export default function DashboardSidebar() {
     const fetchNotifications = async () => {
       try {
         const notifications = await NotificationService.getNotifications();
-        const unread = notifications.filter(n => !n.isRead).length;
+        const unread = notifications.filter((n) => !n.isRead).length;
         setUnreadCount(unread);
       } catch (error) {
         console.error("Failed to fetch notifications:", error);
@@ -34,12 +41,12 @@ export default function DashboardSidebar() {
 
     // Check for new notifications periodically
     const interval = setInterval(fetchNotifications, 60000); // every minute
-    
+
     return () => clearInterval(interval);
   }, []);
 
   const isLinkActive = (href: string) => {
-    if (href === '/dashboard') {
+    if (href === "/dashboard") {
       return pathname === href;
     }
     return pathname.startsWith(href);
@@ -63,12 +70,16 @@ export default function DashboardSidebar() {
               >
                 {link.icon}
                 <span>{link.label}</span>
-                
+
                 {/* Notification Badge */}
                 {link.href === "/notifications" && unreadCount > 0 && (
-                  <span className={`ml-auto inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none rounded-full ${
-                    isLinkActive(link.href) ? "bg-white text-maroon" : "bg-maroon text-white"
-                  }`}>
+                  <span
+                    className={`ml-auto inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none rounded-full ${
+                      isLinkActive(link.href)
+                        ? "bg-white text-maroon"
+                        : "bg-maroon text-white"
+                    }`}
+                  >
                     {unreadCount}
                   </span>
                 )}
@@ -79,4 +90,4 @@ export default function DashboardSidebar() {
       </nav>
     </aside>
   );
-} 
+}

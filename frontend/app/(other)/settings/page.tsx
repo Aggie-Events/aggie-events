@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
-import { MdPerson, MdNotifications, MdSecurity, MdEdit } from 'react-icons/md';
+import { MdPerson, MdNotifications, MdSecurity, MdEdit } from "react-icons/md";
 import { useAuth } from "@/components/auth/AuthContext";
 import AuthSuspense from "@/components/auth/AuthSuspense";
-import Image from 'next/image'; 
+import Image from "next/image";
 
 interface SettingsForm {
   username: string;
@@ -22,8 +22,8 @@ interface SettingsForm {
 
 export default function SettingsPage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile');
-  
+  const [activeTab, setActiveTab] = useState("profile");
+
   return (
     <AuthSuspense>
       <div className="container mx-auto px-4 py-8">
@@ -32,27 +32,33 @@ export default function SettingsPage() {
             {/* Sidebar */}
             <div className="p-6 space-y-2">
               <button
-                onClick={() => setActiveTab('profile')}
+                onClick={() => setActiveTab("profile")}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
-                  activeTab === 'profile' ? 'bg-primary text-white' : 'hover:bg-gray-100'
+                  activeTab === "profile"
+                    ? "bg-primary text-white"
+                    : "hover:bg-gray-100"
                 }`}
               >
                 <MdPerson size={20} />
                 Profile
               </button>
               <button
-                onClick={() => setActiveTab('notifications')}
+                onClick={() => setActiveTab("notifications")}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
-                  activeTab === 'notifications' ? 'bg-primary text-white' : 'hover:bg-gray-100'
+                  activeTab === "notifications"
+                    ? "bg-primary text-white"
+                    : "hover:bg-gray-100"
                 }`}
               >
                 <MdNotifications size={20} />
                 Notifications
               </button>
               <button
-                onClick={() => setActiveTab('account')}
+                onClick={() => setActiveTab("account")}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
-                  activeTab === 'account' ? 'bg-primary text-white' : 'hover:bg-gray-100'
+                  activeTab === "account"
+                    ? "bg-primary text-white"
+                    : "hover:bg-gray-100"
                 }`}
               >
                 <MdSecurity size={20} />
@@ -62,10 +68,10 @@ export default function SettingsPage() {
 
             {/* Main Content */}
             <div className="p-6">
-              {activeTab === 'profile' && (
+              {activeTab === "profile" && (
                 <div className="space-y-6">
                   <h2 className="text-2xl font-bold">Profile Settings</h2>
-                  
+
                   {/* Profile Picture */}
                   <div className="flex items-center gap-4">
                     <div className="relative w-24 h-24">
@@ -92,7 +98,7 @@ export default function SettingsPage() {
                       </label>
                       <input
                         type="text"
-                        value={user?.user_name || ''}
+                        value={user?.user_name || ""}
                         className="w-full px-3 py-2 border rounded-md"
                         readOnly
                       />
@@ -103,7 +109,7 @@ export default function SettingsPage() {
                       </label>
                       <input
                         type="text"
-                        value={user?.user_name || ''}
+                        value={user?.user_name || ""}
                         className="w-full px-3 py-2 border rounded-md"
                         readOnly
                       />
@@ -114,7 +120,7 @@ export default function SettingsPage() {
                       </label>
                       <input
                         type="text"
-                        value={ ''}
+                        value={""}
                         className="w-full px-3 py-2 border rounded-md"
                         readOnly
                       />
@@ -125,7 +131,7 @@ export default function SettingsPage() {
                       </label>
                       <input
                         type="text"
-                        value={''}
+                        value={""}
                         className="w-full px-3 py-2 border rounded-md"
                         readOnly
                       />
@@ -135,7 +141,7 @@ export default function SettingsPage() {
                         Bio
                       </label>
                       <textarea
-                        value={''}
+                        value={""}
                         className="w-full px-3 py-2 border rounded-md"
                         rows={4}
                         readOnly
@@ -145,9 +151,11 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              {activeTab === 'notifications' && (
+              {activeTab === "notifications" && (
                 <div className="space-y-6">
-                  <h2 className="text-2xl font-bold">Notification Preferences</h2>
+                  <h2 className="text-2xl font-bold">
+                    Notification Preferences
+                  </h2>
                   <div className="space-y-4">
                     {Object.entries({
                       email: true,
@@ -155,18 +163,21 @@ export default function SettingsPage() {
                       friendRequests: true,
                       eventReminders: true,
                     }).map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between">
+                      <div
+                        key={key}
+                        className="flex items-center justify-between"
+                      >
                         <span className="font-medium capitalize">
-                          {key.replace(/([A-Z])/g, ' $1').trim()}
+                          {key.replace(/([A-Z])/g, " $1").trim()}
                         </span>
-                        <span>{value ? 'Enabled' : 'Disabled'}</span>
+                        <span>{value ? "Enabled" : "Disabled"}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {activeTab === 'account' && (
+              {activeTab === "account" && (
                 <div className="space-y-6">
                   <h2 className="text-2xl font-bold">Account Settings</h2>
                   <div>
@@ -175,7 +186,7 @@ export default function SettingsPage() {
                     </label>
                     <input
                       type="email"
-                      value={user?.user_email || ''}
+                      value={user?.user_email || ""}
                       className="w-full px-3 py-2 border rounded-md"
                       readOnly
                     />

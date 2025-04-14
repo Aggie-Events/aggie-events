@@ -1,42 +1,42 @@
 import { fetchUtil } from "@/api/fetch";
-import type { User } from "@/config/types";
+import type { User } from "@/config/auth-types";
 
 /**
  * Test the authentication status of the user
- * @returns {Promise<boolean>} True if the user is authenticated, false otherwise. 
+ * @returns {Promise<boolean>} True if the user is authenticated, false otherwise.
  */
 export const testAuth = async (): Promise<boolean> => {
-    console.log("Testing user authentication");
-    const response = await fetchUtil(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth`,
-        {
-            method: "GET",
-        },
-        false,
-    ).catch((error) => {
-        throw new Error("Error testing user authentication: " + error);
-    });
+  console.log("Testing user authentication");
+  const response = await fetchUtil(
+    `${process.env.NEXT_PUBLIC_API_URL}/auth`,
+    {
+      method: "GET",
+    },
+    false,
+  ).catch((error) => {
+    throw new Error("Error testing user authentication: " + error);
+  });
 
-    return response.status === 200;
+  return response.status === 200;
 };
 
 /**
  * Verify the authentication status of the user
- * @returns {Promise<boolean>} True if the user is authenticated, false otherwise. 
+ * @returns {Promise<boolean>} True if the user is authenticated, false otherwise.
  * Throws an error if the user is not authenticated
  */
 export const verifyAuth = async (): Promise<boolean> => {
-    const response = await fetchUtil(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth`,
-        {
-            method: "GET",
-        },
-        true,
-    ).catch((error) => {
-        throw new Error("Error verifying user authentication: " + error);
-    });
+  const response = await fetchUtil(
+    `${process.env.NEXT_PUBLIC_API_URL}/auth`,
+    {
+      method: "GET",
+    },
+    true,
+  ).catch((error) => {
+    throw new Error("Error verifying user authentication: " + error);
+  });
 
-    return response.status === 200;
+  return response.status === 200;
 };
 
 const POPUP_WIDTH = 500;
@@ -51,12 +51,12 @@ export function openAuthPopup(url: string): Promise<User | null> {
     // Open popup
     const popup = window.open(
       url,
-      'Auth',
-      `width=${POPUP_WIDTH},height=${POPUP_HEIGHT},left=${left},top=${top},toolbar=no,menubar=no`
+      "Auth",
+      `width=${POPUP_WIDTH},height=${POPUP_HEIGHT},left=${left},top=${top},toolbar=no,menubar=no`,
     );
 
     if (!popup) {
-      console.error('Failed to open popup window');
+      console.error("Failed to open popup window");
       resolve(null);
       return;
     }
@@ -64,13 +64,13 @@ export function openAuthPopup(url: string): Promise<User | null> {
     // Handle message from popup
     const handleMessage = (e: MessageEvent) => {
       if (e.origin !== window.location.origin) return;
-      
-      if (e.data?.type === 'auth_complete') {
-        window.removeEventListener('message', handleMessage);
+
+      if (e.data?.type === "auth_complete") {
+        window.removeEventListener("message", handleMessage);
         popup.close();
 
         console.log("Received message from popup:", e.data);
-        
+
         if (e.data.user) {
           resolve(e.data.user);
         } else {
@@ -79,13 +79,13 @@ export function openAuthPopup(url: string): Promise<User | null> {
       }
     };
 
-    window.addEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
 
     // Handle popup closed manually
     const checkClosed = setInterval(() => {
       if (popup.closed) {
         clearInterval(checkClosed);
-        window.removeEventListener('message', handleMessage);
+        window.removeEventListener("message", handleMessage);
         resolve(null);
       }
     }, 500);
@@ -93,7 +93,7 @@ export function openAuthPopup(url: string): Promise<User | null> {
     // Cleanup after 2 minutes (in case something goes wrong)
     setTimeout(() => {
       clearInterval(checkClosed);
-      window.removeEventListener('message', handleMessage);
+      window.removeEventListener("message", handleMessage);
       if (!popup.closed) popup.close();
       resolve(null);
     }, 120000);
@@ -101,17 +101,20 @@ export function openAuthPopup(url: string): Promise<User | null> {
 }
 
 export async function updateUsername(username: string): Promise<void> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/username`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/users/username`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ username }),
     },
-    credentials: 'include',
-    body: JSON.stringify({ username }),
-  });
+  );
 
   if (!response.ok) {
     const data = await response.json();
-    throw new Error(data.message || 'Failed to update username');
+    throw new Error(data.message || "Failed to update username");
   }
 }

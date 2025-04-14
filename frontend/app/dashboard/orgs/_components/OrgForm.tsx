@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Organization } from "@/config/dbtypes";
+import { Organization } from "@/config/db-types";
 
 interface OrgFormProps {
   onSubmit: (data: any) => Promise<void>;
@@ -7,7 +7,11 @@ interface OrgFormProps {
   initialData?: Partial<Organization>;
 }
 
-export default function OrgForm({ onSubmit, onCancel, initialData }: OrgFormProps) {
+export default function OrgForm({
+  onSubmit,
+  onCancel,
+  initialData,
+}: OrgFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<Organization>({
     org_name: initialData?.org_name || "",
@@ -170,4 +174,4 @@ export default function OrgForm({ onSubmit, onCancel, initialData }: OrgFormProp
       </div>
     </form>
   );
-} 
+}

@@ -91,61 +91,59 @@ export interface UserProfile {
  * @returns {UseQueryResult<UserProfile>, Error>} The user profile information
  */
 export function useUserProfile(username: string) {
-    return useQuery<UserProfile, Error>({
-      queryKey: ['userProfile', username],
-      queryFn: async () => {
-        const response = await fetchUtil(
-            `${process.env.NEXT_PUBLIC_API_URL}/users/${username}/profile`,
-            {
-              method: "GET",
-            },
-          );
-        ``
-          const userData = await response.json();
-        
-          if (!userData || userData.message === "User not found") {
-            throw new Error("User not found");
-          }
-        
-          return {
-            ...userData,
-            events: userData.events.map((e: any) => ({
-              ...e,
-              start_time: new Date(e.start_time),
-              end_time: new Date(e.end_time),
-              date_created: new Date(e.date_created),
-              date_modified: new Date(e.date_modified),
-            })),
-          };
-      },
-      retry: false,
-    });
+  return useQuery<UserProfile, Error>({
+    queryKey: ["userProfile", username],
+    queryFn: async () => {
+      const response = await fetchUtil(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${username}/profile`,
+        {
+          method: "GET",
+        },
+      );
+      ``;
+      const userData = await response.json();
+
+      if (!userData || userData.message === "User not found") {
+        throw new Error("User not found");
+      }
+
+      return {
+        ...userData,
+        events: userData.events.map((e: any) => ({
+          ...e,
+          start_time: new Date(e.start_time),
+          end_time: new Date(e.end_time),
+          date_created: new Date(e.date_created),
+          date_modified: new Date(e.date_modified),
+        })),
+      };
+    },
+    retry: false,
+  });
 }
 export function isUsernameValid(username: string) {
   if (!username || typeof username !== "string") {
-    return ({
+    return {
       message: "Username is required",
-      isValid: false
-    });
+      isValid: false,
+    };
   }
 
   // Check length constraints or other format validations
   if (username.length > 20 || username.length < 3) {
-    return ({
+    return {
       isValid: false,
-      message: "Username is too long"
-    });
+      message: "Username is too long",
+    };
   }
   if (!/^[a-zA-Z0-9]+$/.test(username)) {
-    return ({
+    return {
       isValid: false,
-      message: "Username must be alphanumeric"
-    });
+      message: "Username must be alphanumeric",
+    };
   }
-      return ({
-        isValid: true,
-        message: "Username is valid"
-  })
+  return {
+    isValid: true,
+    message: "Username is valid",
+  };
 }
-
-

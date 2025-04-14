@@ -4,7 +4,7 @@ import { MdMenu } from "react-icons/md";
 import SearchBar from "@/components/search/SearchBar";
 import UserLogoToggle from "@/components/headers/user-menu/UserLogoToggle";
 import Logo from "@/components/common/Logo";
-import { useSidebar } from "@/components/layout/SidebarContext";
+import { useSidebar } from "@/components/context-providers/SidebarContext";
 
 import { MdAdd } from "react-icons/md";
 
@@ -36,7 +36,7 @@ export default function DashboardHeader() {
             Create Event
           </Link>
         </div>
-        
+
         {/* User Profile */}
         <div className="flex items-center">
           <UserLogoToggle />
@@ -44,4 +44,4 @@ export default function DashboardHeader() {
       </div>
     </header>
   );
-} 
+}

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { UserMenuLinks } from "@/config/config";
 import Link from "next/link";
 import { MdLogout } from "react-icons/md";
-import type { User } from "@/config/types";
+import type { User } from "@/config/auth-types";
 import { FaUserCircle } from "react-icons/fa";
 
 interface UserMenuProps {

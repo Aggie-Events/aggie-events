@@ -1,11 +1,16 @@
 import { fetchUtil } from "@/api/fetch";
-import { Event } from "@/config/dbtypes";
+import { Event } from "@/config/db-types";
 import {
   EventCreate,
   EventPageInformation,
   EventStatus,
 } from "@/config/query-types";
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { EventFormData } from "@/app/dashboard/events/_components/EventForm";
 export interface SearchEventsReturn {
   event_id: number;
@@ -87,7 +92,7 @@ export const createEvent = async (event: CreateEventData) => {
  */
 export const useEventsByUser = (username: string) => {
   return useQuery<SearchEventsReturn[], Error>({
-    queryKey: ['event', { 'user': username }],
+    queryKey: ["event", { user: username }],
     queryFn: async () => {
       const response = await fetchUtil(
         `${process.env.NEXT_PUBLIC_API_URL}/events/user/${username}`,
@@ -143,11 +148,11 @@ export function useEventMutation(eventId: string) {
           body: eventData,
         },
       );
-    
+
       if (!response.ok) {
-        throw new Error('Failed to update event');
+        throw new Error("Failed to update event");
       }
-    
+
       return response.json();
     },
     onSuccess: () => {
@@ -212,13 +217,20 @@ export function useEventSearch(searchParams: string) {
  * @param {{ page?: number, pageSize?: number, sort?: string, order?: 'asc' | 'desc' }} options - Search options
  * @returns {UseQueryResult<{events: SearchEventsReturn[], pageSize: number, resultSize: number, currentPage: number}>} The search results
  */
-export function useEventSearchUser(options: {
-  page?: number;
-  pageSize?: number;
-  sort?: "name" | "eventDate" | "lastModified" | "status" | "likes";
-  order?: "asc" | "desc";
-} = {}) {
-  const { page = 1, pageSize = 10, sort = "eventDate", order = "desc" } = options;
+export function useEventSearchUser(
+  options: {
+    page?: number;
+    pageSize?: number;
+    sort?: "name" | "eventDate" | "lastModified" | "status" | "likes";
+    order?: "asc" | "desc";
+  } = {},
+) {
+  const {
+    page = 1,
+    pageSize = 10,
+    sort = "eventDate",
+    order = "desc",
+  } = options;
 
   return useQuery<{
     events: SearchEventsReturn[];
@@ -232,10 +244,15 @@ export function useEventSearchUser(options: {
         page: page.toString(),
         pageSize: pageSize.toString(),
         sort: sort,
-        order: order
+        order: order,
       });
 
-      const { results, resultSize, pageSize: returnedPageSize, currentPage } = await fetchUtil(
+      const {
+        results,
+        resultSize,
+        pageSize: returnedPageSize,
+        currentPage,
+      } = await fetchUtil(
         `${process.env.NEXT_PUBLIC_API_URL}/search/events/user?${params}`,
         {
           method: "GET",
@@ -250,11 +267,11 @@ export function useEventSearchUser(options: {
           date_created: new Date(e.date_created),
           date_modified: new Date(e.date_modified),
           tags: e.tags || [],
-          event_likes: e.event_likes || 0
+          event_likes: e.event_likes || 0,
         })),
         pageSize: returnedPageSize,
         resultSize,
-        currentPage
+        currentPage,
       };
     },
     staleTime: Infinity, // Never stale (don't want the event search results to change while the user is interacting with the page)
@@ -271,8 +288,19 @@ export function useEventSearchUser(options: {
 export function useToggleEventSave() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ eventId, isCurrentlySaved }: { eventId: string, isCurrentlySaved: boolean }) => {
-      console.log("Toggling event save status for event " + eventId + " to " + isCurrentlySaved);
+    mutationFn: async ({
+      eventId,
+      isCurrentlySaved,
+    }: {
+      eventId: string;
+      isCurrentlySaved: boolean;
+    }) => {
+      console.log(
+        "Toggling event save status for event " +
+          eventId +
+          " to " +
+          isCurrentlySaved,
+      );
       const response = await fetchUtil(
         `${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}/save`,
         {
@@ -281,7 +309,10 @@ export function useToggleEventSave() {
       );
       if (response.ok) {
         // TODO: Only update when event is upcoming
-        queryClient.setQueryData(["events", "saved", "count"], (oldData: number) => oldData + (isCurrentlySaved ? -1 : 1));
+        queryClient.setQueryData(
+          ["events", "saved", "count"],
+          (oldData: number) => oldData + (isCurrentlySaved ? -1 : 1),
+        );
       }
       return response.json();
     },
@@ -323,7 +354,7 @@ export function useSavedEvents() {
           method: "GET",
         },
       );
-      
+
       const events = await response.json();
       return events.map((e: any) => ({
         ...e,
@@ -362,4 +393,3 @@ export function useSavedEventsCount() {
     },
   });
 }
-

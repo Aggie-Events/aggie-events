@@ -20,7 +20,7 @@ export default function CreateOrgPage() {
           ToastManager.addToast(
             "Failed to upload image. Please try again.",
             "error",
-            3000
+            3000,
           );
           throw error;
         }
@@ -30,13 +30,13 @@ export default function CreateOrgPage() {
         ...formData,
         org_icon: imageUrl || formData.org_icon,
         org_verified: false,
-        org_reputation: 0
+        org_reputation: 0,
       });
-      
+
       ToastManager.addToast(
         "Organization created successfully!",
         "success",
-        3000
+        3000,
       );
       router.push("/dashboard/orgs");
     } catch (error) {
@@ -44,7 +44,7 @@ export default function CreateOrgPage() {
       ToastManager.addToast(
         "Failed to create organization. Please try again.",
         "error",
-        3000
+        3000,
       );
       throw error;
     }

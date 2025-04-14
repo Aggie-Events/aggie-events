@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { ReactNode } from "react";
 import ToastManager from "@/components/toast/ToastManager";
-import type { User } from "@/config/types";
+import type { User } from "@/config/auth-types";
 
 interface AuthContextType {
   user: User | undefined | null;
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           ToastManager.addToast(
             "Failed to check authentication status",
             "error",
-            3000
+            3000,
           );
           setUser(null);
         });

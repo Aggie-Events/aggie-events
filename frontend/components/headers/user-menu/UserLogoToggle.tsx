@@ -5,7 +5,7 @@ import { AnimatePresence } from "motion/react";
 import UserMenu from "@/components/headers/user-menu/UserMenu";
 import { useAuth } from "@/components/auth/AuthContext";
 import LoginScreen from "@/components/auth/LoginScreen";
-import { useMenuHandle } from "@/components/MenuHandle";
+import { useMenuSelect } from "@/components/common/MenuSelectionHook";
 
 // Interface for authenticated user component props
 interface AuthenticatedUserToggleProps {
@@ -14,9 +14,16 @@ interface AuthenticatedUserToggleProps {
 }
 
 // Component for authenticated user with profile image and dropdown menu
-function AuthenticatedUserToggle({ user, logout }: AuthenticatedUserToggleProps) {
-  const { isMenuOpen: showMenu, menuRef, setIsMenuOpen: setShowMenu } = useMenuHandle({ 
-    closeOnScroll: true 
+function AuthenticatedUserToggle({
+  user,
+  logout,
+}: AuthenticatedUserToggleProps) {
+  const {
+    isMenuOpen: showMenu,
+    menuRef,
+    setIsMenuOpen: setShowMenu,
+  } = useMenuSelect({
+    closeOnScroll: true,
   });
 
   return (
@@ -46,7 +53,7 @@ function UnauthenticatedUserToggle() {
 
   return (
     <>
-      <button 
+      <button
         onClick={() => setShowLogin(true)}
         className="py-1 px-3 rounded-md border-[1px] border-white text-white hover:bg-white/10 transition-colors"
       >
@@ -62,8 +69,10 @@ function UnauthenticatedUserToggle() {
 // Main component that decides which toggle to display based on auth state
 export default function UserLogoToggle() {
   const { user, logout } = useAuth();
-  
-  return user 
-    ? <AuthenticatedUserToggle user={user} logout={logout} /> 
-    : <UnauthenticatedUserToggle />;
+
+  return user ? (
+    <AuthenticatedUserToggle user={user} logout={logout} />
+  ) : (
+    <UnauthenticatedUserToggle />
+  );
 }

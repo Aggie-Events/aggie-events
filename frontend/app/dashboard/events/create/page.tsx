@@ -21,7 +21,7 @@ export default function CreateEventPage() {
           ToastManager.addToast(
             "Failed to upload image. Please try again.",
             "error",
-            3000
+            3000,
           );
           throw error;
         }
@@ -29,15 +29,15 @@ export default function CreateEventPage() {
 
       await createEvent({
         ...formData,
-        event_img: imageUrl
+        event_img: imageUrl,
       });
-      
+
       ToastManager.addToast(
-        formData.event_status === 'published' 
-          ? "Event published successfully!" 
+        formData.event_status === "published"
+          ? "Event published successfully!"
           : "Event saved as draft!",
         "success",
-        3000
+        3000,
       );
       router.push("/dashboard/events");
     } catch (error) {

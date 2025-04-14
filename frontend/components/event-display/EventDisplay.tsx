@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from "react";
-import EventCard from "@/app/search/_components/_event-display/EventCard";
+import EventCard from "@/components/event-display/EventCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { SearchEventsReturn } from "@/api/event";
-import EventDateDisplay from "@/app/search/_components/_event-display/EventDateDisplay";
+import EventDateDisplay from "@/components/event-display/EventDateDisplay";
 
 interface EventDisplayProps {
   event: SearchEventsReturn;

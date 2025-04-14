@@ -6,26 +6,26 @@ import AuthRedirect from "./AuthRedirect";
 import { motion } from "framer-motion";
 
 interface AuthSuspenseProps {
-    children: ReactNode;
+  children: ReactNode;
 }
 
 export default function AuthSuspense({ children }: AuthSuspenseProps) {
-    const { user } = useAuth();
+  const { user } = useAuth();
 
-    return (
-        <>
-            <AuthRedirect url={"/login"} />
-            {user ? (
-                <>{children}</>
-            ) : (
-                <div className="fixed inset-0 flex items-center justify-center">
-                    <motion.div 
-                        className="w-12 h-12 border-4 border-maroon/30 border-t-maroon rounded-full"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    />
-                </div>
-            )}
-        </>
-    );
+  return (
+    <>
+      <AuthRedirect url={"/login"} />
+      {user ? (
+        <>{children}</>
+      ) : (
+        <div className="fixed inset-0 flex items-center justify-center">
+          <motion.div
+            className="w-12 h-12 border-4 border-maroon/30 border-t-maroon rounded-full"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+        </div>
+      )}
+    </>
+  );
 }
