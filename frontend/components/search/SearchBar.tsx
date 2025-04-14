@@ -7,8 +7,13 @@ import { useMenuHandle } from "../MenuHandle";
 
 export default function SearchBar() {
   const [searchInput, setSearchInput] = useState<string>("");
+  const inputRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
-  const { isMenuOpen: focused, menuRef, setIsMenuOpen: setFocused } = useMenuHandle();
+  const {
+    isMenuOpen: focused,
+    menuRef,
+    setIsMenuOpen: setFocused,
+  } = useMenuHandle();
   const { push } = useRouter();
 
   useEffect(() => {
@@ -18,15 +23,31 @@ export default function SearchBar() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    // On / pressed, focus the input
+    // Ensure / doesn't get entered into the input
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "/" && !focused) {
+        e.preventDefault();
+        setFocused(true);
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   function handleSearch() {
     // Manipulate url query parameters
     const params = new URLSearchParams(searchParams);
-    console.log("Searching for: " + searchInput);
+
     if (searchInput) {
       params.set("query", searchInput);
     } else {
       params.delete("query");
     }
+    params.delete("page");
+    
     setFocused(false);
     push(`/search?${params.toString()}`);
   }
@@ -42,6 +63,7 @@ export default function SearchBar() {
     } else {
       params.set("tags", tag);
     }
+    params.delete("page");
     setFocused(false);
     setSearchInput("");
     push(`/search?${params.toString()}`);
@@ -51,7 +73,6 @@ export default function SearchBar() {
     <>
       <form
         className={`flex grow justify-center hover:drop-shadow-lg ${focused && "z-[999]"}`}
-        
       >
         <div
           className={`relative flex w-full items-center
@@ -62,7 +83,7 @@ export default function SearchBar() {
               : "rounded-md bg-gray-100"
           }
             `}
-            ref={menuRef}
+          ref={menuRef}
         >
           <button
             onClick={handleSearch}
@@ -71,6 +92,7 @@ export default function SearchBar() {
             <FaSearch />
           </button>
           <input
+            ref={inputRef}
             id="search-input"
             alt="Test"
             className={`text-black py-1 w-full h-10 outline-none bg-transparent`}
@@ -84,6 +106,7 @@ export default function SearchBar() {
               }
               if (e.key === "Escape") {
                 setFocused(false);
+                inputRef.current?.blur();
               }
             }}
             onClick={() => setFocused(true)}

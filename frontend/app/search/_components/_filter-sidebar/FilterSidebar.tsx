@@ -11,25 +11,14 @@ interface SidebarProps {
 
 export default function Sidebar({ onFilterChange, filters }: SidebarProps) {
   const applyFilters = (newFilters: SearchFilters) => {
-    console.log({
-      tags: new Set(newFilters.tags),
-      startDate: newFilters.startDate,
-      endDate: newFilters.endDate,
-      startTime: newFilters.startTime ?? undefined,
-      endTime: newFilters.endTime ?? undefined,
-    });
     onFilterChange({
-      tags: new Set(newFilters.tags),
+      tags: newFilters.tags && newFilters.tags.size > 0 ? new Set(newFilters.tags) : undefined,
       startDate: newFilters.startDate,
       endDate: newFilters.endDate,
       startTime: newFilters.startTime ?? undefined,
       endTime: newFilters.endTime ?? undefined,
     });
   };
-
-  useEffect(() => {
-    console.log(filters);
-  }, [filters]);
 
   return (
     <div className="space-y-6">
@@ -40,7 +29,7 @@ export default function Sidebar({ onFilterChange, filters }: SidebarProps) {
           onClick={() =>
             applyFilters({
               ...filters,
-              tags: new Set(),
+              tags: undefined,
               startDate: undefined,
               endDate: undefined,
               startTime: undefined,
@@ -58,12 +47,6 @@ export default function Sidebar({ onFilterChange, filters }: SidebarProps) {
           startDate: Date | undefined,
           endDate: Date | undefined,
         ) => {
-          console.log("startDate", startDate
-            ? startDate.toISOString().split("T")[0]
-            : undefined);
-          console.log("endDate", endDate
-            ? endDate.toISOString().split("T")[0]
-            : undefined);
           applyFilters({
             ...filters,
             startDate: startDate
@@ -85,7 +68,7 @@ export default function Sidebar({ onFilterChange, filters }: SidebarProps) {
        {/* <LocationFilter onLocationChange={(locations: string[]) => applyFilters({ ...filters, locations })} /> */}
       <TagsFilter
         onTagsChange={(tags: string[]) =>
-          applyFilters({ ...filters, tags: new Set(tags) })
+          applyFilters({ ...filters, tags: tags.length > 0 ? new Set(tags) : undefined })
         }
         selectedTags={Array.from(filters.tags || new Set())}
       /> 

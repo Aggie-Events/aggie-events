@@ -15,6 +15,7 @@ interface EventCardProps {
   onReportEvent: (eventId: number) => void;
   isSaved: boolean;
   saves: number;
+  isActive?: boolean;
 }
 
 export default function EventCard({
@@ -24,9 +25,27 @@ export default function EventCard({
   onReportEvent,
   isSaved,
   saves,
+  isActive = false,
 }: EventCardProps) {
   return (
-    <div className="bg-gray-150 rounded-lg py-3 px-3 grow shadow-md w-full border-[1px] border-gray-200">
+    <div className={`
+      relative grow w-full
+      bg-gray-150
+      rounded-lg
+      py-3 px-3
+      border-[1px] border-gray-200
+      shadow-md
+      
+      transition-all duration-200
+      ${isActive ? 'border-maroon/30 shadow-lg translate-x-1' : ''}
+
+      before:absolute before:left-0 before:top-0
+      before:h-full before:w-1
+      before:bg-maroon-400
+      before:rounded-l-lg
+      ${isActive ? 'before:opacity-100' : 'before:opacity-0'}
+      before:transition-opacity before:duration-200
+    `}>
       <div className="flex gap-4">
         <EventImage event={event} />
         <div className="grow my-auto">
@@ -38,7 +57,7 @@ export default function EventCard({
           </Link>
 
           <p className="h-max line-clamp-3">{event.event_description}</p>
-          
+
           {event.tags && event.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 my-2">
               {event.tags.map((tag) => (
@@ -46,6 +65,7 @@ export default function EventCard({
                   key={tag}
                   href={`/search?tags=${encodeURIComponent(tag)}`}
                   className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-200 text-xs text-gray-700 rounded-full hover:bg-maroon hover:text-white transition-colors"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <FaTag className="w-3 h-3" />
                   {tag}
@@ -55,7 +75,10 @@ export default function EventCard({
           )}
         </div>
 
-        <div className="flex items-center h-fit gap-2">
+        <div
+          className="flex items-center h-fit gap-2"
+          onClick={(e) => e.stopPropagation()}
+        >
           <SaveButton
             isSaved={isSaved}
             onSaveEvent={onSaveEvent}
@@ -69,7 +92,7 @@ export default function EventCard({
         </div>
       </div>
 
-      <hr className="mt-3 mb-1"/>
+      <hr className="mt-3 mb-1" />
 
       <div className="flex items-center gap-1.5 h-fit">
         <p className="text-sm w-fit">
@@ -79,6 +102,7 @@ export default function EventCard({
               <Link
                 className="text-maroon hover:underline"
                 href={`/orgs/${event.org_slug}`}
+                onClick={(e) => e.stopPropagation()}
               >
                 {event.org_name}
               </Link>
@@ -89,6 +113,7 @@ export default function EventCard({
               <Link
                 className="text-maroon hover:underline"
                 href={`/users/${event.contributor_name}`}
+                onClick={(e) => e.stopPropagation()}
               >
                 {event.contributor_name}
               </Link>

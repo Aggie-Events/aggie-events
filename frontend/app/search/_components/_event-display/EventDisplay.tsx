@@ -1,12 +1,8 @@
 "use client";
-import React from "react";
-import { FaLocationDot } from "react-icons/fa6";
-import { FaClock } from "react-icons/fa";
-import IconLabel from "@/components/common/IconLabel";
+import React, { useState } from "react";
 import EventCard from "@/app/search/_components/_event-display/EventCard";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { SearchEventsReturn } from "@/api/event";
-import { formatTimeInterval } from "@/utils/date";
 import EventDateDisplay from "@/app/search/_components/_event-display/EventDateDisplay";
 
 interface EventDisplayProps {
@@ -14,43 +10,58 @@ interface EventDisplayProps {
   onSaveEvent: (eventId: number) => void;
   onBlockEvent: (eventId: number) => void;
   onReportEvent: (eventId: number) => void;
+  onCardClick: () => void;
   isSaved: boolean;
   saves: number;
+  isActive: boolean;
 }
 
-export default function EventDisplay({ 
+export default function EventDisplay({
   event,
   onSaveEvent,
   onBlockEvent,
   onReportEvent,
+  onCardClick,
   isSaved,
-  saves
+  saves,
+  isActive,
 }: EventDisplayProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <motion.div
-      className="flex gap-4 w-full"
-      initial={{
-        opacity: 0,
-        transform: "translateY(4px)",
-      }}
-      animate={{
-        transform: "translateY(0px)",
-        opacity: 1,
-      }}
-      exit={{
-        opacity: 0,
-        transform: "translateY(4px)",
-      }}
+      className="flex gap-4 w-full cursor-pointer group relative text-left border-none"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 10 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      onClick={onCardClick}
     >
       <EventDateDisplay event={event} />
-      <EventCard 
-        event={event} 
+      <EventCard
+        event={event}
         onSaveEvent={onSaveEvent}
         onBlockEvent={onBlockEvent}
         onReportEvent={onReportEvent}
         isSaved={isSaved}
         saves={saves}
+        isActive={isHovered || isActive}
       />
+      <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            className="absolute bottom-3 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-gray-600 pointer-events-none shadow-sm"
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 5, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+          >
+            Click to view details
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

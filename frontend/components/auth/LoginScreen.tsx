@@ -4,7 +4,7 @@ import Image from "next/image";
 import { FcGoogle } from "react-icons/fc";
 import { MdClose } from "react-icons/md";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { openAuthPopup, updateUsername } from "@/api/auth";
 import ToastManager from "@/components/toast/ToastManager";
 import UsernameSelection from "./UsernameSelection";
@@ -22,6 +22,17 @@ export default function LoginScreen({ onClose, showBackButton = true }: LoginScr
   const [isLoading, setIsLoading] = useState(false);
   const [showUsernameSelection, setShowUsernameSelection] = useState(false);
   const [tempUserData, setTempUserData] = useState<User | null>(null);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && onClose) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
 
   const handleLogout = async () => {
     try {

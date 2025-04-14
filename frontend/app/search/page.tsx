@@ -1,11 +1,7 @@
 "use client";
-import React, { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import {
-  SearchFilters,
-  setFilterParam,
-  castFilterParam,
-} from "@/config/query-types";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { SearchFilters } from "@/config/query-types";
 import { useEventSearch, useToggleEventSave } from "@/api/event";
 import EventDisplay from "./_components/_event-display/EventDisplay";
 import PageSelect from "./_components/PageSelect";
@@ -18,6 +14,7 @@ import ToastManager from "@/components/toast/ToastManager";
 import LoginScreen from "@/components/auth/LoginScreen";
 import { DraggableSidebar } from "@/components/common/DraggableSidebar";
 import { useSearchState } from "./_components/SearchStateHook";
+import EventSidebar from "./_components/_event-display/EventSidebar";
 
 // Filters
 // - Date Range
@@ -49,6 +46,11 @@ export default function Search() {
   const { user } = useAuth();
   const { state, updateFilters, updateEventState } = useSearchState();
   const { filters, loading, eventStates } = state;
+  const [selectedEvent, setSelectedEvent] = useState<number | null>(null);
+
+  useEffect(() => {
+    console.log(selectedEvent);
+  }, [selectedEvent]);
 
   const { mutateAsync: toggleEventSave } = useToggleEventSave();
   const {
@@ -93,6 +95,17 @@ export default function Search() {
     console.log(`Reported event: ${eventId}`);
   };
 
+  const handleEventNavigation = (currentEventId: number, direction: 'up' | 'down') => {
+    if (!results?.events) return;
+    
+
+    if (direction === 'up' && currentEventId > 0) {
+      setSelectedEvent(currentEventId - 1);
+    } else if (direction === 'down' && currentEventId < results.events.length - 1) {
+      setSelectedEvent(currentEventId + 1);
+    }
+  };
+
   return (
     <div className="flex flex-col w-full h-[calc(100vh-4rem)] relative">
       <AnimatePresence>
@@ -130,14 +143,14 @@ export default function Search() {
                   <SortOption
                     currentSort={filters.sort ?? "start"}
                     onUpdate={(value) => {
-                      updateFilters({ ...filters, sort: value, page: 1 });
+                      updateFilters({ ...filters, sort: value });
                     }}
                     sortOptions={sortOptions}
                   />
                 </div>
 
                 <div className="flex flex-col gap-4 p-4">
-                  {results.events.map((event) => {
+                  {results.events.map((event, index) => {
                     const state = eventStates[event.event_id] || {
                       isSaved: event.event_saved ?? false,
                       saves: event.event_saves,
@@ -152,6 +165,10 @@ export default function Search() {
                         onReportEvent={handleReportEvent}
                         isSaved={state.isSaved}
                         saves={state.saves}
+                        onCardClick={() => {
+                          setSelectedEvent(index);
+                        }}
+                        isActive={selectedEvent === index}
                       />
                     );
                   })}
@@ -174,6 +191,19 @@ export default function Search() {
           </div>
         </div>
       </div>
+
+      <AnimatePresence> 
+        {results && selectedEvent !== null && (
+          <EventSidebar
+            event={results.events[selectedEvent]}
+            onClose={() => setSelectedEvent(null)}
+            onNavigate={(direction) => {
+              handleEventNavigation(selectedEvent, direction);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {showLogin && <LoginScreen onClose={() => setShowLogin(false)} />}
     </div>
   );

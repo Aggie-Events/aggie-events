@@ -21,7 +21,7 @@ export default function EventMenu({ onBlockEvent, onReportEvent, eventId }: Even
         <FaEllipsisH size={16} />
       </button>
       {isMenuOpen && (
-        <div className="absolute right-0 top-full mt-1 z-10 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <div className="absolute right-0 top-full mt-1 z-20 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1">
             <button
               onClick={() => {

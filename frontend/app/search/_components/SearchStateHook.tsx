@@ -13,12 +13,17 @@ export function useSearchState() {
   const searchParams = useSearchParams();
   const { push } = useRouter();
   const [state, setState] = useState<SearchState>({
-    filters: getFilters(false),
+    filters: {},
     loading: false,
     eventStates: {},
   });
 
-  function getFilters(resetPage: boolean = false) {
+  /**
+   * Get the filters from the URL search params
+   * @param resetPage Whether to reset the page number to 1 on filter change
+   * @returns The filters
+   */
+  function getFilters() {
     const params = new URLSearchParams(searchParams);
     let newFilters: SearchFilters = {};
     for (const [key, value] of params.entries()) {
@@ -27,50 +32,53 @@ export function useSearchState() {
       setFilterParam(newFilters, castKey, val);
     }
 
-    if (resetPage) {
-      // Check if any non-page filters changed
-      const hasFilterChanges = Object.entries(newFilters).some(
-        ([key, value]) => {
-          if (key === "page") return false;
-          return (
-            JSON.stringify(state.filters[key as keyof SearchFilters]) !==
-            JSON.stringify(value)
-          );
-        },
-      );
-
-      if (hasFilterChanges) {
-        newFilters.page = 1;
-      }
-    }
-
     return newFilters;
   }
 
   useEffect(() => {
     setState((prev) => ({
       ...prev,
-      filters: getFilters(true),
+      filters: getFilters(),
       loading: false,
     }));
   }, [searchParams]);
 
   const updateFilters = (newFilters: SearchFilters) => {
+    let hasChanged = false;
+    let hasNonPageChange = false;
+
+    for (const [key, value] of Object.entries(newFilters)) {
+      if (state.filters[key as keyof SearchFilters] !== value) {
+        hasChanged = true;
+        if (key !== "page") {
+          hasNonPageChange = true;
+        }
+      }
+    }
+
+    // Don't update the URL if the filters haven't changed
+    if (!hasChanged) {
+      return;
+    }
+
     setState((prev) => ({ ...prev, loading: true }));
+
+    // If the filters have changed, reset the page number to 1
+    if (hasNonPageChange) {
+      newFilters.page = 1;
+    }
 
     // Update the URL with the current filters
     const params = new URLSearchParams();
     Object.entries(newFilters).forEach(([key, val]) => {
-      if (val) {
-        if (val instanceof Set) {
-          val.size > 0
-            ? params.set(key, Array.from(val).join(","))
-            : params.delete(key);
-        } else if (Array.isArray(val)) {
-          params.set(key, val.join(","));
-        } else {
-          params.set(key, val.toString());
-        }
+      if (val && val instanceof Set) {
+        val.size > 0
+          ? params.set(key, Array.from(val).join(","))
+          : params.delete(key);
+      } else if (Array.isArray(val)) {
+        params.set(key, val.join(","));
+      } else {
+        params.set(key, val.toString());
       }
     });
 
