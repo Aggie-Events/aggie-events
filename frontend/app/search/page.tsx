@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   SearchFilters,
+  setFilterParam,
+  castFilterParam,
 } from "@/config/query-types";
 import { useEventSearch, useToggleEventSave } from "@/api/event";
 import EventDisplay from "./_components/_event-display/EventDisplay";
@@ -15,7 +17,7 @@ import { useAuth } from "@/components/auth/AuthContext";
 import ToastManager from "@/components/toast/ToastManager";
 import LoginScreen from "@/components/auth/LoginScreen";
 import { DraggableSidebar } from "@/components/common/DraggableSidebar";
-import { useFilterHook } from "./_components/FilterHook";
+import { useSearchState } from "./_components/SearchStateHook";
 
 // Filters
 // - Date Range
@@ -44,43 +46,17 @@ const sortOptions = [
 
 export default function Search() {
   const searchParams = useSearchParams();
-  const { push } = useRouter();
   const { user } = useAuth();
+  const { state, updateFilters, updateEventState } = useSearchState();
+  const { filters, loading, eventStates } = state;
 
   const { mutateAsync: toggleEventSave } = useToggleEventSave();
   const {
     data: results,
-    isLoading,
-    isFetching,
+    isLoading
   } = useEventSearch(searchParams.toString());
 
   const [showLogin, setShowLogin] = useState(false);
-  const [eventStates, setEventStates] = useState<
-    Record<number, { isSaved: boolean; saves: number }>
-  >({});
-  const { filters } = useFilterHook();
-
-  function updateSearchParams(filters: SearchFilters) {
-    // Update the URL with the current filters
-    const params = new URLSearchParams();
-
-    // Add current filter params
-    Object.entries(filters).forEach(([key, val]) => {
-      if (val) {
-        if (val instanceof Set) {
-          val.size > 0
-            ? params.set(key, Array.from(val).join(","))
-            : params.delete(key);
-        } else if (Array.isArray(val)) {
-          params.set(key, val.join(","));
-        } else {
-          params.set(key, val.toString());
-        }
-      }
-    });
-
-    push(`/search?${params.toString()}`);
-  }
 
   const handleSaveEvent = (eventId: number) => {
     if (!user) {
@@ -92,8 +68,6 @@ export default function Search() {
     const event = results?.events?.find((e) => e.event_id === eventId);
     if (!event) return;
 
-    // Update the event card state
-    // Functions like an optimistic update to show the event as saved immediately without having to refetch
     const currentState = eventStates[eventId] || {
       isSaved: event.event_saved ?? false,
       saves: event.event_saves,
@@ -103,44 +77,40 @@ export default function Search() {
       eventId: eventId.toString(),
       isCurrentlySaved: currentState.isSaved,
     }).then(() => {
-      setEventStates((prev) => ({
-        ...prev,
-        [eventId]: {
-          isSaved: !currentState.isSaved,
-          saves: currentState.saves + (currentState.isSaved ? -1 : 1),
-        },
-      }));
+      updateEventState(
+        eventId,
+        !currentState.isSaved,
+        currentState.saves + (currentState.isSaved ? -1 : 1)
+      );
     });
   };
 
   const handleBlockEvent = (eventId: number) => {
-    // Implement block functionality
     console.log(`Blocked event: ${eventId}`);
   };
 
   const handleReportEvent = (eventId: number) => {
-    // Implement report functionality
     console.log(`Reported event: ${eventId}`);
   };
 
   return (
     <div className="flex flex-col w-full h-[calc(100vh-4rem)] relative">
-      <AnimatePresence>{isFetching && <LoadingBar />}</AnimatePresence>
+      <AnimatePresence>
+        {(loading) && <LoadingBar />}
+      </AnimatePresence>
 
-      {/* Main content area with filters and results */}
       <div className="flex flex-1 overflow-hidden">
         <DraggableSidebar>
           <div className="h-full p-4">
             <Sidebar
               filters={filters}
               onFilterChange={(newFilters: SearchFilters) =>
-                updateSearchParams({ ...newFilters, page: undefined })
+                updateFilters({ ...newFilters, page: undefined })
               }
             />
           </div>
         </DraggableSidebar>
 
-        {/* Results area */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-7xl">
             {isLoading ? (
@@ -160,7 +130,7 @@ export default function Search() {
                   <SortOption
                     currentSort={filters.sort ?? "start"}
                     onUpdate={(value) => {
-                      updateSearchParams({ ...filters, sort: value, page: 1 });
+                      updateFilters({ ...filters, sort: value, page: 1 });
                     }}
                     sortOptions={sortOptions}
                   />
@@ -193,7 +163,7 @@ export default function Search() {
                       page={filters.page ?? 1}
                       pageSize={results.pageSize}
                       setPage={(page) => {
-                        updateSearchParams({ ...filters, page });
+                        updateFilters({ ...filters, page });
                       }}
                       maxResults={results.resultSize}
                     />

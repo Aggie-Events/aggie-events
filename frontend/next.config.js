@@ -6,8 +6,10 @@ module.exports = {
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
-        //   port: '',
-        //   pathname: '/account123/**',
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
       },
     ],
   },

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { SearchEventsReturn } from "@/api/event";
 import { FaCalendarAlt } from "react-icons/fa";
+import Image from "next/image";
 
 export default function EventImage({ event }: { event: SearchEventsReturn }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -26,11 +27,13 @@ export default function EventImage({ event }: { event: SearchEventsReturn }) {
               <div className="w-2/3 h-2 bg-gray-300 rounded absolute top-1/2 left-1/2 -translate-x-1/2"></div>
             </div>
           )}
-          <img
+          <Image
             src={event.event_img}
             alt={`Image for ${event.event_name}`}
+            width={100}
+            height={100}
             className={`object-cover w-full h-full transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
-            sizes="100px"
+            loading="lazy"
             onLoad={handleImageLoad}
             onError={handleImageError}
           />
