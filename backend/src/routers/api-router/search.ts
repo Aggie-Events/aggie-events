@@ -216,7 +216,7 @@ searchRouter.get("/events", async (req, res) => {
       }));
     }
 
-    console.log(results);
+    console.log(`${results.length} results returned`);
     res
       .status(200)
       .json({ results: results, resultSize: resultSize, pageSize: pageSize });
