@@ -65,13 +65,15 @@ export function useSearchState() {
 
     // If the filters have changed, reset the page number to 1
     if (hasNonPageChange) {
-      newFilters.page = 1;
+      newFilters.page = undefined;
     }
 
     // Update the URL with the current filters
     const params = new URLSearchParams();
     Object.entries(newFilters).forEach(([key, val]) => {
-      if (val && val instanceof Set) {
+      if (val === undefined) {
+        params.delete(key);
+      } else if (val instanceof Set) {
         val.size > 0
           ? params.set(key, Array.from(val).join(","))
           : params.delete(key);

@@ -149,30 +149,37 @@ export default function Search() {
                   />
                 </div>
 
-                <div className="flex flex-col gap-4 p-4">
-                  {results.events.map((event, index) => {
-                    const state = eventStates[event.event_id] || {
-                      isSaved: event.event_saved ?? false,
-                      saves: event.event_saves,
-                    };
+                {results.events.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+                    <p className="text-xl font-medium mb-2">No events found</p>
+                    <p className="text-sm">Try adjusting your filters or search query</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4 p-4">
+                    {results.events.map((event, index) => {
+                      const state = eventStates[event.event_id] || {
+                        isSaved: event.event_saved ?? false,
+                        saves: event.event_saves,
+                      };
 
-                    return (
-                      <EventDisplay
-                        key={event.event_id}
-                        event={event}
-                        onSaveEvent={handleSaveEvent}
-                        onBlockEvent={handleBlockEvent}
-                        onReportEvent={handleReportEvent}
-                        isSaved={state.isSaved}
-                        saves={state.saves}
-                        onCardClick={() => {
-                          setSelectedEvent(index);
-                        }}
-                        isActive={selectedEvent === index}
-                      />
-                    );
-                  })}
-                </div>
+                      return (
+                        <EventDisplay
+                          key={event.event_id}
+                          event={event}
+                          onSaveEvent={handleSaveEvent}
+                          onBlockEvent={handleBlockEvent}
+                          onReportEvent={handleReportEvent}
+                          isSaved={state.isSaved}
+                          saves={state.saves}
+                          onCardClick={() => {
+                            setSelectedEvent(index);
+                          }}
+                          isActive={selectedEvent === index}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
 
                 {results.events.length < results.resultSize && (
                   <div className="flex justify-center mt-6">
