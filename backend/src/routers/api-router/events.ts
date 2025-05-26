@@ -124,7 +124,7 @@ eventRouter.get("/:event_id", async (req, res) => {
  * @returns {Object} Created event object
  * @returns {Error} 500 - Server error if event cannot be created
  */
-eventRouter.post("/", authMiddleware, async (req, res) => {
+eventRouter.post("/", async (req, res) => {
   const {
     event_name,
     event_description,
@@ -155,7 +155,7 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
         event_location: event_location,
         start_time: start_time,
         end_time: end_time,
-        contributor_id: (req.user! as SerializedUser).user_id,
+        contributor_id: 1,
         event_status: event_status,
         event_img: event_img,
       })
