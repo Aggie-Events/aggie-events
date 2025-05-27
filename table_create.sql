@@ -74,7 +74,8 @@ CREATE TABLE events
     -- GENERATED COLUMNS
     date_created      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     date_modified     TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    event_saves       INT                  DEFAULT 0         NOT NULL,
+    event_saves       INT                  DEFAULT 0        NOT NULL,
+    max_capacity      INT                  DEFAULT -1       NOT NULL,
 
     -- If both start_time and end_time are not null, then start_time must be less than end_time
     CHECK (start_time < end_time),

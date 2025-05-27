@@ -74,6 +74,8 @@ orgRouter.get("/", async (req, res) => {
         "o.org_reputation",
         "o.org_building",
         "o.org_room",
+        "o.org_events_count",
+        "o.org_members_count",
         "s.org_slug",
       ])
       .execute();
@@ -109,13 +111,15 @@ orgRouter.get("/:org_param", async (req, res) => {
           .select([
             "o.org_id",
             "o.org_name",
+            "o.org_email",
             "o.org_description",
             "o.org_icon",
             "o.org_verified",
             "o.org_reputation",
             "o.org_building",
             "o.org_room",
-            "o.org_email",
+            "o.org_events_count",
+            "o.org_members_count",
             "os.org_slug",
           ])
           .executeTakeFirst()) || null;
@@ -129,13 +133,15 @@ orgRouter.get("/:org_param", async (req, res) => {
           .select([
             "o.org_id",
             "o.org_name",
+            "o.org_email",
             "o.org_description",
             "o.org_icon",
             "o.org_verified",
             "o.org_reputation",
             "o.org_building",
             "o.org_room",
-            "o.org_email",
+            "o.org_events_count",
+            "o.org_members_count",
             "s.org_slug",
           ])
           .executeTakeFirst()) || null;
