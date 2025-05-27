@@ -6,6 +6,7 @@ import { SerializedUser } from "../../types/user-storage";
 import express from "express";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
 import { EventStatus } from "../../types/schema";
+import { OrgInfo } from "../../types/orgs";
 
 export const eventRouter = express.Router();
 
@@ -120,11 +121,15 @@ eventRouter.get("/:event_id", async (req, res) => {
  * @param {string} [req.body.event_location] - Location of the event
  * @param {Date} req.body.start_time - Start time of the event
  * @param {Date} req.body.end_time - End time of the event
+ * @param {EventStatus} req.body.event_status - Status of the event
+ * @param {string} [req.body.event_img] - Image of the event
  * @param {string[]} req.body.tags - Array of tag names for the event
+ * @param {number} req.body.max_capacity - Maximum capacity of the event
+ * @param {OrgInfo} [req.body.event_org] - Organization associated with event
  * @returns {Object} Created event object
  * @returns {Error} 500 - Server error if event cannot be created
  */
-eventRouter.post("/", async (req, res) => {
+eventRouter.post("/", authMiddleware, async (req, res) => {
   const {
     event_name,
     event_description,
@@ -132,17 +137,21 @@ eventRouter.post("/", async (req, res) => {
     start_time,
     end_time,
     event_status,
-    tags,
     event_img,
+    tags,
+    max_capacity,
+    event_org,
   }: {
     event_name: string;
     event_description: string | null;
     event_location: string | null;
     start_time: Date;
     end_time: Date;
-    tags: string[];
-    event_img: string | null;
     event_status: EventStatus;
+    event_img: string | null;
+    tags: string[];
+    max_capacity: number;
+    event_org?: OrgInfo | null;
   } = req.body;
 
   try {
@@ -155,9 +164,10 @@ eventRouter.post("/", async (req, res) => {
         event_location: event_location,
         start_time: start_time,
         end_time: end_time,
-        contributor_id: 1,
+        contributor_id: (req.user! as SerializedUser).user_id,
         event_status: event_status,
         event_img: event_img,
+        max_capacity: max_capacity,
       })
       .returning("event_id")
       .executeTakeFirstOrThrow()
@@ -193,6 +203,35 @@ eventRouter.post("/", async (req, res) => {
       console.error("Error inserting tags:", tagError);
       await db.deleteFrom("events").where("event_id", "=", event_id).execute();
       res.status(500).send("Error inserting tags, event not created!");
+      return;
+    }
+
+    // Now tries to connect event to org
+    if (!event_org) {
+      // No organization provided, skipping eventorgs insertion
+      res.json({ event_id: event_id });
+      console.log("Event created!");
+      return;
+    }
+
+    // Insert into eventorgs table to associate event with provided organization
+    // org_events_counts in the "orgs" table will automatically get incremented
+    try {
+      const org_id = event_org.org_id;
+      await db
+        .insertInto("eventorgs")
+        .values({
+          event_id: event_id,
+          org_id: org_id,
+          official: false, // Assuming this will always be false. I'm not sure what the condition is for this
+        })
+        .execute();
+    } catch (orgError) {
+      console.error("Error inserting into eventorgs:", orgError);
+      await db.deleteFrom("events").where("event_id", "=", event_id).execute();
+      res
+        .status(500)
+        .send("Error inserting into eventorgs, event not created!");
       return;
     }
 
