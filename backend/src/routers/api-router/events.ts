@@ -150,9 +150,11 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
     event_status: EventStatus;
     event_img: string | null;
     tags: string[];
-    max_capacity: number;
+    max_capacity: number | null;
     event_org?: OrgInfo | null;
   } = req.body;
+
+  const real_max_capacity = max_capacity ?? -1; // Default to -1 (Unlimited) if not provided
 
   try {
     // Insert the event into the database and return the event_id
@@ -167,7 +169,7 @@ eventRouter.post("/", authMiddleware, async (req, res) => {
         contributor_id: (req.user! as SerializedUser).user_id,
         event_status: event_status,
         event_img: event_img,
-        max_capacity: max_capacity,
+        max_capacity: real_max_capacity,
       })
       .returning("event_id")
       .executeTakeFirstOrThrow()
