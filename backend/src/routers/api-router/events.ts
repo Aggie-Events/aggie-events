@@ -63,6 +63,7 @@ eventRouter.get("/:event_id", async (req, res) => {
         "e.date_modified as date_modified",
         "e.event_status as event_status",
         "e.event_saves as event_saves",
+        "e.max_capacity as max_capacity",
         // Kinda hacky, just pray that there is never a user who added an event with a null user_name
         eb.fn
           .coalesce("u.user_name", sql<string>`'null_user'`)
