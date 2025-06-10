@@ -231,17 +231,15 @@ usersRouter.get("/saved", authMiddleware, async (req, res) => {
         "e.event_img",
         "e.start_time",
         "e.end_time",
+        "e.event_status",
         "e.date_created",
         "e.date_modified",
-        "e.event_status",
         "e.event_saves",
-        "s.date_created as saved_at",
+        "e.max_capacity",
         eb.fn
           .coalesce("u.user_name", sql<string>`'null_user'`)
           .as("contributor_name"),
         "o.org_name",
-        "o.org_id",
-        "o_s.org_slug",
         jsonArrayFrom(
           eb
             .selectFrom("eventtags as e_t")
@@ -255,10 +253,6 @@ usersRouter.get("/saved", authMiddleware, async (req, res) => {
         events.map((event) => ({
           ...event,
           tags: (event.tags as { tag_name: string }[]).map((t) => t.tag_name),
-          event_views: 0,
-          event_likes: 0,
-          event_going: 0,
-          event_saved: true,
         })),
       );
 

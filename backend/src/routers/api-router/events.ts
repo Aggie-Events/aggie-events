@@ -270,10 +270,14 @@ eventRouter.get("/user/:user_name", async (req, res) => {
           .as("event_name"),
         "e.event_description",
         "e.event_location",
+        "e.event_img",
         "e.start_time",
         "e.end_time",
+        "e.event_status",
         "e.date_created",
         "e.date_modified",
+        "e.event_saves",
+        "e.max_capacity",
         eb.fn
           .coalesce("u.user_name", sql<string>`'null_user'`)
           .as("contributor_name"),
@@ -291,11 +295,6 @@ eventRouter.get("/user/:user_name", async (req, res) => {
         events.map((event) => ({
           ...event,
           tags: (event.tags as { tag_name: string }[]).map((t) => t.tag_name),
-          event_img: null,
-          event_status: "published" as const,
-          event_likes: 0,
-          event_views: 0,
-          event_going: 0,
         })),
       );
 
@@ -555,15 +554,15 @@ eventRouter.get("/org/:org_id", async (req, res) => {
         "e.event_img",
         "e.start_time",
         "e.end_time",
+        "e.event_status",
         "e.date_created",
         "e.date_modified",
-        "e.event_status",
         "e.event_saves",
+        "e.max_capacity",
         eb.fn
           .coalesce("u.user_name", sql<string>`'null_user'`)
           .as("contributor_name"),
         "o.org_name",
-        "o.org_id",
         jsonArrayFrom(
           eb
             .selectFrom("eventtags as e_t")
@@ -577,10 +576,6 @@ eventRouter.get("/org/:org_id", async (req, res) => {
         events.map((event) => ({
           ...event,
           tags: (event.tags as { tag_name: string }[]).map((t) => t.tag_name),
-          event_views: 0,
-          event_likes: 0,
-          event_going: 0,
-          event_status: "published" as const,
         })),
       );
 

@@ -6,16 +6,15 @@ export interface EventInfo {
   event_description: string | null;
   event_location: string | null;
   event_img: string | null;
-  event_status: EventStatus;
-
-  event_views: number;
-  event_likes: number;
-  event_going: number;
 
   start_time: Date | null;
   end_time: Date | null;
+  event_status: EventStatus;
   date_created: Date;
   date_modified: Date;
+
+  event_saves: number;
+  max_capacity: number | null;
 
   contributor_name: string;
   org_name: string | null;
