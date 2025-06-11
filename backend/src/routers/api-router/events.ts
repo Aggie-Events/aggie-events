@@ -282,6 +282,7 @@ eventRouter.get("/user/:user_name", async (req, res) => {
           .coalesce("u.user_name", sql<string>`'null_user'`)
           .as("contributor_name"),
         "o.org_name",
+        "o.org_id",
         jsonArrayFrom(
           eb
             .selectFrom("eventtags as e_t")
@@ -563,6 +564,7 @@ eventRouter.get("/org/:org_id", async (req, res) => {
           .coalesce("u.user_name", sql<string>`'null_user'`)
           .as("contributor_name"),
         "o.org_name",
+        "o.org_id",
         jsonArrayFrom(
           eb
             .selectFrom("eventtags as e_t")

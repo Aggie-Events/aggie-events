@@ -18,5 +18,6 @@ export interface EventInfo {
 
   contributor_name: string;
   org_name: string | null;
+  org_id: number | null;
   tags: string[];
 }
