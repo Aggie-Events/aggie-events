@@ -130,15 +130,12 @@ searchRouter.get("/events", async (req, res) => {
 
     // If user is authenticated, check if they have saved each event
     // TODO: Could possibly make more efficient with a subquery
-    if (req.user) {
+    if (req.user && results.length > 0) {
+      const eventIds = results.map((r: any) => r.event_id);
       const savedEvents = await db
         .selectFrom("savedevents")
         .where("user_id", "=", req.user.user_id)
-        .where(
-          "event_id",
-          "in",
-          results.map((r: any) => r.event_id),
-        )
+        .where("event_id", "in", eventIds)
         .select(["event_id"])
         .execute();
 
@@ -299,24 +296,24 @@ searchRouter.get("/events/user", authMiddleware, async (req, res) => {
       .execute();
 
     // Get likes count in a separate query
-    const likesQuery = await db
-      .selectFrom("savedevents")
-      .select([
-        "event_id",
-        (eb) => eb.fn.count<number>("user_id").as("likes_count"),
-      ])
-      .where(
-        "event_id",
-        "in",
-        results.map((r: any) => r.event_id),
-      )
-      .groupBy("event_id")
-      .execute();
+    const likesMap = new Map();
+    if (results.length > 0) {
+      const eventIds = results.map((r: any) => r.event_id);
+      const likesQuery = await db
+        .selectFrom("savedevents")
+        .select([
+          "event_id",
+          (eb) => eb.fn.count<number>("user_id").as("likes_count"),
+        ])
+        .where("event_id", "in", eventIds)
+        .groupBy("event_id")
+        .execute();
 
-    // Map likes to events
-    const likesMap = new Map(
-      likesQuery.map((l) => [l.event_id, l.likes_count]),
-    );
+      // Map likes to events
+      likesQuery.forEach((l) => {
+        likesMap.set(l.event_id, l.likes_count);
+      });
+    }
     results = results.map((event) => ({
       ...event,
       event_likes: 0,
@@ -324,15 +321,12 @@ searchRouter.get("/events/user", authMiddleware, async (req, res) => {
     }));
 
     // If user is authenticated, check if they have saved each event
-    if (req.user) {
+    if (req.user && results.length > 0) {
+      const eventIds = results.map((r: any) => r.event_id);
       const savedEvents = await db
         .selectFrom("savedevents")
         .where("user_id", "=", req.user.user_id)
-        .where(
-          "event_id",
-          "in",
-          results.map((r: any) => r.event_id),
-        )
+        .where("event_id", "in", eventIds)
         .select(["event_id"])
         .execute();
 
