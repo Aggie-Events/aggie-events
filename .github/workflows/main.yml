@@ -34,9 +34,9 @@ jobs:
         with:
           context: frontend
           push: true
-          build-args: |
-            API_URL=${{ vars.API_URL }}
-            AUTH_URL=${{ vars.AUTH_URL }}
+          # build-args: |
+          #   API_URL=${{ vars.API_URL }}
+          #   AUTH_URL=${{ vars.AUTH_URL }}
           tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
       - name: Build and push backend
@@ -46,47 +46,47 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/backend:latest
 
-      - name: Create root .env file
-        run: |
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+      # - name: Create root .env file
+      #   run: |
+      #     echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
       
-      - name: Create frontend .env file
-        run: |
-          echo NEXT_PUBLIC_API_URL=${{ vars.API_URL }} >> .env.frontend
-          echo NEXT_PUBLIC_AUTH_URL=${{ vars.AUTH_URL }} >> .env.frontend
-          echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> .env.frontend
-          echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> .env.frontend
+      # - name: Create frontend .env file
+      #   run: |
+      #     echo NEXT_PUBLIC_API_URL=${{ vars.API_URL }} >> .env.frontend
+      #     echo NEXT_PUBLIC_AUTH_URL=${{ vars.AUTH_URL }} >> .env.frontend
+      #     echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> .env.frontend
+      #     echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> .env.frontend
 
-      - name: Create backend .env file
-        run: |
-          echo FRONTEND_URL=${{ vars.FRONTEND_URL }} >> .env.backend
-          echo BACKEND_URL=${{ vars.BACKEND_URL }} >> .env.backend
-          echo DATABASE_URL=${{ vars.DATABASE_URL }} >> .env.backend
+      # - name: Create backend .env file
+      #   run: |
+      #     echo FRONTEND_URL=${{ vars.FRONTEND_URL }} >> .env.backend
+      #     echo BACKEND_URL=${{ vars.BACKEND_URL }} >> .env.backend
+      #     echo DATABASE_URL=${{ vars.DATABASE_URL }} >> .env.backend
           
-          echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> .env.backend
-          echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> .env.backend
-          echo BACKEND_SECRET=${{ secrets.BACKEND_SECRET }} >> .env.backend
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.backend
+      #     echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> .env.backend
+      #     echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> .env.backend
+      #     echo BACKEND_SECRET=${{ secrets.BACKEND_SECRET }} >> .env.backend
+      #     echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.backend
         
-      - name: Copy environment variables and run script
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_IP }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          source: "compose.prod.yml,compose.deps.yml,.env,.env.frontend,.env.backend,run_prod.sh,table_create.sql"
-          target: ~/deploy/
+      # - name: Copy environment variables and run script
+      #   uses: appleboy/scp-action@v0.1.7
+      #   with:
+      #     host: ${{ secrets.SSH_IP }}
+      #     username: ${{ secrets.SSH_USER }}
+      #     key: ${{ secrets.VPS_SSH_KEY }}
+      #     port: ${{ secrets.SSH_PORT }}
+      #     source: "compose.prod.yml,compose.deps.yml,.env,.env.frontend,.env.backend,run_prod.sh,table_create.sql"
+      #     target: ~/deploy/
         
-      - name: Run Docker Compose
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_IP }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd ~/deploy
-            sudo bash run_prod.sh
+      # - name: Run Docker Compose
+      #   uses: appleboy/ssh-action@v1.0.3
+      #   with:
+      #     host: ${{ secrets.SSH_IP }}
+      #     username: ${{ secrets.SSH_USER }}
+      #     key: ${{ secrets.VPS_SSH_KEY }}
+      #     port: ${{ secrets.SSH_PORT }}
+      #     script: |
+      #       cd ~/deploy
+      #       sudo bash run_prod.sh
       
       

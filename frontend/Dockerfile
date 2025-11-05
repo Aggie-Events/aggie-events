@@ -21,13 +21,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY ./ ./
 
-ARG API_URL
-ARG AUTH_URL
+# ARG API_URL
+# ARG AUTH_URL
 
-ENV NEXT_PUBLIC_API_URL=$API_URL
-ENV NEXT_PUBLIC_AUTH_URL=$AUTH_URL
+# ENV NEXT_PUBLIC_API_URL=$API_URL
+# ENV NEXT_PUBLIC_AUTH_URL=$AUTH_URL
 
-RUN if [ -z "$NEXT_PUBLIC_API_URL" ]; then echo 'Environment variable NEXT_PUBLIC_API_URL must be specified. Exiting.'; exit 1; fi
+# RUN if [ -z "$NEXT_PUBLIC_API_URL" ]; then echo 'Environment variable NEXT_PUBLIC_API_URL must be specified. Exiting.'; exit 1; fi
 
 # Build the Next.js application
 RUN npm run build
