@@ -34,9 +34,9 @@ jobs:
         with:
           context: frontend
           push: true
-          # build-args: |
-          #   API_URL=${{ vars.API_URL }}
-          #   AUTH_URL=${{ vars.AUTH_URL }}
+          build-args: |
+            API_URL=${{ vars.API_URL }}
+            AUTH_URL=${{ vars.AUTH_URL }}
           tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
       - name: Build and push backend
